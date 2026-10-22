@@ -1,0 +1,19 @@
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+coverage/
+*.iml
+.idea/
+
+# Local Android configuration and build outputs
+android/local.properties
+android/key.properties
+android/.gradle/
+android/captures/
+
+*.log
