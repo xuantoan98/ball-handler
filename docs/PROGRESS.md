@@ -1,5 +1,11 @@
 # Tiến độ và task board
 
+## Rà soát skill Git (22/10/2026)
+
+Đã chỉnh `skills/push-branch`, `skills/run-commit`, `skills/write-commit` cho GitHub/`develop`: push thường, không force push hoặc tạo PR; commit chỉ lấy file đúng phạm vi, không stage toàn bộ mặc định. Cập nhật `AGENTS.md` để ghi nhận quy trình Git. Đây là thay đổi hướng dẫn, không thay đổi game hay milestone.
+
+Kiểm tra: chạy `quick_validate.py` riêng cho cả ba skill — đều trả `Skill is valid!`; `git diff --check` — không báo lỗi. `git status --short --branch` xác nhận đang ở `develop`, ba skill mới vẫn chưa được track. Chưa commit hoặc push.
+
 Ngày cập nhật: 21/10/2026. Trạng thái: TODO, DOING, BLOCKED, READY FOR REVIEW, DONE.
 
 Trạng thái nghiệm thu M1: **READY FOR REVIEW**. Mã, test mô phỏng và kiểm tra browser đã qua; yêu cầu xác nhận điều khiển ổn định bằng một ngón trên thiết bị thật còn NOT VERIFIED.
