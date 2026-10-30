@@ -60,6 +60,22 @@ class FakeAd implements RewardedAdSource {
 void main() {
   final origin = DateTime.utc(2026, 10, 22, 0);
 
+  test('saved progress and active attempt can reach level twenty', () async {
+    final store = MemoryStore();
+    store.value = SaveRecord.fresh
+        .change(activeLevel: 19, highestUnlocked: 19)
+        .encode();
+    final lives = LivesService(SaveService(store), FakeClock(origin));
+    await lives.initialize();
+    expect(lives.activeLevel, 19);
+    expect(lives.highestUnlocked, 19);
+    await lives.finishAttempt(won: true);
+    expect(lives.highestUnlocked, 19);
+    final restored = LivesService(SaveService(store), FakeClock(origin));
+    await restored.initialize();
+    expect(restored.highestUnlocked, 19);
+  });
+
   test(
     'fresh 3, atomic start, double click opens once without spending',
     () async {
@@ -231,6 +247,30 @@ void main() {
     await reloaded.initialize();
     expect(await reloaded.grantReward('reward-7'), SessionResult.duplicate);
     expect(reloaded.lives, 3);
+  });
+
+  testWidgets('cancel during reward save reports the committed reward', (
+    tester,
+  ) async {
+    final store = MemoryStore();
+    final lives = LivesService(SaveService(store), FakeClock(origin));
+    await lives.initialize();
+    await lives.startAttempt(0);
+    await lives.finishAttempt(won: false);
+    final gate = Completer<void>();
+    store.writeGate = gate;
+    final ad = MockRewardedAds(FakeIds('reward-saving'));
+    addTearDown(ad.dispose);
+    final flow = RewardedAdCoordinator(ad, lives);
+    final result = flow.watch();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 5));
+    expect(ad.progress, 1);
+    ad.cancel();
+    gate.complete();
+    await tester.pump();
+    expect(await result, AdOutcome.earned);
+    expect(lives.lives, 3);
   });
 
   test('cancel/error and failed reward save grant zero', () async {

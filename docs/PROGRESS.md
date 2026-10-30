@@ -60,3 +60,27 @@ M2 chưa triển khai lượt, save, quảng cáo hoặc nội dung sau màn 3. 
 - Chỉ thua đã lưu mới trừ 1; bắt đầu/retry không trừ; thắng reset 3. Save schema v2 chuyển bản v1 đang chơi bằng cách hoàn 1 lượt một lần; nếu ghi migration lỗi, không mở phiên. HUD dùng 3 đèn vàng theo ảnh chuẩn, cân lại nhãn màn, đèn và nút pause.
 - `/home/bss-group/snap/flutter/common/flutter/bin/flutter test`: **42/42 pass** (Clock giả, ID giả, duplicate, save fail, migration, widget). `flutter analyze`: **No issues found**. `flutter build web`: **pass**, artifact `build/web`; cảnh báo font CupertinoIcons template còn xuất hiện.
 - Browser localhost viewport giả lập **390×844**: đã xem preview và màn đang chơi; 3 đèn, số 3/3, nhãn màn và pause không chồng nhau. Kiểm tra bằng chuột/browser, **chưa kiểm tra thiết bị thật**. Android SDK/artifact vẫn chưa được xác minh.
+
+## M4 — Dữ liệu, validator, editor dev và 20 màn (30/10/2026)
+
+| ID | Task | Trạng thái | Bằng chứng / việc còn lại |
+| --- | --- | --- | --- |
+| M4-01 | Schema v1 và JSON catalog | DONE trong code | `Level.toJson/fromJson`, 20 bản export ở `data/m4_levels.json`, `dart run tool/export_levels.dart` báo 20 validated levels. |
+| M4-02 | Validator và replay | DONE trong test | `validateCatalog(m4Levels)` rỗng; cả 20 màn thắng với `GameAttempt` và giữ cửa 1 giây. Test lỗi ID trùng, ngoài biên, ref sai, spawn đỏ, thiếu/sai lời giải. |
+| M4-03 | Editor dev tối thiểu | DONE trong test | Entry riêng `tool/editor_main.dart`; kéo bounds, đổi thứ tự sao, import/export JSON và thử đèn bằng rules; widget test kéo hazard/export JSON và đổi thứ tự sao làm replay báo lỗi. Chưa kiểm tra thủ công UI editor trong browser. |
+| M4-04 | Nhóm màn 04–07, 08–12, 13–16, 17–20 | READY FOR REVIEW | Geometry và waypoint có replay; bốn key visual draft đã lưu ở `design/chapters/` nhưng chưa duyệt; chơi thử người thật chưa thực hiện. Build dùng lại nền hiện có. |
+| M4-05 | Playtest người thật/thiết bị thật | NOT VERIFIED | Không có kết quả người chơi cho màn 01–20; Android SDK/artifact vẫn chưa có bằng chứng. |
+
+Chi tiết schema, lệnh editor và các giới hạn ở `docs/M4_LEVEL_SCHEMA.md`. Không coi replay tự động là bằng chứng màn dễ hiểu, đủ khoảng hở cho ngón tay hay thú vị khi chơi.
+
+## M6 — QA candidate web (30/10/2026)
+
+- Baseline trước sửa: `flutter analyze` — pass; `flutter test --reporter compact` — **49/49 pass**; `dart run tool/export_levels.dart` — **20 validated levels**; `flutter build web --no-wasm-dry-run` — pass, còn cảnh báo font CupertinoIcons template.
+- Phát hiện từ Chrome headless viewport 844 × 390: UI ngang chồng chữ/nút. Test orientation viết trước đã fail; sau khi thêm hướng dẫn xoay dọc và pause, `flutter test test/m6_qa_test.dart --reporter compact` — **2/2 pass**, gồm 30 chu kỳ start/reset/pause/menu.
+- Test race hủy ad trong khi save reward viết trước đã fail (kỳ vọng earned, nhận cancelled). Sau sửa `MockRewardedAds` và UI trạng thái lưu, test service và widget liên quan đều pass. Chưa tích hợp SDK ad thật.
+- Chrome headless CDP ở 1366 × 768, 360 × 800, 390 × 844, 844 × 390: render không có Runtime/Log/console error. Tại 390 × 844, start, reload, bật Network offline, kéo đèn và thắng màn 01; screenshot lưu trong `docs/qa/m6/`. Các thao tác dùng chuột CDP/viewport giả lập.
+- `flutter doctor -v` và `flutter devices`: thiếu Android SDK, không có thiết bị Android/iPhone; chưa build APK/AAB, chưa đo FPS/frame time hoặc bộ nhớ trên thiết bị. M5 còn TODO và playtest người thật màn 01–20 chưa có. Xem bảng pass/fail/chưa thực hiện, bug và blocker ở `docs/QA.md`.
+
+Smoke test cuối sau sửa: `flutter analyze` — **No issues found**; `flutter test --reporter compact` — **53/53 pass**; `dart run tool/export_levels.dart` — **20 validated levels**; `flutter build web --no-wasm-dry-run` — **pass**, artifact `build/web` (cảnh báo CupertinoIcons template còn); `git diff --check` — pass. Mở lại artifact bằng Chrome headless CDP ở cả bốn viewport — **không Runtime/Log/console error**; ở 390 × 844 start → reload → chuyển Network offline → kéo đèn → thắng màn 01, 3/3 lượt. `rg -n 'Editor dev|Import JSON|Export JSON' build/web/main.dart.js` không tìm thấy chuỗi editor (exit 1 mong đợi). Screenshot cuối ở `docs/qa/m6/`.
+
+Trạng thái M6: **candidate web để review, chưa production-ready**. Chưa deploy và chưa push; chưa có bằng chứng nghiệm thu thiết bị thật hoặc nội dung từ người chơi.

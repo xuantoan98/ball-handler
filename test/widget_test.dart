@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' show PointerDeviceKind;
 
 import 'package:ball_handler/core/geometry.dart';
@@ -38,10 +39,12 @@ void setSize(WidgetTester tester, Size size) {
 class _MemoryStore implements SaveStore {
   String? value;
   bool failWrites = false;
+  Completer<void>? writeGate;
   @override
   Future<String?> read() async => value;
   @override
   Future<void> write(String candidate) async {
+    await writeGate?.future;
     if (failWrites) throw StateError('quota exceeded');
     value = candidate;
   }
@@ -310,10 +313,12 @@ void main() {
     setSize(tester, const Size(390, 844));
     final now = DateTime.utc(2026, 10, 22);
     final store = _MemoryStore()
-      ..value = SaveRecord.fresh.change(
-        lives: 2,
-        nextRefillAtMs: now.millisecondsSinceEpoch + LivesService.refillMs,
-      ).encode();
+      ..value = SaveRecord.fresh
+          .change(
+            lives: 2,
+            nextRefillAtMs: now.millisecondsSinceEpoch + LivesService.refillMs,
+          )
+          .encode();
     await _pumpM3(tester, store: store, clock: _FixedClock(now));
     await tester.tap(find.text('Bắt đầu'));
     await tester.pump();
@@ -326,6 +331,34 @@ void main() {
     await tester.pump();
     expect(currentPainter(tester).lives, 2);
     expect(find.textContaining('không nhận lượt'), findsOneWidget);
+  });
+
+  testWidgets('reward save disables cancel and reports earned after commit', (
+    tester,
+  ) async {
+    setSize(tester, const Size(390, 844));
+    final now = DateTime.utc(2026, 10, 22);
+    final store = _MemoryStore()
+      ..value = SaveRecord.fresh
+          .change(
+            lives: 2,
+            nextRefillAtMs: now.millisecondsSinceEpoch + LivesService.refillMs,
+          )
+          .encode();
+    await _pumpM3(tester, store: store, clock: _FixedClock(now));
+    final gate = Completer<void>();
+    store.writeGate = gate;
+    await tester.tap(find.text('Xem quảng cáo\n+1 lượt'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 5));
+    expect(find.text('Đang lưu thưởng…'), findsWidgets);
+    await tester.tap(find.text('Đang lưu thưởng…').last);
+    await tester.pump();
+    expect(currentPainter(tester).lives, 2);
+    gate.complete();
+    await tester.pump();
+    expect(currentPainter(tester).lives, 3);
+    expect(find.textContaining('Đã nhận +1 lượt'), findsOneWidget);
   });
 
   testWidgets('zero lives disables start and shows refill plus ad', (

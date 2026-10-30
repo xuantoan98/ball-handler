@@ -140,7 +140,7 @@ class LivesService {
           clearAttempt: true,
           highestUnlocked: won
               ? math.min(
-                  2,
+                  19,
                   math.max(current.highestUnlocked, current.activeLevel! + 1),
                 )
               : current.highestUnlocked,
@@ -229,7 +229,7 @@ class LivesService {
 
   SaveRecord _normalize(SaveRecord value) {
     final lives = value.lives.clamp(0, maxLives);
-    final unlocked = value.highestUnlocked.clamp(0, 2);
+    final unlocked = value.highestUnlocked.clamp(0, 19);
     if (lives != value.lives || unlocked != value.highestUnlocked) {
       // Keep the original on disk until this repaired record is saved.
       assert(() {

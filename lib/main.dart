@@ -38,7 +38,7 @@ class ShadowTheatreApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-    title: 'Rạp bóng nhỏ — M2',
+    title: 'Rạp bóng nhỏ',
     debugShowCheckedModeBanner: false,
     theme: ThemeData(
       fontFamily: 'Nunito',
@@ -105,7 +105,7 @@ class _GamePageState extends State<GamePage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _attempt = GameAttempt(m2Levels[_levelIndex]);
+    _attempt = GameAttempt(m4Levels[_levelIndex]);
     _lives = LivesService(
       SaveService(widget.saveStore ?? PreferencesSaveStore()),
       widget.clock ?? const SystemGameClock(),
@@ -145,14 +145,18 @@ class _GamePageState extends State<GamePage>
         _ready = true;
         if (active != null) {
           _levelIndex = active;
-          _attempt = GameAttempt(m2Levels[active])..start();
+          _attempt = GameAttempt(m4Levels[active])..start();
           _drag = LampDrag(initial: _attempt.lamp);
           _notice = 'Đã khôi phục ván ở điểm đầu màn, không trừ thêm lượt.';
         }
       });
       if (active != null) {
         _loadBackdrop(active);
-        _runClock();
+        if (_phoneLandscape) {
+          _attempt.pause();
+        } else {
+          _runClock();
+        }
       }
       _countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
         if (!mounted) return;
@@ -175,7 +179,7 @@ class _GamePageState extends State<GamePage>
 
   Future<void> _loadBackdrop(int index) async {
     final data = await rootBundle.load(
-      'assets/backgrounds/stage-0${index + 1}.png',
+      'assets/backgrounds/stage-0${(index % 3) + 1}.png',
     );
     final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
     final frame = await codec.getNextFrame();
@@ -200,6 +204,19 @@ class _GamePageState extends State<GamePage>
     }
     if (state != AppLifecycleState.resumed &&
         _attempt.phase == AttemptPhase.playing) {
+      _pause();
+    }
+  }
+
+  bool get _phoneLandscape {
+    final view = View.of(context);
+    final size = view.physicalSize / view.devicePixelRatio;
+    return size.width > size.height && size.height < 600;
+  }
+
+  @override
+  void didChangeMetrics() {
+    if (mounted && _phoneLandscape && _attempt.phase == AttemptPhase.playing) {
       _pause();
     }
   }
@@ -235,7 +252,7 @@ class _GamePageState extends State<GamePage>
       if (result == SessionResult.ok) {
         setState(() {
           _levelIndex = levelIndex;
-          _attempt = GameAttempt(m2Levels[levelIndex])..start();
+          _attempt = GameAttempt(m4Levels[levelIndex])..start();
           _drag = LampDrag(initial: _attempt.lamp);
           _lastMovementMs = -10000;
           _travelDirection = Offset.zero;
@@ -402,11 +419,11 @@ class _GamePageState extends State<GamePage>
   }
 
   void _selectLevel(int index) {
-    if (index < 0 || index >= m2Levels.length) return;
+    if (index < 0 || index >= m4Levels.length) return;
     _ticker.stop();
     setState(() {
       _levelIndex = index;
-      _attempt = GameAttempt(m2Levels[index]);
+      _attempt = GameAttempt(m4Levels[index]);
       _drag = LampDrag(initial: _attempt.lamp);
       _lastMovementMs = -10000;
       _travelDirection = Offset.zero;
@@ -425,6 +442,42 @@ class _GamePageState extends State<GamePage>
     body: SafeArea(
       child: LayoutBuilder(
         builder: (context, constraints) {
+          if (constraints.maxWidth > constraints.maxHeight &&
+              constraints.maxHeight < 600) {
+            return Center(
+              child: SizedBox(
+                width: math.min(360, constraints.maxWidth - 32),
+                height: 150,
+                child: TheatrePanel(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.screen_rotation,
+                          color: StageColors.goldCore,
+                          size: 32,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          _attempt.phase == AttemptPhase.paused
+                              ? 'Xoay dọc để tiếp tục'
+                              : 'Xoay dọc để chơi',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: StageColors.text,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
           final mapper = ViewportMapper.contain(
             viewportWidth: constraints.maxWidth,
             viewportHeight: constraints.maxHeight,
@@ -708,7 +761,7 @@ class _GamePageState extends State<GamePage>
                       Expanded(
                         child: _action(
                           'Màn sau',
-                          _operationBusy || _levelIndex == m2Levels.length - 1
+                          _operationBusy || _levelIndex == m4Levels.length - 1
                               ? null
                               : () => _selectLevel(_levelIndex + 1),
                           small: true,
@@ -727,7 +780,7 @@ class _GamePageState extends State<GamePage>
                         : switch (phase) {
                             AttemptPhase.paused => 'Tiếp tục',
                             AttemptPhase.won =>
-                              _levelIndex < m2Levels.length - 1
+                              _levelIndex < m4Levels.length - 1
                                   ? 'Màn tiếp theo'
                                   : 'Chơi lại',
                             AttemptPhase.lost => 'Thử lại',
@@ -740,7 +793,7 @@ class _GamePageState extends State<GamePage>
                         : switch (phase) {
                             AttemptPhase.paused => _resume,
                             AttemptPhase.won =>
-                              _levelIndex < m2Levels.length - 1
+                              _levelIndex < m4Levels.length - 1
                                   ? () => _beginAttempt(_levelIndex + 1)
                                   : () => _beginAttempt(_levelIndex),
                             AttemptPhase.lost => () => _beginAttempt(
@@ -811,9 +864,11 @@ class _GamePageState extends State<GamePage>
                       ),
                     ),
                     Text(
-                      _ads.phase == AdPhase.loading
-                          ? 'Đang tải…'
-                          : 'Xem đủ 5 giây để nhận +1 lượt.',
+                      switch (_ads.phase) {
+                        AdPhase.loading => 'Đang tải…',
+                        AdPhase.saving => 'Đang lưu thưởng…',
+                        _ => 'Xem đủ 5 giây để nhận +1 lượt.',
+                      },
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: StageColors.text,
@@ -826,7 +881,9 @@ class _GamePageState extends State<GamePage>
                       backgroundColor: StageColors.frameEdge,
                     ),
                     Text(
-                      '${(5 - _ads.progress * 5).ceil().clamp(0, 5)} giây',
+                      _ads.phase == AdPhase.saving
+                          ? 'Đang lưu'
+                          : '${(5 - _ads.progress * 5).ceil().clamp(0, 5)} giây',
                       style: TextStyle(
                         color: StageColors.goldCore,
                         fontSize: 15 * map.scale,
@@ -835,9 +892,14 @@ class _GamePageState extends State<GamePage>
                     SizedBox(
                       height: 46 * map.scale,
                       width: double.infinity,
-                      child: _action('Đóng · không nhận lượt', _reward.cancel),
+                      child: _action(
+                        _ads.phase == AdPhase.saving
+                            ? 'Đang lưu thưởng…'
+                            : 'Đóng · không nhận lượt',
+                        _ads.phase == AdPhase.saving ? null : _reward.cancel,
+                      ),
                     ),
-                    if (kDebugMode)
+                    if (kDebugMode && _ads.phase != AdPhase.saving)
                       TextButton(
                         onPressed: _ads.failForDebug,
                         child: const Text('Giả lập lỗi tải'),

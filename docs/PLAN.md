@@ -10,9 +10,9 @@ Nguồn đầy đủ và tiêu chí từng mốc: [SHADOW_CONTROLLER_PLAN.md](..
 | M1 | Hình chiếu và kéo đèn trong sandbox | Đã kiểm thử bằng viewport/touch giả lập; thiết bị thật chưa xác minh |
 | M2 | Vòng chơi ba màn, rules và chống xuyên | Đã triển khai/test tự động; chờ playtest người thật và cảm ứng thiết bị |
 | M3 | Lượt, save và ad mô phỏng | Đã triển khai/test tự động; chờ kiểm tra thiết bị thật |
-| M4 | Validator/editor và tối đa 20 màn có lời giải | TODO |
+| M4 | Validator/editor và 20 màn có lời giải | READY FOR REVIEW — replay tự động qua; playtest/key visual chưa duyệt |
 | M5 | UI, âm thanh, hướng dẫn và art | TODO |
-| M6 | QA Flutter trên các target được chọn và bản candidate | TODO |
+| M6 | QA Flutter trên các target được chọn và bản candidate | Candidate web đang QA; chưa đủ điều kiện phát hành (xem QA) |
 | M7 | Quảng cáo thật và phát hành Android nếu quyết định phát hành | Chưa quyết định |
 
 M2 tạm thời chưa tính lượt để tập trung kiểm chứng gameplay. Lượt, lưu game và quảng cáo mô phỏng thuộc M3.

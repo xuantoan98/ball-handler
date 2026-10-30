@@ -122,7 +122,7 @@ class SaveRecord {
           observed is! int ||
           observed < 0 ||
           next != null && next < 0 ||
-          active != null && (active < 0 || active > 2)) {
+          active != null && (active < 0 || active > 19)) {
         throw const SaveFailure('Dữ liệu lưu bị lỗi.');
       }
       final oldActive = data['schemaVersion'] == 1 && active != null;

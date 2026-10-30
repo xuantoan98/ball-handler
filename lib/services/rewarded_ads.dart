@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import 'lives_service.dart';
 
-enum AdPhase { idle, loading, showing, earned, cancelled, error }
+enum AdPhase { idle, loading, showing, saving, earned, cancelled, error }
 
 enum AdOutcome { earned, cancelled, error, busy, full }
 
@@ -27,13 +27,15 @@ abstract interface class RewardedAdSource {
   void cancel();
 }
 
-/// Mock only: closing, losing focus and errors never call onEarned.
+/// Mock only: closing before five seconds or a load error grants nothing.
+/// Once the earned callback starts, cancellation waits for the save result.
 class MockRewardedAds extends ChangeNotifier implements RewardedAdSource {
   MockRewardedAds(this._ids);
   final RewardIdFactory _ids;
   Timer? _timer;
   Completer<AdOutcome>? _completion;
   int _ticks = 0;
+  bool _disposed = false;
 
   @override
   AdPhase phase = AdPhase.idle;
@@ -58,6 +60,8 @@ class MockRewardedAds extends ChangeNotifier implements RewardedAdSource {
         notifyListeners();
         if (_ticks < 50) return;
         timer.cancel();
+        phase = AdPhase.saving;
+        notifyListeners();
         try {
           await onEarned(_ids.nextId());
           _complete(completion, AdOutcome.earned, AdPhase.earned);
@@ -71,6 +75,7 @@ class MockRewardedAds extends ChangeNotifier implements RewardedAdSource {
 
   @override
   void cancel() {
+    if (phase == AdPhase.saving) return;
     final completion = _completion;
     if (completion != null) {
       _complete(completion, AdOutcome.cancelled, AdPhase.cancelled);
@@ -79,6 +84,7 @@ class MockRewardedAds extends ChangeNotifier implements RewardedAdSource {
 
   /// Development control. No production ad SDK is connected.
   void failForDebug() {
+    if (phase == AdPhase.saving) return;
     final completion = _completion;
     if (completion != null) {
       _complete(completion, AdOutcome.error, AdPhase.error);
@@ -95,12 +101,13 @@ class MockRewardedAds extends ChangeNotifier implements RewardedAdSource {
     _timer = null;
     _completion = null;
     phase = end;
-    notifyListeners();
+    if (!_disposed) notifyListeners();
     completion.complete(result);
   }
 
   @override
   void dispose() {
+    _disposed = true;
     cancel();
     super.dispose();
   }

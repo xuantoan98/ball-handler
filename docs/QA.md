@@ -77,3 +77,53 @@ Sau khi dời preview xuống bàn và sửa tràn bố cục: `flutter analyze`
 | Migration save v1→v2 | PASS tự động, giới hạn dữ liệu cũ | Ván v1 đang chơi được hoàn 1 lượt khi migration ghi thành công, không hoàn lặp sau reload; lỗi ghi chặn mở phiên. Bản v1 đã kết thúc không đủ dữ liệu để suy ra lượt nào bị trừ bởi start nên không tự hoàn. |
 
 Lệnh cuối sau điều chỉnh: `flutter analyze` — **No issues found**; `flutter test` — **42/42 pass**; `flutter build web` — **pass**, artifact `build/web`. Build vẫn có cảnh báo font CupertinoIcons template; không chặn. `shared_preferences` không bảo đảm dữ liệu quan trọng đã bền trên đĩa sau Future thành công, nên kết quả M3 chỉ là demo local, không tuyên bố dùng được cho thưởng có giá trị.
+
+## M4 — kiểm tra tự động (30/10/2026)
+
+| Kiểm tra | Trạng thái | Bằng chứng |
+| --- | --- | --- |
+| Catalog và validator | PASS | `dart run tool/export_levels.dart` in “Exported 20 validated levels”; JSON có 20 màn. Test validator kiểm tra lỗi ID, biên, ref, spawn, thiếu/sai replay. |
+| Replay màn 01–20 | PASS tự động | `flutter test`: 49/49 pass; `validateCatalog` replay qua `GameAttempt` và `tick(1)`. |
+| Editor dev | PASS widget test | Kéo hazard đổi tọa độ trong JSON export; đổi thứ tự công tắc màn 09 làm replay báo lỗi. Chưa chạy thử editor bằng browser hoặc thiết bị thật. |
+| Build phát hành web | PASS | `flutter build web` tạo `build/web`; `rg 'Editor dev|Import JSON|Export JSON' build/web/main.dart.js` không có kết quả. |
+| Playtest người thật 01–20 | NOT VERIFIED | Không có người mới chơi thử từng màn. |
+| Android build/cảm ứng thật | NOT VERIFIED | Chưa có Android SDK hoặc artifact APK/AAB được xác nhận. |
+| Duyệt mỹ thuật chapter | NOT VERIFIED | 04–20 dùng lại ba nền hiện có; bốn key visual draft đã tạo nhưng chưa được chủ sản phẩm duyệt hoặc tích hợp. |
+
+## M6 — QA candidate web trên bản hiện tại (30/10/2026)
+
+Môi trường: Ubuntu 24.04, Flutter 3.47.7, Dart 3.13.5, Chrome headless trên máy phát triển. `flutter devices` chỉ liệt kê Linux và Chrome; `flutter doctor -v` báo thiếu Android SDK và Linux toolchain. Không có điện thoại Android, iPhone hay giả lập Android được kết nối. Ảnh dưới `docs/qa/m6/` là screenshot Chrome headless ở kích thước viewport chỉ định, không phải ảnh thiết bị thật.
+
+| Ma trận | Kết quả | Bằng chứng / giới hạn |
+| --- | --- | --- |
+| Desktop 1366 × 768 | PASS render | [Ảnh](qa/m6/m6-desktop.png); không có Runtime/Log/console error trong lần mở. Không đo FPS. |
+| Mobile viewport 360 × 800 | PASS render giả lập | [Ảnh](qa/m6/m6-mobile360.png); không phải cảm ứng thật. |
+| Mobile viewport 390 × 844 | PASS render + thắng màn 01 bằng chuột | [Ảnh preview](qa/m6/m6-mobile390.png), [ảnh thắng](qa/m6/m6-mobile390-win.png); 3/3 lượt sau thắng; không có console error. |
+| Ngang 844 × 390 | PASS sau sửa | [Ảnh](qa/m6/m6-landscape.png): hiện hướng dẫn xoay dọc; widget test xác nhận ván tự pause và còn pause khi xoay lại. |
+| Android Chrome thiết bị thật | CHƯA THỰC HIỆN — blocker nghiệm thu | Thiếu thiết bị và Android SDK; chưa có APK/AAB hay đo cảm ứng/FPS trên model cụ thể. |
+| Safari iPhone | CHƯA THỰC HIỆN | Không có iPhone hoặc dịch vụ kiểm thử Safari. |
+
+| Kiểm tra chức năng | Kết quả | Bằng chứng / giới hạn |
+| --- | --- | --- |
+| 20 replay lời giải bằng engine rules | PASS tự động | `dart run tool/export_levels.dart` xuất 20 validated levels; `flutter test` chạy validator cùng `GameAttempt` và giữ cửa. Không chứng minh người mới giải được. |
+| Luật lượt, hồi sau 30 phút, reward ID trùng, ad error/cancel, lỗi lưu | PASS tự động | `test/services/m3_services_test.dart` dùng fake clock, ID và write gate; không có SDK ad thật. Race hủy trong lúc lưu thưởng được sửa và test riêng. |
+| 30 chu kỳ start/reset/pause/menu | PASS chức năng; bộ nhớ CHƯA ĐO | `test/m6_qa_test.dart`: 30 lần, mỗi lần về preview, active session null, lượt 3/3, đúng 61 lần ghi, không exception. Chưa có profile heap/listener trên thiết bị thật. |
+| Refresh ván và mất mạng sau tải | PASS browser hạn chế | [Ảnh sau reload](qa/m6/m6-mobile390-reload.png) cho thấy ván trở lại spawn, 3/3. Bật Chrome Network offline sau reload, kéo đèn vào cửa và thắng màn 01; không có console error. Chưa kiểm tra khởi động offline từ cold cache. |
+| Pause, resize, orientation | PASS tự động/browser viewport | Widget test kiểm tra pause khi xoay ngang và khôi phục portrait; Chrome render bốn kích thước. Chưa kiểm tra app nền trên điện thoại. |
+| Console error | PASS trong các phiên đã chạy | CDP theo dõi `Runtime.exceptionThrown`, `Log.entryAdded` mức error và `Runtime.consoleAPICalled` mức error; đều rỗng ở bốn viewport và luồng reload/offline. |
+| 60 FPS / frame time | CHƯA THỰC HIỆN — blocker nghiệm thu | Không có model thiết bị thật để đo frame time; screenshot headless không thay thế phép đo. |
+| Playtest người thật màn 01–20 | CHƯA THỰC HIỆN — blocker nghiệm thu | 20 replay tự động pass; chưa có kết quả người thật chơi từng màn. |
+
+### Bug M6
+
+| ID | Mức | Trạng thái | Kết quả |
+| --- | --- | --- | --- |
+| M6-01 | Cao | ĐÃ SỬA, PASS tập trung | Viewport ngang điện thoại trước đó ép cả board vào vùng 390px cao, chữ/nút chồng nhau. Nay hiện nhắc xoay dọc và pause ván; test resize + screenshot pass. |
+| M6-02 | Cao, sai báo thưởng | ĐÃ SỬA, PASS tập trung | Hủy ad đúng lúc callback lưu reward từng báo “đã hủy” dù lượt được cộng. Nay trạng thái lưu khóa nút hủy và chờ kết quả ghi; test service và widget pass. |
+| M6-03 | Blocker phát hành | CHƯA XÁC MINH | Chưa có thiết bị Android thật, đo FPS/frame time, cảm ứng và lifecycle. |
+| M6-04 | Blocker nội dung | CHƯA XÁC MINH | Màn 01–20 chưa được người thật chơi thử; replay chỉ chứng minh có một đường giải theo rules. |
+| M6-05 | Blocker phạm vi sản phẩm | CHƯA TRIỂN KHAI | M5 vẫn TODO: âm thanh/cài đặt/hướng dẫn/chọn màn và hoàn thiện art chưa được nghiệm thu. Không coi M6 là hoàn thành M5. |
+
+Candidate web chỉ để review. **Không production-ready** khi M6-03/04/05 còn mở. Không triển khai bản riêng tư vì chưa được yêu cầu.
+
+Smoke cuối sau sửa: `flutter analyze` **PASS** (No issues found); `flutter test --reporter compact` **PASS 53/53**; `dart run tool/export_levels.dart` **PASS 20 validated levels**; `flutter build web --no-wasm-dry-run` **PASS**, artifact `build/web`; `git diff --check` **PASS**. Chrome headless CDP mở lại artifact cuối ở bốn viewport, console error rỗng; riêng 390 × 844 thử start → reload → offline → giải thắng màn 01, lượt 3/3. Build còn cảnh báo font CupertinoIcons template. Editor dev không có chuỗi `Editor dev`, `Import JSON`, `Export JSON` trong `build/web/main.dart.js` (`rg` exit 1 là kết quả mong đợi).
