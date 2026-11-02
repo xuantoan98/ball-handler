@@ -68,17 +68,7 @@ class GamePainter extends CustomPainter {
       canvas.clipRRect(
         RRect.fromRectAndRadius(_stageRect, const Radius.circular(8)),
       );
-      canvas.drawImageRect(
-        backdrop!,
-        Rect.fromLTWH(
-          0,
-          0,
-          backdrop!.width.toDouble(),
-          backdrop!.height.toDouble(),
-        ),
-        _stageRect,
-        Paint()..filterQuality = FilterQuality.medium,
-      );
+      _paintBackdrop(canvas, backdrop!, _stageRect);
       canvas.restore();
     }
     canvas.save();
@@ -106,6 +96,70 @@ class GamePainter extends CustomPainter {
       _debug(canvas);
     }
     canvas.restore();
+  }
+
+  /// Keep the illustrated top/bottom proscenium at its native proportions.
+  /// Only the quiet central wall is shortened to fit the gameplay viewport.
+  void _paintBackdrop(Canvas canvas, ui.Image image, Rect destination) {
+    final width = image.width.toDouble();
+    final height = image.height.toDouble();
+    final scale = destination.width / width;
+    final visibleHeight = destination.height / scale;
+    final basePaint = Paint()..filterQuality = FilterQuality.medium;
+    if (visibleHeight >= height) {
+      canvas.drawImageRect(
+        image,
+        Rect.fromLTWH(0, 0, width, height),
+        destination,
+        basePaint,
+      );
+      return;
+    }
+    final join = visibleHeight * .54;
+    final fade = math.min(80.0, visibleHeight * .1);
+    final fadeStart = join - fade / 2;
+    final lowerSourceStart = height - (visibleHeight - fadeStart);
+    canvas.drawImageRect(
+      image,
+      Rect.fromLTRB(0, lowerSourceStart, width, height),
+      Rect.fromLTRB(
+        destination.left,
+        destination.top + fadeStart * scale,
+        destination.right,
+        destination.bottom,
+      ),
+      basePaint,
+    );
+    canvas.drawImageRect(
+      image,
+      Rect.fromLTRB(0, 0, width, fadeStart),
+      Rect.fromLTRB(
+        destination.left,
+        destination.top,
+        destination.right,
+        destination.top + fadeStart * scale,
+      ),
+      basePaint,
+    );
+    const strips = 16;
+    for (var i = 0; i < strips; i++) {
+      final sourceTop = fadeStart + fade * i / strips;
+      final sourceBottom = fadeStart + fade * (i + 1) / strips;
+      final alpha = (1 - (i + .5) / strips).clamp(0.0, 1.0);
+      canvas.drawImageRect(
+        image,
+        Rect.fromLTRB(0, sourceTop, width, sourceBottom),
+        Rect.fromLTRB(
+          destination.left,
+          destination.top + sourceTop * scale,
+          destination.right,
+          destination.top + sourceBottom * scale,
+        ),
+        Paint()
+          ..filterQuality = FilterQuality.medium
+          ..color = Colors.white.withValues(alpha: alpha),
+      );
+    }
   }
 
   void _stage(Canvas c) {
@@ -214,9 +268,10 @@ class GamePainter extends CustomPainter {
       _star(c, box.center, 12, active ? StageColors.mint : StageColors.cream);
     }
 
-    for (final gate in attempt.level.gates) {
+    for (var i = 0; i < attempt.level.gates.length; i++) {
+      final gate = attempt.level.gates[i];
       final box = _wall(gate);
-      if (attempt.gateOpen) {
+      if (attempt.isGateOpen(i)) {
         _line(
           c,
           Offset(box.center.dx, box.top),
@@ -354,15 +409,18 @@ class GamePainter extends CustomPainter {
   }) {
     final cycle = animation.value;
     c.save();
+    // Visual motion stays inside the exact collision rectangle.
+    c.clipRect(box);
     c.translate(box.center.dx, box.center.dy);
     c.rotate(-direction.dx * activity * .055);
     c.translate(-box.center.dx, -box.center.dy);
     c.translate(0, PuppetMotion.bob(cycle, activity));
-    _drop(c, box, 5, StageColors.gold, 7, offset: const Offset(0, 3));
-    final left = box.left;
-    final top = box.top;
-    final w = box.width;
-    final h = box.height;
+    final artBox = box.deflate(2);
+    _drop(c, artBox, 5, StageColors.gold, 7, offset: const Offset(0, 3));
+    final left = artBox.left;
+    final top = artBox.top;
+    final w = artBox.width;
+    final h = artBox.height;
     for (var i = 0; i < 2; i++) {
       final anchor = left + w * (.38 + i * .22);
       final tip = PuppetMotion.footTip(i, cycle, activity, direction);

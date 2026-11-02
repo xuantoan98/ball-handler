@@ -4,6 +4,22 @@ import 'package:ball_handler/core/rules.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('each gate opens from its own required switch IDs', () {
+    final level = m2Levels[2].copyWith(
+      switches: [const Rect2(90, 90, 20, 20), const Rect2(120, 90, 20, 20)],
+      switchIds: ['first', 'second'],
+      gates: [const Rect2(200, 0, 6, 180), const Rect2(250, 0, 6, 180)],
+      gateRequires: [
+        ['first'],
+        ['first', 'second'],
+      ],
+    );
+    final attempt = GameAttempt(level)..start();
+    expect(attempt.isGateOpen(0), isFalse);
+    attempt.activatedSwitches = 1;
+    expect(attempt.isGateOpen(0), isTrue);
+    expect(attempt.isGateOpen(1), isFalse);
+  });
   test('60 seconds is a loss exactly once', () {
     final attempt = GameAttempt(m2Levels[0])..start();
     attempt.tick(59.9);
@@ -176,6 +192,29 @@ void main() {
     attempt.tick(1);
     expect(attempt.phase, AttemptPhase.lost);
     expect(attempt.feedback, contains('chớp'));
+  });
+
+  test('crossing shadow and shutter paths lose within one tick', () {
+    final level = Level(
+      id: 97,
+      title: 'crossing',
+      hint: 'crossing',
+      initialLamp: controlForShadow(100, 100),
+      exit: const Rect2(300, 20, 50, 70),
+      movingHazards: const [
+        MovingHazard(
+          bounds: Rect2(200, 100, 20, 20),
+          travel: Point2(-100, 100),
+          periodSeconds: 2,
+        ),
+      ],
+      solution: const [],
+    );
+    final attempt = GameAttempt(level)..start();
+    attempt.moveLamp(controlForShadow(200, 200));
+    expect(attempt.phase, AttemptPhase.playing);
+    attempt.tick(1);
+    expect(attempt.phase, AttemptPhase.lost);
   });
 
   test('pause freezes moving danger and reset restarts its phase', () {

@@ -85,9 +85,12 @@ List<String> validateLevel(Level level) {
     for (final refs in level.gateRequires) {
       if (refs.isEmpty ||
           refs.toSet().length != refs.length ||
-          refs.any((id) => !all.contains(id)) ||
-          refs.toSet().length != all.length) {
+          refs.any((id) => !all.contains(id))) {
         issues.add('gate tham chiếu công tắc sai; cửa không bao giờ mở');
+      }
+      if (level.gateWindowSeconds != null &&
+          (refs.length != all.length || !refs.toSet().containsAll(all))) {
+        issues.add('gate có thời hạn phải dùng đủ chuỗi sao');
       }
     }
   }

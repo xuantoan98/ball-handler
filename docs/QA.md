@@ -1,5 +1,19 @@
 # QA và bằng chứng Flutter
 
+## Thiết kế lại 20 màn v2 (02/11/2026)
+
+| Kiểm tra | Kết quả / giới hạn |
+| --- | --- |
+| Catalog/schema/luật | PASS tự động: 20 layout có ID giữ nguyên, validator và replay có thời gian qua trong 60 giây. Test riêng kiểm đạo cụ chắn, chớp chạm bóng đứng yên, pause/reset, cửa có thời hạn và export JSON. Replay không chứng minh người mới hiểu hay giải được bằng ngón tay. |
+| Art và bố cục | 20 WebP riêng được nạp từ asset bundle, tổng 11.76 MB. Đã xem từng nền qua contact sheet và render từ `GamePainter` bảy màn 01/04/08/10/13/17/20 ở 390×844. Flutter test dùng font thay thế, nên bản render chỉ dùng rà vị trí/độ tương phản vật thể, không phải ảnh app thật. |
+| Lệnh xác minh | `dart format lib test`: 40 files, 0 changed; `dart run tool/export_levels.dart`: 20 validated levels; `flutter test`: **84/84 pass**; `flutter analyze`: No issues found; `flutter build web`: pass; `flutter build apk --debug`: pass. APK debug 177 MiB, SHA-256 `e61798339eae84420674476f21221ab16327aa722dd159a7fc6444f3a73fc4ad`. Web build có cảnh báo CupertinoIcons template nhưng vẫn thành công. |
+| Android thật bản v2 | **NOT VERIFIED**: `adb devices -l` không liệt kê thiết bị ở lần kiểm cuối. Chưa cài APK v2, đo FPS/heap, kiểm kéo một ngón hoặc quan sát chớp/cửa có hạn trên máy. |
+| Playtest độ khó 20 màn | **NOT VERIFIED**: chưa có người chơi mới thử từng màn; cần đo thời gian giải, số lần chết, nhận biết coral/vật chắn và khoảng hở với ngón tay. |
+
+Bản v2 chưa có bằng chứng đủ để nghiệm thu chất lượng trải nghiệm trên Android thật. Không xuất bản công khai.
+
+Review code độc lập phát hiện và đã sửa: cửa đọc `requires` riêng, va chạm khi bóng/chớp cùng đi qua nhau, ảnh nền bị kéo giãn, và phần nhân vật động vượt mép hitbox. Validator chặn gate có thời hạn chỉ tham chiếu một phần chuỗi sao vì đồng hồ của schema v2 bắt đầu ở sao cuối. Ba test mới tương ứng đã chạy đỏ trước sửa và xanh sau sửa; toàn bộ suite cuối 84/84.
+
 ## Trang chủ v2, duyệt màn và đồng hồ 60 giây (02/11/2026)
 
 Chủ sản phẩm duyệt [preview v2](superpowers/specs/home-preview-v2.png) theo UI Kit và chốt: trang chủ mỗi lần mở app, hướng dẫn chỉ lần đầu; màn 1–20 duyệt bằng Màn trước/Màn sau nhưng Play khóa nếu chưa qua màn trước; 60 giây mỗi lượt, hết giờ thua; Đặt lại/mở lại app giữ giờ còn lại. Save schema v3 migrate v1/v2; save cũ không hiện lại popup.

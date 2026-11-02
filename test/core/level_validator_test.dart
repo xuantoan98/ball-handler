@@ -4,6 +4,25 @@ import 'package:ball_handler/core/level_validator.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('gate may require a valid subset of ordered switches', () {
+    final level = m4Levels[2].copyWith(
+      gateRequires: [
+        [m4Levels[2].switchIds.first],
+      ],
+    );
+    expect(validateLevel(level), isEmpty);
+  });
+  test('timed gate requires the full star sequence in schema v2', () {
+    final base = m4Levels[12];
+    final level = base.copyWith(
+      switches: [base.switches.first, const Rect2(150, 150, 20, 20)],
+      switchIds: ['s1', 's2'],
+      gateRequires: [
+        ['s1'],
+      ],
+    );
+    expect(validateLevel(level).join(' '), contains('thời hạn'));
+  });
   test(
     'catalog has twenty unique valid levels with winning engine replays',
     () {

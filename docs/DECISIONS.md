@@ -1,5 +1,12 @@
 # Quyết định M0
 
+## Thiết kế lại 20 màn (02/11/2026)
+
+| ID | Quyết định | Hệ quả / giới hạn |
+| --- | --- | --- |
+| D33 | Chủ sản phẩm duyệt [thiết kế 20 màn](superpowers/specs/2026-11-02-twenty-stage-redesign-design.md) và ba concept, chọn thêm cơ chế có kiểm soát theo từng chapter | Giữ một đèn/một bóng, 60 giây, save ID và luật lượt. Màn 04 học đạo cụ chắn, 08 thêm màn chớp di chuyển, 13 thêm sao mở cửa có thời hạn, 17–20 kết hợp. |
+| D34 | 20 nền WebP riêng là lớp trang trí; mọi vật tương tác lấy hitbox từ `Level` | Không suy luận va chạm từ ảnh. Bóng Mơ và bàn đèn vẽ bằng Flutter theo concept đã duyệt. Replay của engine không thay playtest người thật. |
+
 ## Quyết định M7 (02/11/2026)
 
 | ID | Quyết định | Lý do / giới hạn |

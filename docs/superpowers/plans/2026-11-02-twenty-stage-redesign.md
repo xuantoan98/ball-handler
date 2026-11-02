@@ -66,13 +66,13 @@
 
 ### Task 4: Twenty distinct stage backdrops
 
-**Files:** Create `assets/backgrounds/stage-01-v2.png` … `stage-20-v2.png`; modify `pubspec.yaml`, stage asset selection in `lib/main.dart`, `docs/ASSETS.md`; tests in `test/widget_test.dart` or focused asset test.
+**Files:** Create `assets/backgrounds/stage-01-v2.webp` … `stage-20-v2.webp`; modify stage asset selection in `lib/main.dart`, `docs/ASSETS.md`; add a focused asset test.
 
 **Interfaces:** Stage background lookup is total for level IDs 1–20, no fallback to repeating the old three images. Images have no interactive objects or text and are clipped to the stage wall.
 
 - [ ] Add failing asset mapping/load test for all 20 IDs.
 - [ ] Run test red.
-- [ ] Generate distinct paper-cut backgrounds from approved home/UI Kit reference, central low-detail wall and chapter-specific edge scenery; inspect each, save versioned PNGs, record prompt/source.
+- [ ] Generate distinct paper-cut backgrounds from approved home/UI Kit reference, central low-detail wall and chapter-specific edge scenery; inspect each, save versioned WebPs, record prompt/source.
 - [ ] Wire asset loading and run targeted/full tests, web build and Android debug build.
 - [ ] Commit assets, mapping and documentation.
 
@@ -87,4 +87,4 @@
 
 ## Execution record
 
-Pending.
+Tasks 1–4 implemented in local `develop` commits `2fe28c2`, `e23e799`, `c51ad2d`, `95f6ab5`; review fixes and evidence follow. Final local checks: 84/84 Flutter tests, clean analyze, 20 validated levels, web and Android debug builds. Seven representative boards were rendered through Flutter test at 390×844; Android device QA and human playtest remain open because `adb devices -l` was empty. No public release or push.

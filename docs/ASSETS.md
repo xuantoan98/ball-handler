@@ -34,6 +34,8 @@ Prompt gốc: “Create a NEW single portrait mobile game HOME SCREEN art plate,
 
 `assets/backgrounds/stage-01-v2.webp` đến `stage-20-v2.webp` được tạo bằng built-in `image_gen`, mỗi màn một lệnh/ảnh riêng, dùng `home-stage-v2.png` và `design/Whimsical Shadow Theatre UI Kit.png` làm **style reference**, không cắt ghép asset người khác. Tất cả là tường hậu cảnh trang trí; Bóng Mơ, đèn, cửa, đạo cụ, cảm biến, sao, chữ và hitbox được vẽ từ Flutter/rules. Ảnh gốc 863×1823 RGBA được chuyển sang WebP quality 92 bằng Pillow để đóng gói; 20 file còn 11.76 MB. Game giải mã từng ảnh khi đổi màn và giải phóng ảnh trước. Cần đo FPS/bộ nhớ trên máy trước khi coi là release-ready.
 
+Khi vẽ vào tường 360×480, `GamePainter` giữ tỷ lệ gốc của họa tiết ở đầu/cuối ảnh và nối trong vùng giấy tối giữa ảnh bằng fade ngắn. Cách này giữ rèm, đèn lồng và viền vàng không bị kéo giãn ngang; vùng ghép không tham gia va chạm.
+
 | Màn | Cảnh riêng ở mép tường | Màn | Cảnh riêng ở mép tường |
 | --- | --- | --- | --- |
 | 01 | Rèm mở, lâu đài xa | 11 | Hai mặt đồng hồ cổ |

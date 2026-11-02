@@ -1,5 +1,13 @@
 # Tiến độ và task board
 
+## Thiết kế lại 20 màn v2 (02/11/2026)
+
+Chủ sản phẩm đã duyệt [thiết kế và ba concept](superpowers/specs/2026-11-02-twenty-stage-redesign-design.md). Trong cùng codebase Flutter đã thêm đạo cụ chắn không gây thua, màn chớp nguy hiểm di chuyển, sao/cửa có thời hạn; author lại 20 layout, lời giải có bước thời gian; vẽ lại Bóng Mơ và bàn đèn; thêm 20 hậu cảnh WebP riêng. Level ID 01–20, tiến độ/lượt/60 giây và adapter quảng cáo M7 giữ nguyên. Các ảnh nền chỉ trang trí, không chứa hitbox.
+
+Lệnh cuối: `dart format lib test` → 40 files, 0 changed; `dart run tool/export_levels.dart` → `Exported 20 validated levels`; `flutter test` → **84/84 pass**; `flutter analyze` → **No issues found**; `flutter build web` → `Built build/web`; `flutter build apk --debug` → `Built build/app/outputs/flutter-apk/app-debug.apk`, 177 MiB, SHA-256 `e61798339eae84420674476f21221ab16327aa722dd159a7fc6444f3a73fc4ad`; `git diff --check` → không có lỗi. Đã render thử 7 board đại diện 01/04/08/10/13/17/20 bằng `GamePainter` trong Flutter test với asset đóng gói; đây là kiểm tra bố cục, font test không phản ánh app thật.
+
+`adb devices -l` tại lần kiểm tra cuối chỉ hiện `List of devices attached` rỗng. APK v2 **chưa cài/chạy trên Android thật**; chưa có ảnh, đo FPS/bộ nhớ, kiểm cảm ứng một ngón, hay người mới giải các màn v2. Các replay tự động chỉ chứng minh đường tham chiếu hợp lệ trong rules. Bản này chưa phát hành và chưa push.
+
 ## Phản hồi sau thử máy — trang chủ v2, khóa màn, đồng hồ (02/11/2026)
 
 Chủ sản phẩm duyệt [thiết kế v2](superpowers/specs/2026-11-02-home-level-timer-design.md) và quy tắc 60 giây/hết giờ thua/giữ giờ khi Đặt lại hoặc mở app lại. Đã thêm trang chủ art Kit + nút Flutter thật, popup lần đầu, duyệt 1–20 với Play disabled khi chưa mở, vòng thời gian và huy hiệu `còn/60s` quanh Pause, pulse vàng 10 giây cuối. Save schema v3 thêm `introSeen` và `attemptRemainingMs` với migration v1/v2; `LivesService` chặn start màn khóa. Code M7 trong worktree được giữ nguyên. Không push hoặc công bố công khai.

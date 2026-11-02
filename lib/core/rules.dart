@@ -56,11 +56,13 @@ class _Contact {
 class GameAttempt {
   GameAttempt(this.level, {double remainingMs = 60000})
     : lamp = level.initialLamp,
+      _shadowAtLastTick = SandboxGeometry.shadowOnWall(level.initialLamp),
       remainingMs = remainingMs.clamp(0, 60000).toDouble();
 
   final Level level;
   AttemptPhase phase = AttemptPhase.preview;
   Point2 lamp;
+  Rect2 _shadowAtLastTick;
   int activatedSwitches = 0;
   double exitHoldSeconds = 0;
   double remainingMs;
@@ -78,6 +80,18 @@ class GameAttempt {
       (level.gateWindowSeconds == null ||
           gateWindowRemaining > 0 ||
           _gateClosingPending);
+  bool isGateOpen(int index) {
+    if (level.gateRequires.length != level.gates.length ||
+        level.switchIds.length != level.switches.length) {
+      return gateOpen;
+    }
+    final activeIds = level.switchIds.take(activatedSwitches).toSet();
+    if (!level.gateRequires[index].every(activeIds.contains)) return false;
+    if (level.gateWindowSeconds == null) return true;
+    if (activatedSwitches < level.switches.length) return false;
+    return gateWindowRemaining > 0 || _gateClosingPending;
+  }
+
   bool get insideExit => gateOpen && containsRect(level.exit, shadow);
 
   void start() {
@@ -106,6 +120,7 @@ class GameAttempt {
 
   void _resetPuzzleState() {
     lamp = level.initialLamp;
+    _shadowAtLastTick = shadow;
     activatedSwitches = 0;
     exitHoldSeconds = 0;
     elapsedSeconds = 0;
@@ -175,7 +190,7 @@ class GameAttempt {
         feedback = 'Đạo cụ đang chắn đường bóng.';
         return;
       }
-      if (contact.kind == 'gate' && !gateOpen) {
+      if (contact.kind == 'gate' && !isGateOpen(contact.index)) {
         lamp = _lerp(oldLamp, target, math.max(0, contact.time - 1e-6));
         exitHoldSeconds = 0;
         feedback = 'Cửa chắn đang khóa. Hãy chạm công tắc sao.';
@@ -209,6 +224,7 @@ class GameAttempt {
       feedback = 'Bóng chạm màn chớp.';
       return;
     }
+    _shadowAtLastTick = shadow;
     elapsedSeconds += effectiveSeconds;
     remainingMs = math.max(0, remainingMs - seconds * 1000);
     if (remainingMs == 0) {
@@ -256,6 +272,19 @@ class GameAttempt {
   }
 
   bool _movingHazardHits(double start, double end) {
+    final shadowEnd = shadow;
+    Rect2 shadowAt(double time) {
+      final fraction = (time - start) / (end - start);
+      return Rect2(
+        _shadowAtLastTick.left +
+            (shadowEnd.left - _shadowAtLastTick.left) * fraction,
+        _shadowAtLastTick.top +
+            (shadowEnd.top - _shadowAtLastTick.top) * fraction,
+        _shadowAtLastTick.width,
+        _shadowAtLastTick.height,
+      );
+    }
+
     for (final hazard in level.movingHazards) {
       var t = start;
       while (t < end - 1e-9) {
@@ -265,10 +294,17 @@ class GameAttempt {
         final next = math.min(end, t + untilTurn);
         final before = hazard.at(t);
         final after = hazard.at(next);
+        final shadowBefore = shadowAt(t);
+        final shadowAfter = shadowAt(next);
         if (sweptAabb(
+              shadowBefore,
+              Point2(
+                shadowAfter.left -
+                    shadowBefore.left -
+                    (after.left - before.left),
+                shadowAfter.top - shadowBefore.top - (after.top - before.top),
+              ),
               before,
-              Point2(after.left - before.left, after.top - before.top),
-              shadow,
             ) !=
             null) {
           return true;

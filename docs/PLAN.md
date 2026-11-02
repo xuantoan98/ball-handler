@@ -10,7 +10,7 @@ Nguồn đầy đủ và tiêu chí từng mốc: [SHADOW_CONTROLLER_PLAN.md](..
 | M1 | Hình chiếu và kéo đèn trong sandbox | Đã kiểm thử bằng viewport/touch giả lập; thiết bị thật chưa xác minh |
 | M2 | Vòng chơi ba màn, rules và chống xuyên | Đã triển khai/test tự động; chờ playtest người thật và cảm ứng thiết bị |
 | M3 | Lượt, save và ad mô phỏng | Đã triển khai/test tự động; chờ kiểm tra thiết bị thật |
-| M4 | Validator/editor và 20 màn có lời giải | READY FOR REVIEW — replay tự động qua; playtest/key visual chưa duyệt |
+| M4 | Validator/editor và 20 màn có lời giải | Thiết kế 20 màn v2 và concept đã duyệt; code/art/replay v2 qua test, chờ playtest và kiểm trên máy bản mới |
 | M5 | UI, âm thanh, hướng dẫn và art | Trang chủ v2/popup/huy hiệu thời gian đã triển khai theo duyệt; các phần M5 khác còn theo kế hoạch |
 | M6 | QA Flutter trên các target được chọn và bản candidate | Test/build bản điều chỉnh qua; smoke Redmi giới hạn, chưa đủ điều kiện phát hành (xem QA) |
 | M7 | Adapter quảng cáo Android và chuẩn bị phát hành Google Play | Đang làm spike với quảng cáo test trên thiết bị thật; phát hành/ads live chưa đủ điều kiện |

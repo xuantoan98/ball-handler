@@ -4,7 +4,7 @@ Nguồn đang chạy là `lib/core/level_catalog.dart`; `data/m4_levels.json` l�
 
 ## Schema v1/v2
 
-Mỗi màn có `id`, `schemaVersion: 1`, `title`, `hint`, `logicalBounds: [0,0,360,480]`, `lightBounds: [49,694,292,88]`, `initialLight: [x,y]`, `caster: [174,231,12,18]`, `hazards`, `switches`, `gates`, `exit`, `solutionWaypoints` và `solutionHoldSeconds`. Rect là `[left,top,width,height]`, điểm là `[x,y]` trong đơn vị logic. `switches` gồm `id`, `order`, `bounds`; `gates` gồm `bounds`, `requires` là ID công tắc. Engine hiện tại mở mọi gate khi toàn bộ công tắc được chạm đúng thứ tự, nên mỗi gate phải tham chiếu đủ bộ công tắc của màn.
+Mỗi màn có `id`, `schemaVersion`, `title`, `hint`, `logicalBounds: [0,0,360,480]`, `lightBounds: [49,694,292,88]`, `initialLight: [x,y]`, `caster: [174,231,12,18]`, `hazards`, `switches`, `gates`, `exit`, `solutionWaypoints` và `solutionHoldSeconds`. Rect là `[left,top,width,height]`, điểm là `[x,y]` trong đơn vị logic. `switches` gồm `id`, `order`, `bounds`; `gates` gồm `bounds`, `requires` là danh sách ID công tắc đã bật để mở riêng cửa đó. Gate không hẹn giờ có thể dùng một tập con; gate có `gateWindowSeconds` phải dùng đủ chuỗi sao để đồng hồ cục bộ bắt đầu ở sao cuối. Bản v1 vẫn giải mã được; catalog hiện tại dùng schema v2.
 
 Schema v2 thêm `solids` (đạo cụ chặn bóng nhưng không gây thua), `movingHazards` (`bounds`, `travel`, `periodSeconds`, `phaseSeconds`), `gateWindowSeconds` và `solutionSteps` (di chuyển đèn có thời lượng hoặc chờ). V1 vẫn đọc được với các trường mới mặc định rỗng. `m4Levels` dùng v2, 20 ID cũ được giữ để không làm mất tiến độ mở màn. Màn chớp coral chạm bóng là thua kể cả khi bóng đứng yên; pause dừng pha. Hết thời hạn cửa sao đặt lại chuỗi sao, nhưng chờ bóng rời hitbox cửa trước khi khép.
 
