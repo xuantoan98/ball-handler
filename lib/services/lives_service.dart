@@ -18,6 +18,7 @@ enum SessionResult {
   busy,
   alreadyActive,
   readOnly,
+  locked,
   duplicate,
   full,
 }
@@ -108,6 +109,11 @@ class LivesService {
       await _refillDuringTransaction();
       final current = record;
       if (current.activeLevel != null) return SessionResult.alreadyActive;
+      if (levelIndex < 0 ||
+          levelIndex > 19 ||
+          levelIndex > current.highestUnlocked) {
+        return SessionResult.locked;
+      }
       if (current.lives == 0) return SessionResult.noLives;
       final now = _effectiveNow(current);
       final candidate = current.change(
@@ -202,6 +208,35 @@ class LivesService {
     _busy = true;
     try {
       await _commit(record.change(soundEnabled: value));
+    } finally {
+      _busy = false;
+    }
+  }
+
+  Future<void> setIntroSeen() async {
+    if (_readOnly) throw const SaveFailure('Tab này chỉ đọc.');
+    if (_busy) throw const SaveFailure('Đang lưu.');
+    if (record.introSeen) return;
+    _busy = true;
+    try {
+      await _commit(record.change(introSeen: true));
+    } finally {
+      _busy = false;
+    }
+  }
+
+  Future<void> setAttemptRemainingMs(int remainingMs) async {
+    if (_readOnly) throw const SaveFailure('Tab này chỉ đọc.');
+    if (_busy) throw const SaveFailure('Đang lưu.');
+    if (record.activeLevel == null) return;
+    if (remainingMs < 0 || remainingMs > 60000) {
+      throw const SaveFailure('Thời gian còn lại không hợp lệ.');
+    }
+    final next = math.min(record.attemptRemainingMs ?? 60000, remainingMs);
+    if (next == record.attemptRemainingMs) return;
+    _busy = true;
+    try {
+      await _commit(record.change(attemptRemainingMs: next));
     } finally {
       _busy = false;
     }

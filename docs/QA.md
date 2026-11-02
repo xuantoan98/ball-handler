@@ -1,4 +1,36 @@
-# QA và bằng chứng Flutter M0–M1
+# QA và bằng chứng Flutter
+
+## Trang chủ v2, duyệt màn và đồng hồ 60 giây (02/11/2026)
+
+Chủ sản phẩm duyệt [preview v2](superpowers/specs/home-preview-v2.png) theo UI Kit và chốt: trang chủ mỗi lần mở app, hướng dẫn chỉ lần đầu; màn 1–20 duyệt bằng Màn trước/Màn sau nhưng Play khóa nếu chưa qua màn trước; 60 giây mỗi lượt, hết giờ thua; Đặt lại/mở lại app giữ giờ còn lại. Save schema v3 migrate v1/v2; save cũ không hiện lại popup.
+
+| Kiểm tra | Kết quả và giới hạn |
+| --- | --- |
+| Flutter test/analyze | `dart format lib test` → 37 file, 0 đổi; `flutter analyze` → No issues found; `flutter test` → **69/69 pass**. Test mới bao gồm timeout đúng ngưỡng, tie với cửa, reset/pause/retry, save v2→v3, khóa trực tiếp tại service, home/popup và lỗi lưu popup có thể thử lại, duyệt màn, reload timer, timeout trừ một lượt và nhịp sáng từng giây cuối. |
+| Artifact | `flutter build web` → exit 0, `build/web`; cảnh báo CupertinoIcons như trước. `flutter build apk --debug` → exit 0, `build/app/outputs/flutter-apk/app-debug.apk`, SHA-256 `457f597e4d75f10562f03b917553ac2909da89284b7e34fdc77361e78b48d62a`; APK cuối đã `adb install -r` thành công. Không có AAB release hay upload. |
+| Redmi K30 5G, Android 10 | `adb install -r ...` → `Performing Streamed Install / Success`; `adb shell am start -n com.example.ball_handler/.MainActivity` mở app. Trang chủ v2 nhìn được trên máy ([ảnh](qa/home-timer/home-redmi.png)); nút “Xem màn” vào preview màn 1 có hint đúng sau sửa notice ([ảnh](qa/home-timer/preview-redmi.png)); vào chơi thấy viền Pause và `57/60s` nằm trong HUD, không đè thẻ gợi ý ([ảnh](qa/home-timer/timer-redmi.png)). APK cuối đã cài đè thành công và chạy lại với save tạm mới. ADB có ngắt kết nối ngắn lúc đầu, lần cài sau thành công. |
+| Save tạm mới trên Redmi | Sau khi sao lưu file DataStore gốc, thử trạng thái fresh save trên APK cuối: popup hướng dẫn hiện ở lần mở đầu ([ảnh](qa/home-timer/first-run-redmi.png)); đóng popup, vào “Xem màn”, bấm “Màn sau” tới màn 02 thấy “Qua màn 01 để mở” và Play “Chưa mở” ([ảnh](qa/home-timer/locked-redmi.png)); bấm vùng nút khóa vẫn ở preview ([ảnh](qa/home-timer/locked-tapped-redmi.png)). Trở lại màn 01 và chơi tới hết giờ: kết quả “Hết 60 giây”, lượt giảm 3/3 → 2/3 ([ảnh](qa/home-timer/timeout-redmi.png)). Đây là một lượt quan sát cho mỗi nhánh, không phải playtest nhiều người. |
+| Dữ liệu máy sau smoke | Đã force-stop và khôi phục file DataStore gốc từ backup sau thử save tạm; `adb exec-out run-as ... cat ... | sha256sum` → `8294037ec0b849591143e87facb6f98acbea847ccbe36afe5c1d28912676052b`, khớp backup. Không xóa toàn bộ app data; app được để ở trạng thái force-stop sau khi khôi phục. |
+| Cần xác minh thêm trên máy | Nhịp sáng viền Pause trong 10 giây cuối **PASS test thời điểm, chưa xác minh hiệu ứng nhìn thấy trên thiết bị**; ảnh gần hết giờ chỉ ghi được nhãn `1/60s`. Chưa đo FPS, tương phản bằng số hoặc playtest người mới. |
+
+Đồng hồ lưu theo lần đổi giây và ngay khi app pause; nếu tiến trình bị kill đột ngột trước khi callback pause/ghi hoàn tất, lần khôi phục có thể cao hơn tối đa gần một giây. `shared_preferences` cũng không hứa ghi bền vững sau mất điện, nên chưa coi đây là cơ chế chống gian lận hay lưu tài sản có giá trị.
+
+
+## M7 — Android AdMob test spike (02/11/2026)
+
+Thiết bị thật: Redmi K30 5G, Android 10/API 29, USB `9d9af905`. Flutter 3.47.7/Dart 3.13.5; `google_mobile_ads` 9.2.0; Google sample app ID `ca-app-pub-3940256099942544~3347511713` chỉ ở `src/debug/AndroidManifest.xml`, sample rewarded unit `ca-app-pub-3940256099942544/5224354917` chỉ chạy khi `kDebugMode`. Đây là **quảng cáo test SDK thật**, không phải quảng cáo live. APK dùng cho ảnh spike có SHA-256 `e6f26df4bda068e2999ee92ef96d572de7ecde84964c67f2a654c8357b547494`; APK build cuối sau chỉnh nhãn UI có SHA-256 `3b8719d5b67f8f446af31e7098cb40f909dc4d68c322a7d3ef0d0f960d7b349a` tại `build/app/outputs/flutter-apk/app-debug.apk`, đã cài lại và xác nhận process chạy trên máy.
+
+Lệnh và kết quả: `flutter test` → 57 test pass; `flutter analyze` → sạch; `flutter build web` → exit 0; `flutter build apk --debug` → exit 0; `adb install -r build/app/outputs/flutter-apk/app-debug.apk` → Success; `adb shell am start -n com.example.ball_handler/.MainActivity` → app hiển thị trên máy. `aapt dump badging` của APK ghi minSdk 24, target/compile SDK 36, application ID placeholder `com.example.ball_handler`; manifest đã merge có `INTERNET`, `ACCESS_NETWORK_STATE`, `AD_ID`, `ACCESS_ADSERVICES_AD_ID`, `ACCESS_ADSERVICES_ATTRIBUTION`, `ACCESS_ADSERVICES_TOPICS` cùng các quyền kỹ thuật khác. Mọi quyền và dữ liệu SDK phải được đối chiếu Data safety/consent trước bản phát hành.
+
+| Kịch bản | Kết quả và bằng chứng |
+| --- | --- |
+| Reward sau xem đủ | **PASS trên Redmi cho 1 lượt quan sát:** thua màn 20 làm 3/3 → 2/3; sample ad Google hiển thị; sau nhãn “Đã cấp phần thưởng” và đóng ad, UI hiện 3/3, “Đã nhận +1 lượt”. Ảnh: [trước](qa/m7/before-test-ad.png), [ad test](qa/m7/google-test-ad.png), [sau](qa/m7/earned.png). File save sau restart chứa `lives:3` và 1 `processedRewardIds`. |
+| Cancel trước reward | **PASS unit, CHƯA XÁC MINH trên SDK thiết bị:** `RewardedAdSession` dismiss trước earned → cancelled; sample creative trên máy chưa cho đóng trước lúc cấp thưởng; phím Back không đóng ad. Không suy diễn từ test đơn vị sang ad network. |
+| Load/show error | **PASS unit; PASS một đường lỗi trên máy:** session fail → error, +0. Bấm xem ad rồi về Home ngay khi tải, sau 9 giây mở lại thấy “Quảng cáo hoặc lưu thưởng bị lỗi; không cộng lượt”, vẫn 2/3 và `processedRewardIds` rỗng ([ảnh](qa/m7/resume-error.png)). Chưa phân biệt được callback load fail hay show fail từ log; lỗi mạng riêng chưa kiểm. |
+| Callback earned trùng | **PASS unit/service, CHƯA XÁC MINH callback trùng từ SDK:** session gọi earn hai lần chỉ lưu một lần; `LivesService` chặn reward ID trùng kể cả reload theo `test/services/m3_services_test.dart`. |
+| Lifecycle | **PASS hai nhánh trên máy:** force-stop 1 giây sau bấm ad khi đang tải, save vẫn 2/3 và `processedRewardIds` rỗng; Home khi tải rồi resume cũng +0 và hiện lỗi. Reward đã hoàn thành tồn tại qua force-stop/restart. Home/lock/rotate trong lúc ad đang hiện và kill đúng lúc save đang ghi vẫn CHƯA XÁC MINH. |
+
+Dữ liệu save của thiết bị trước spike đã sao lưu; sau spike đã khôi phục, SHA-256 trước/sau cùng `8294037ec0b849591143e87facb6f98acbea847ccbe36afe5c1d28912676052b`. Chưa có AAB release ký, Play test track, Data safety đã duyệt, consent theo khu vực/độ tuổi, ad live hoặc công bố công khai. M7 **chưa đủ điều kiện DONE/phát hành**.
 
 Ngày: 21/10/2026. Máy: Ubuntu 24.04, Flutter 3.47.7 stable, Dart 3.13.5.
 

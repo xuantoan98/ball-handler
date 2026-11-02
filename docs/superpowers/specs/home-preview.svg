@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="816" height="900" viewBox="0 0 816 900" role="img" aria-label="Bản duyệt trang chủ Rạp bóng nhỏ và popup Cách chơi lần đầu">
+  <defs>
+    <linearGradient id="stage" x2="0" y2="1"><stop stop-color="#171b3c"/><stop offset="1" stop-color="#29203f"/></linearGradient>
+    <radialGradient id="moon"><stop stop-color="#d7fff0"/><stop offset=".55" stop-color="#94e6d4"/><stop offset="1" stop-color="#63bcae"/></radialGradient>
+    <radialGradient id="lamp"><stop stop-color="#fff6ae"/><stop offset="1" stop-color="#edbb63"/></radialGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="12"/></filter>
+    <g id="artboard">
+      <rect width="390" height="844" rx="30" fill="url(#stage)" stroke="#b189ad" stroke-width="3"/>
+      <path d="M14 15 Q85 75 58 293 Q41 412 10 452 L10 29 Q10 15 14 15Z M376 15 Q305 75 332 293 Q349 412 380 452 L380 29 Q380 15 376 15Z" fill="#66395f" stroke="#ab7197" stroke-width="3"/>
+      <path d="M13 23 Q88 80 64 280 M377 23 Q302 80 326 280" fill="none" stroke="#885479" stroke-width="8"/>
+      <circle cx="52" cy="256" r="2" fill="#f3d18c"/><circle cx="320" cy="148" r="3" fill="#f3d18c"/><circle cx="87" cy="364" r="2" fill="#f3d18c"/><circle cx="296" cy="368" r="2" fill="#f3d18c"/>
+      <text x="195" y="104" text-anchor="middle" fill="#f4d58a" font-family="Nunito, sans-serif" font-weight="900" font-size="27">RẠP BÓNG NHỎ</text>
+      <text x="195" y="139" text-anchor="middle" fill="#e4cddd" font-family="Nunito, sans-serif" font-size="14">Một ngọn đèn. Cả thế giới chuyển động.</text>
+      <ellipse cx="195" cy="558" rx="151" ry="29" fill="#0d122c" opacity=".75"/>
+      <circle cx="272" cy="307" r="75" fill="#7ddccc" opacity=".25" filter="url(#glow)"/>
+      <circle cx="272" cy="307" r="60" fill="url(#moon)" stroke="#d5fff1" stroke-width="5"/>
+      <circle cx="286" cy="295" r="57" fill="#25233d"/>
+      <circle cx="100" cy="288" r="47" fill="#efc46e" opacity=".4" filter="url(#glow)"/>
+      <circle cx="100" cy="288" r="29" fill="url(#lamp)" stroke="#fff2ba" stroke-width="4"/>
+      <path d="M68 430 Q65 379 96 372 Q126 366 132 427 L142 500 Q113 537 71 503Z" fill="#10142a" stroke="#b68eb4" stroke-width="4"/>
+      <path d="M66 377 L77 352 L94 369 L107 346 L122 366 L134 350 L139 380Z" fill="#e8bd6a" stroke="#fff0af" stroke-width="3"/>
+      <circle cx="91" cy="414" r="3" fill="#fff5bd"/><circle cx="115" cy="414" r="3" fill="#fff5bd"/>
+      <path d="M33 567 Q195 533 357 567 L357 815 L33 815Z" fill="#30243f" stroke="#8d6689" stroke-width="3"/>
+      <rect x="61" y="610" width="268" height="62" rx="18" fill="#efc66f" stroke="#fff0ae" stroke-width="3"/>
+      <text x="195" y="650" text-anchor="middle" fill="#29203f" font-family="Nunito, sans-serif" font-size="23" font-weight="900">Chơi ngay</text>
+      <rect x="61" y="685" width="268" height="56" rx="17" fill="#9b7db5" stroke="#dfc4ec" stroke-width="3"/>
+      <text x="195" y="721" text-anchor="middle" fill="#1e1834" font-family="Nunito, sans-serif" font-size="21" font-weight="800">Xem màn</text>
+      <text x="195" y="779" text-anchor="middle" fill="#ebd9e7" font-family="Nunito, sans-serif" font-size="16">♥  3 / 3 lượt</text>
+    </g>
+  </defs>
+  <rect width="816" height="900" fill="#f2edf2"/>
+  <text x="200" y="26" text-anchor="middle" fill="#332845" font-family="Nunito, sans-serif" font-size="16" font-weight="800">TRANG CHỦ · MỖI LẦN MỞ APP</text>
+  <text x="616" y="26" text-anchor="middle" fill="#332845" font-family="Nunito, sans-serif" font-size="16" font-weight="800">POPUP · CHỈ LẦN ĐẦU</text>
+  <g transform="translate(5 42)"><use href="#artboard"/></g>
+  <g transform="translate(421 42)"><use href="#artboard"/>
+    <rect width="390" height="844" rx="30" fill="#101329" opacity=".67"/>
+    <rect x="32" y="206" width="326" height="432" rx="24" fill="#30243f" stroke="#e6bf77" stroke-width="4"/>
+    <path d="M60 259 Q195 239 330 259" fill="none" stroke="#a784b1" stroke-width="2"/>
+    <text x="195" y="256" text-anchor="middle" fill="#f2d48b" font-family="Nunito, sans-serif" font-size="27" font-weight="900">Cách chơi</text>
+    <text x="58" y="320" fill="#e8d8e9" font-family="Nunito, sans-serif" font-size="17" font-weight="700">✦  Kéo đèn để dẫn bóng</text>
+    <text x="83" y="345" fill="#e8d8e9" font-family="Nunito, sans-serif" font-size="17">về cửa trăng.</text>
+    <text x="58" y="399" fill="#e8d8e9" font-family="Nunito, sans-serif" font-size="17" font-weight="700">✦  Tránh vùng đỏ, bật sao</text>
+    <text x="83" y="424" fill="#e8d8e9" font-family="Nunito, sans-serif" font-size="17">theo thứ tự.</text>
+    <text x="58" y="478" fill="#e8d8e9" font-family="Nunito, sans-serif" font-size="17" font-weight="700">✦  Mỗi lượt có 60 giây.</text>
+    <text x="83" y="503" fill="#e8d8e9" font-family="Nunito, sans-serif" font-size="17">Tạm dừng sẽ dừng giờ.</text>
+    <rect x="69" y="547" width="252" height="59" rx="17" fill="#efc66f" stroke="#fff0ae" stroke-width="3"/>
+    <text x="195" y="585" text-anchor="middle" fill="#29203f" font-family="Nunito, sans-serif" font-size="21" font-weight="900">Đã hiểu</text>
+  </g>
+</svg>

@@ -37,6 +37,12 @@ Future<void> _open(WidgetTester tester, _Store store) async {
     ShadowTheatreApp(saveStore: store, tabOwnership: _Writer()),
   );
   await tester.pump();
+  if (find.text('Đã hiểu').evaluate().isNotEmpty) {
+    await tester.tap(find.text('Đã hiểu'));
+    await tester.pump();
+  }
+  await tester.tap(find.text('Chơi ngay'));
+  await tester.pump();
 }
 
 void main() {
@@ -65,7 +71,7 @@ void main() {
       expect(tester.takeException(), isNull);
     }
     expect(SaveRecord.decode(store.value!).lives, 3);
-    expect(store.writes, 61); // Initial save + start and abandon per cycle.
+    expect(store.writes, greaterThanOrEqualTo(62));
   });
 
   testWidgets('phone landscape asks for portrait and preserves paused game', (

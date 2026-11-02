@@ -1,5 +1,45 @@
 # Tiến độ và task board
 
+## Phản hồi sau thử máy — trang chủ v2, khóa màn, đồng hồ (02/11/2026)
+
+Chủ sản phẩm duyệt [thiết kế v2](superpowers/specs/2026-11-02-home-level-timer-design.md) và quy tắc 60 giây/hết giờ thua/giữ giờ khi Đặt lại hoặc mở app lại. Đã thêm trang chủ art Kit + nút Flutter thật, popup lần đầu, duyệt 1–20 với Play disabled khi chưa mở, vòng thời gian và huy hiệu `còn/60s` quanh Pause, pulse vàng 10 giây cuối. Save schema v3 thêm `introSeen` và `attemptRemainingMs` với migration v1/v2; `LivesService` chặn start màn khóa. Code M7 trong worktree được giữ nguyên. Không push hoặc công bố công khai.
+
+Lệnh cuối: `dart format lib test` → 37 file, 0 đổi; `flutter analyze` → No issues found; `flutter test` → 69/69 pass; `flutter build web` → exit 0; `flutter build apk --debug` → exit 0 (SHA-256 APK `457f597e4d75f10562f03b917553ac2909da89284b7e34fdc77361e78b48d62a`). `adb install -r` APK cuối trên Redmi K30 5G → Success. Ảnh trên máy xác nhận home v2, hint preview, vòng/huy hiệu Pause; thử với save tạm mới xác nhận popup lần đầu, Play màn 02 khóa và không phản ứng khi bấm, hết 60 giây thua và giảm một lượt. Dữ liệu save gốc đã được khôi phục, hash sau cùng trùng backup. Nhịp sáng nhìn thấy trong 10 giây cuối chưa chụp xác nhận. Xem [QA](QA.md) để phân biệt kiểm thử tự động và quan sát trên thiết bị.
+
+## M7 — Google Play được chọn, spike AdMob test Android (02/11/2026)
+
+Chủ sản phẩm chọn lựa chọn 1: Flutter Android trên Google Play (D27). Đã thêm `google_mobile_ads` 9.2.0, adapter Android debug qua `RewardedAdSource`, Google sample app/unit ID và cổng consent UMP trước ad request. Web giữ mock. Android release chưa cấu hình ad live nên nút bị vô hiệu hóa; không dùng sample ID để phát hành. Test callback session kiểm tra cancel/error/duplicate/save. Lệnh cuối: `flutter test` 57 pass, `flutter analyze` sạch, `flutter build web` exit 0, `flutter build apk --debug` exit 0; `adb install -r` Success và process chạy trên Redmi K30 5G. APK debug cuối SHA-256 `3b8719d5b67f8f446af31e7098cb40f909dc4d68c322a7d3ef0d0f960d7b349a`. Ad test Google thực đã hiện trên APK ngay trước chỉnh nhãn UI; một lượt hoàn tất làm 2/3 → 3/3 và lưu qua restart. Kill trong khi tải +0. Chi tiết pass/chưa xác minh và ảnh ở `docs/QA.md`.
+
+Trạng thái: **DOING / chưa đủ điều kiện phát hành**. Device cancel trước reward, lỗi mạng/show tách riêng, callback SDK trùng và một số nhánh lifecycle chưa xác minh. Home khi ad đang tải rồi resume cho error +0 trên máy. Chưa có application ID thương mại, AdMob ID của app, khóa ký, AAB release ký, hồ sơ privacy/Data safety, Play Console test track hoặc ad live. Không upload/xuất bản. Save thiết bị đã khôi phục nguyên trạng sau spike với SHA-256 đối chiếu.
+
+## Kiểm tra lại điều kiện bắt đầu M7 (02/11/2026)
+
+Đã đối chiếu tài liệu chính thức hiện hành của Google Mobile Ads Flutter (setup, rewarded, test ads, UMP), pub.dev `google_mobile_ads` 9.2.0 và Google Play target API. Ma trận adapter và đầu vào của chủ sản phẩm ở `docs/M7_READINESS.md` đã cập nhật theo môi trường hiện tại. `flutter devices` nhận Redmi K30 5G `9d9af905` (Android 10/API 29); `flutter doctor -v` nhận SDK 36.0.0, all Android licenses accepted; `adb devices -l` báo `device` qua USB. `ls -l build/app/outputs/flutter-apk` thấy APK debug có sẵn từ 10:18 nhưng chưa xác minh cài/chạy. Đây chỉ là kiểm tra môi trường, **không phải spike quảng cáo M7**. Kênh phát hành chưa được chốt trong PLAN/DECISIONS, nên chưa tích hợp SDK, chạy spike ad hoặc tuyên bố reward/cancel/error/lifecycle đạt.
+
+## Tái hiện assembleDebug sau phản hồi lỗi (02/11/2026)
+
+`flutter build apk --debug` exit 1 sau 9,8 giây. Log xác nhận `LicenceNotAcceptedException` cho `ndk;28.2.13676358`, SDK đang dùng `/home/bss-group/Android/Sdk`; `sdkmanager --sdk_root=/home/bss-group/Android/Sdk --licenses </dev/null` vẫn báo **8/8 chưa chấp nhận**. `flutter doctor -v` còn báo chưa có Android platform hợp lệ. `flutter devices` có Redmi K30 5G, nhưng chưa build/cài/chạy app trên máy này. Cần chủ sản phẩm hoàn tất lệnh license tương tác trong terminal trước khi có thể cài NDK và kiểm tra lại.
+
+## Android SDK license/NDK blocker (02/11/2026)
+
+`flutter run` trên Redmi K30 5G dừng ở `LicenseNotAcceptedException`: Gradle cần NDK `28.2.13676358` nhưng `/usr/lib/android-sdk` chỉ có `platform-tools`, không có `cmdline-tools`, NDK hoặc license được chấp nhận. Đây là lỗi setup SDK, chưa phải lỗi gameplay.
+
+Đã tải Android Command-line Tools Linux `commandlinetools-linux-15859902_latest.zip` từ trang Android Developers, kiểm SHA-256 `4e4c464f145a7512b57d088ac6c278c03c9eea610886b35a5e0804e74eedf583`, giải nén vào `~/Android/Sdk/cmdline-tools/latest`, sao chép `platform-tools` có sẵn, đặt `ANDROID_HOME`/`ANDROID_SDK_ROOT` trong shell và trỏ `flutter config --android-sdk` cùng `android/local.properties` đến `~/Android/Sdk`. `sdkmanager --version` → 22.0. Flutter 3.47.7 yêu cầu compile/target SDK 36 và NDK 28.2.13676358 theo `FlutterExtension.kt` của SDK đang cài.
+
+Lệnh `sdkmanager --sdk_root=/home/bss-group/Android/Sdk --licenses </dev/null` → **8/8 SDK package licenses not accepted**. Đã yêu cầu chủ sản phẩm đọc và tự chấp nhận license nếu đồng ý. Chưa cài platform 36, build-tools 36.0.0, NDK; `flutter doctor -v` vẫn báo không có Android platform hợp lệ. Chưa build APK hoặc chạy app trên điện thoại. Sau khi license được chấp nhận, cài đúng các package bằng SDK manager, chạy lại `flutter doctor -v`, `flutter run -d 9d9af905` và lưu artifact/log thật.
+
+## Sửa môi trường Java cho Android (02/11/2026)
+
+Lỗi nhận được: `JAVA_HOME is not set and no 'java' command could be found in your PATH`. Kiểm tra `command -v java`, `command -v javac` và `/usr/lib/jvm` đều không tìm được JDK; `sudo -n true` báo cần mật khẩu. Android Gradle Plugin 9.1.0 của repo và Gradle 9.3.1 cần JDK 17. Tải `openjdk-17-jdk-headless` và `openjdk-17-jre-headless` 17.0.20.1 từ Ubuntu bằng `apt-get download`, giải nén trong `~/.local/opt/java17-packages`, tạo truststore từ CA hệ thống và cấu hình `JAVA_HOME`/`PATH` trong `~/.profile`, `~/.bashrc`; chạy `flutter config --jdk-dir=...` tới JDK đó. Không sửa source/build config trong repo.
+
+Xác minh: `bash -lc '... java -version; javac -version'` → cả hai là 17.0.20.1; `cd android && ./gradlew --version` → Gradle 9.3.1, Launcher JVM 17.0.20.1, exit 0. `flutter doctor -v` hiện nhận Android SDK tại `/usr/lib/android-sdk` và Redmi K30 5G Android 10, nhưng báo **thiếu cmdline-tools**; chưa chạy Android build, chưa có APK/AAB hoặc spike ad. Trạng thái thiết bị này mới hơn bản khảo sát M7 ngay bên dưới.
+
+## Khảo sát cổng M7 (02/11/2026)
+
+`docs/M7_READINESS.md` ghi adapter compatibility matrix, nguồn Google/Flutter/Play hiện hành, kịch bản spike reward/cancel/error/duplicate/lifecycle và đầu vào cần chủ sản phẩm. Đây là khảo sát, **M7 vẫn chưa bắt đầu**: `docs/PLAN.md` ghi kênh phát hành chưa quyết định; `com.example.ball_handler`/ký debug vẫn là placeholder. Chưa thêm `google_mobile_ads`, chưa chạy ad SDK hoặc phát hành.
+
+Lệnh thực chạy: `git status --short --branch` → `## develop...origin/develop`, sạch trước khi sửa; `/home/bss-group/snap/flutter/common/flutter/bin/flutter devices` → chỉ Linux và Chrome; `/home/bss-group/snap/flutter/common/flutter/bin/flutter doctor -v` → Flutter 3.47.7/Dart 3.13.5, Android toolchain **Unable to locate Android SDK**. Vì không có điện thoại Android kết nối hoặc SDK, spike thiết bị thật, APK/AAB và test ad thật là **NOT VERIFIED**. Xem `docs/M7_READINESS.md` để mở cổng sau khi chủ sản phẩm chốt kênh phát hành và cung cấp thiết bị.
+
 ## Rà soát skill Git (22/10/2026)
 
 Đã chỉnh `skills/push-branch`, `skills/run-commit`, `skills/write-commit` cho GitHub/`develop`: push thường, không force push hoặc tạo PR; commit chỉ lấy file đúng phạm vi, không stage toàn bộ mặc định. Cập nhật `AGENTS.md` để ghi nhận quy trình Git. Đây là thay đổi hướng dẫn, không thay đổi game hay milestone.

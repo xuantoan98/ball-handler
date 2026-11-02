@@ -54,13 +54,16 @@ class _Contact {
 
 /// Deterministic M2 attempt. No Flutter or frame clock dependency.
 class GameAttempt {
-  GameAttempt(this.level) : lamp = level.initialLamp;
+  GameAttempt(this.level, {double remainingMs = 60000})
+    : lamp = level.initialLamp,
+      remainingMs = remainingMs.clamp(0, 60000).toDouble();
 
   final Level level;
   AttemptPhase phase = AttemptPhase.preview;
   Point2 lamp;
   int activatedSwitches = 0;
   double exitHoldSeconds = 0;
+  double remainingMs;
   String feedback = '';
 
   Rect2 get shadow => SandboxGeometry.shadowOnWall(lamp);
@@ -83,6 +86,15 @@ class GameAttempt {
 
   void reset() {
     phase = AttemptPhase.preview;
+    remainingMs = 60000;
+    _resetPuzzleState();
+  }
+
+  void resetPuzzle() {
+    if (phase == AttemptPhase.playing) _resetPuzzleState();
+  }
+
+  void _resetPuzzleState() {
     lamp = level.initialLamp;
     activatedSwitches = 0;
     exitHoldSeconds = 0;
@@ -150,6 +162,12 @@ class GameAttempt {
 
   void tick(double seconds) {
     if (phase != AttemptPhase.playing || seconds <= 0) return;
+    remainingMs = math.max(0, remainingMs - seconds * 1000);
+    if (remainingMs == 0) {
+      phase = AttemptPhase.lost;
+      feedback = 'Hết 60 giây.';
+      return;
+    }
     if (!insideExit) {
       exitHoldSeconds = 0;
       return;

@@ -4,6 +4,46 @@ import 'package:ball_handler/core/rules.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('60 seconds is a loss exactly once', () {
+    final attempt = GameAttempt(m2Levels[0])..start();
+    attempt.tick(59.9);
+    expect(attempt.phase, AttemptPhase.playing);
+    expect(attempt.remainingMs, closeTo(100, 1));
+    attempt.tick(0.1);
+    expect(attempt.phase, AttemptPhase.lost);
+    expect(attempt.remainingMs, 0);
+    expect(attempt.feedback, 'Hết 60 giây.');
+    attempt.tick(5);
+    expect(attempt.phase, AttemptPhase.lost);
+  });
+
+  test('timeout wins tie with exit hold completion', () {
+    final attempt = GameAttempt(m2Levels[0], remainingMs: 1000)..start();
+    attempt.moveLamp(m2Levels[0].solution.single);
+    attempt.tick(1);
+    expect(attempt.phase, AttemptPhase.lost);
+  });
+
+  test(
+    'pause and puzzle reset preserve time while retry restores 60 seconds',
+    () {
+      final attempt = GameAttempt(m2Levels[0])..start();
+      attempt.tick(8);
+      attempt.pause();
+      attempt.tick(10);
+      expect(attempt.remainingMs, 52000);
+      attempt.resume();
+      attempt.resetPuzzle();
+      expect(attempt.phase, AttemptPhase.playing);
+      expect(attempt.remainingMs, 52000);
+      attempt.tick(52);
+      expect(attempt.phase, AttemptPhase.lost);
+      attempt.retry();
+      expect(attempt.phase, AttemptPhase.playing);
+      expect(attempt.remainingMs, 60000);
+    },
+  );
+
   test('all three reference solutions win through the actual rules', () {
     for (final level in m2Levels) {
       final attempt = GameAttempt(level)..start();

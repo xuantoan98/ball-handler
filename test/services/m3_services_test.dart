@@ -60,6 +60,48 @@ class FakeAd implements RewardedAdSource {
 void main() {
   final origin = DateTime.utc(2026, 10, 22, 0);
 
+  test(
+    'fresh guide, locked levels and timer persist only after save',
+    () async {
+      final store = MemoryStore();
+      final lives = LivesService(SaveService(store), FakeClock(origin));
+      await lives.initialize();
+      expect(lives.record.introSeen, false);
+      expect(await lives.startAttempt(19), SessionResult.locked);
+      expect(lives.activeLevel, isNull);
+      await lives.setIntroSeen();
+      expect(lives.record.introSeen, true);
+      expect(await lives.startAttempt(0), SessionResult.ok);
+      expect(lives.record.attemptRemainingMs, 60000);
+      await lives.setAttemptRemainingMs(41321);
+      final reloaded = LivesService(SaveService(store), FakeClock(origin));
+      await reloaded.initialize();
+      expect(reloaded.record.introSeen, true);
+      expect(reloaded.record.attemptRemainingMs, 41321);
+      store.failWrite = true;
+      await expectLater(
+        reloaded.setAttemptRemainingMs(20000),
+        throwsA(isA<SaveFailure>()),
+      );
+      expect(reloaded.record.attemptRemainingMs, 41321);
+    },
+  );
+
+  test('old v2 active save gets full clock and does not show guide', () async {
+    final old = jsonDecode(
+      SaveRecord.fresh.change(activeLevel: 0).encode(),
+    ) as Map<String, dynamic>;
+    old['schemaVersion'] = 2;
+    old.remove('introSeen');
+    old.remove('attemptRemainingMs');
+    final store = MemoryStore()..value = jsonEncode(old);
+    final lives = LivesService(SaveService(store), FakeClock(origin));
+    await lives.initialize();
+    expect(lives.record.introSeen, true);
+    expect(lives.record.attemptRemainingMs, 60000);
+    expect(jsonDecode(store.value!)['schemaVersion'], 3);
+  });
+
   test('saved progress and active attempt can reach level twenty', () async {
     final store = MemoryStore();
     store.value = SaveRecord.fresh
@@ -104,7 +146,8 @@ void main() {
   );
 
   test('refresh restores free attempt and win resets lives to three', () async {
-    final store = MemoryStore();
+    final store = MemoryStore()
+      ..value = SaveRecord.fresh.change(highestUnlocked: 1).encode();
     final clock = FakeClock(origin);
     final first = LivesService(SaveService(store), clock);
     await first.initialize();
@@ -129,8 +172,8 @@ void main() {
     final clock = FakeClock(origin);
     final lives = LivesService(SaveService(store), clock);
     await lives.initialize();
-    for (var level = 0; level < 3; level++) {
-      expect(await lives.startAttempt(level), SessionResult.ok);
+    for (var loss = 0; loss < 3; loss++) {
+      expect(await lives.startAttempt(0), SessionResult.ok);
       await lives.finishAttempt(won: false);
     }
     expect(lives.lives, 0);
@@ -199,7 +242,7 @@ void main() {
       expect(first.lives, 3);
       expect(first.activeLevel, 1);
       expect(first.untilNextRefill, isNull);
-      expect(jsonDecode(store.value!)['schemaVersion'], 2);
+      expect(jsonDecode(store.value!)['schemaVersion'], 3);
       final again = LivesService(SaveService(store), FakeClock(origin));
       await again.initialize();
       expect(again.lives, 3);
@@ -221,7 +264,7 @@ void main() {
     store.failWrite = false;
     await lives.initialize();
     expect(lives.lives, 2);
-    expect(jsonDecode(store.value!)['schemaVersion'], 2);
+    expect(jsonDecode(store.value!)['schemaVersion'], 3);
   });
 
   test('reward ID is durable and duplicate callback earns once', () async {

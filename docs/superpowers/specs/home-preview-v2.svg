@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="820" height="900" viewBox="0 0 820 900" role="img" aria-label="Bản duyệt trang chủ Rạp bóng nhỏ phiên bản hai theo UI Kit và popup hướng dẫn">
+  <defs>
+    <linearGradient id="gold" x2="0" y2="1"><stop stop-color="#fff0b4"/><stop offset=".48" stop-color="#ffc65a"/><stop offset="1" stop-color="#d78c32"/></linearGradient>
+    <linearGradient id="lilac" x2="0" y2="1"><stop stop-color="#e6dcf4"/><stop offset=".5" stop-color="#c4b5e0"/><stop offset="1" stop-color="#a489c4"/></linearGradient>
+    <linearGradient id="ink" x2="0" y2="1"><stop stop-color="#273252"/><stop offset="1" stop-color="#171b37"/></linearGradient>
+    <filter id="shadow"><feGaussianBlur in="SourceAlpha" stdDeviation="5"/><feOffset dy="3"/><feComponentTransfer><feFuncA type="linear" slope=".65"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <g id="ticketGold" filter="url(#shadow)">
+      <path d="M15 0 H253 L268 14 V46 L253 60 H15 L0 46 V14Z" fill="url(#gold)" stroke="#f7dd8d" stroke-width="2.5"/>
+      <path d="M18 5 H250 L263 17 V43 L250 55 H18 L5 43 V17Z" fill="none" stroke="#9d5e2d" stroke-width="1.4"/>
+      <path d="M12 14 L18 10 L24 14 M244 14 L250 10 L256 14 M12 46 L18 50 L24 46 M244 46 L250 50 L256 46" fill="none" stroke="#9d5e2d" stroke-width="2"/>
+      <path d="M16 30 L20 26 L24 30 L20 34Z M244 30 L248 26 L252 30 L248 34Z" fill="#9d5e2d"/>
+    </g>
+    <g id="ticketLilac" filter="url(#shadow)">
+      <path d="M15 0 H253 L268 14 V46 L253 60 H15 L0 46 V14Z" fill="url(#lilac)" stroke="#eddef8" stroke-width="2.5"/>
+      <path d="M18 5 H250 L263 17 V43 L250 55 H18 L5 43 V17Z" fill="none" stroke="#846195" stroke-width="1.4"/>
+      <path d="M12 14 L18 10 L24 14 M244 14 L250 10 L256 14 M12 46 L18 50 L24 46 M244 46 L250 50 L256 46" fill="none" stroke="#846195" stroke-width="2"/>
+      <path d="M16 30 L20 26 L24 30 L20 34Z M244 30 L248 26 L252 30 L248 34Z" fill="#846195"/>
+    </g>
+    <g id="screen">
+      <rect width="390" height="844" rx="23" fill="#10152f"/>
+      <image xlink:href="home-stage-concept-v2.png" x="0" y="0" width="390" height="844" preserveAspectRatio="xMidYMid slice"/>
+      <rect x="38" y="119" width="314" height="102" rx="18" fill="#10152f" opacity=".91" stroke="#d9a259" stroke-width="2.3"/>
+      <rect x="44" y="125" width="302" height="90" rx="13" fill="none" stroke="#7c82a7" stroke-width="1"/>
+      <path d="M52 137 q15 -7 22 0 M316 137 q15 -7 22 0 M52 203 q15 7 22 0 M316 203 q15 7 22 0" fill="none" stroke="#d9a259" stroke-width="1.8"/>
+      <text x="195" y="164" text-anchor="middle" fill="#fff3d8" font-family="Nunito, sans-serif" font-size="29" font-weight="900" letter-spacing=".4">RẠP BÓNG NHỎ</text>
+      <path d="M106 177 H284" stroke="#d9a259" stroke-width="1"/>
+      <text x="195" y="198" text-anchor="middle" fill="#e6dcf4" font-family="Nunito, sans-serif" font-size="13" font-weight="700">Một ngọn đèn. Cả thế giới chuyển động.</text>
+      <g transform="translate(61 594)"><use xlink:href="#ticketGold"/><path d="M32 19 L32 41 L50 30Z" fill="#26213d"/><text x="141" y="39" text-anchor="middle" fill="#181b36" font-family="Nunito, sans-serif" font-size="21" font-weight="900">Chơi ngay</text></g>
+      <g transform="translate(61 668)"><use xlink:href="#ticketLilac"/><path d="M29 22 L46 22 L46 41 L29 41Z M30 22 Q37 14 45 22" fill="none" stroke="#342546" stroke-width="2"/><text x="141" y="39" text-anchor="middle" fill="#181b36" font-family="Nunito, sans-serif" font-size="20" font-weight="900">Xem màn</text></g>
+      <path d="M94 755 Q195 742 296 755 L304 781 Q195 797 86 781Z" fill="url(#ink)" stroke="#c7975a" stroke-width="2"/>
+      <text x="195" y="777" text-anchor="middle" fill="#fff3d8" font-family="Nunito, sans-serif" font-size="17" font-weight="800">✦  3 / 3 lượt  ✦</text>
+    </g>
+  </defs>
+  <rect width="820" height="900" fill="#10152f"/>
+  <text x="200" y="27" text-anchor="middle" fill="#fff3d8" font-family="Nunito, sans-serif" font-size="16" font-weight="800">TRANG CHỦ · MỖI LẦN MỞ APP</text>
+  <text x="620" y="27" text-anchor="middle" fill="#fff3d8" font-family="Nunito, sans-serif" font-size="16" font-weight="800">HƯỚNG DẪN · CHỈ LẦN ĐẦU</text>
+  <g transform="translate(5 43)"><use xlink:href="#screen"/></g>
+  <g transform="translate(425 43)"><use xlink:href="#screen"/>
+    <rect width="390" height="844" rx="23" fill="#0b1029" opacity=".78"/>
+    <rect x="28" y="228" width="334" height="409" rx="25" fill="#191c42" stroke="#d9a259" stroke-width="4" filter="url(#shadow)"/>
+    <rect x="35" y="235" width="320" height="395" rx="19" fill="none" stroke="#806ea1" stroke-width="1.6"/>
+    <path d="M42 250 q19 -16 35 -4 M348 250 q-19 -16 -35 -4 M42 615 q19 16 35 4 M348 615 q-19 16 -35 4" fill="none" stroke="#d9a259" stroke-width="3"/>
+    <circle cx="195" cy="231" r="24" fill="#263052" stroke="#d9a259" stroke-width="3"/>
+    <path d="M189 216 A16 16 0 1 0 211 238 A13 13 0 1 1 189 216Z" fill="#ffc65a"/>
+    <text x="195" y="293" text-anchor="middle" fill="#fff3d8" font-family="Nunito, sans-serif" font-size="28" font-weight="900">Cách chơi</text>
+    <path d="M70 310 H320" stroke="#c7975a" stroke-width="1.4"/>
+    <text x="62" y="359" fill="#ffc65a" font-family="Nunito, sans-serif" font-size="21">✦</text><text x="91" y="355" fill="#fff3d8" font-family="Nunito, sans-serif" font-size="17" font-weight="700">Kéo đèn để dẫn bóng</text><text x="91" y="380" fill="#fff3d8" font-family="Nunito, sans-serif" font-size="17">về cửa trăng.</text>
+    <text x="62" y="429" fill="#ffc65a" font-family="Nunito, sans-serif" font-size="21">✦</text><text x="91" y="425" fill="#fff3d8" font-family="Nunito, sans-serif" font-size="17" font-weight="700">Tránh vùng đỏ, bật sao</text><text x="91" y="450" fill="#fff3d8" font-family="Nunito, sans-serif" font-size="17">theo thứ tự.</text>
+    <text x="62" y="499" fill="#ffc65a" font-family="Nunito, sans-serif" font-size="21">✦</text><text x="91" y="495" fill="#fff3d8" font-family="Nunito, sans-serif" font-size="17" font-weight="700">Mỗi lượt có 60 giây.</text><text x="91" y="520" fill="#fff3d8" font-family="Nunito, sans-serif" font-size="17">Tạm dừng sẽ dừng giờ.</text>
+    <g transform="translate(61 547)"><use xlink:href="#ticketGold"/><text x="134" y="39" text-anchor="middle" fill="#181b36" font-family="Nunito, sans-serif" font-size="20" font-weight="900">Đã hiểu</text></g>
+  </g>
+</svg>

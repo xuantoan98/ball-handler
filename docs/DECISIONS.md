@@ -1,5 +1,22 @@
 # Quyết định M0
 
+## Quyết định M7 (02/11/2026)
+
+| ID | Quyết định | Lý do / giới hạn |
+| --- | --- | --- |
+| D27 | Chủ sản phẩm chọn lựa chọn 1: **Flutter Android trên Google Play** | Trả lời “1” cho câu hỏi kênh phát hành M7. Web tiếp tục là bản review theo codebase hiện tại; chưa có chỉ đạo phát hành web công khai. |
+| D28 | Spike Android debug dùng `google_mobile_ads` 9.2.0, Google sample app ID/unit ID, `RewardedAdSource` và `RewardedAdCoordinator` hiện có | Chỉ callback `onUserEarnedReward` gọi lưu thưởng. Dismiss/error không tự cộng. Ad test chỉ bật trong debug; release Android vô hiệu hóa nút cho đến khi có AdMob ID và hồ sơ phát hành. Không có ad live hoặc Play Console upload. |
+
+## Phản hồi thiết bị thật, thiết kế trang chủ v2 (02/11/2026)
+
+| ID | Quyết định | Hệ quả / giới hạn |
+| --- | --- | --- |
+| D29 | Duyệt mọi màn bằng Màn trước/Màn sau; chỉ Play khi màn trước đã qua | `highestUnlocked` chặn cả UI lẫn `LivesService.startAttempt`; màn khóa vẫn xem được. |
+| D30 | Trang chủ theo UI Kit hiện mỗi lần khởi động; popup hướng dẫn chỉ trên save mới | Chủ sản phẩm duyệt [preview v2](superpowers/specs/home-preview-v2.png); bản v1 bị nhận xét quá đơn giản. Save cũ coi như đã xem hướng dẫn. |
+| D31 | Giới hạn 60 giây mỗi ván, hết giờ thua; Đặt lại và mở lại app giữ giờ còn lại | Pause/background dừng đồng hồ; kết quả thua trừ một lượt sau save, Retry sau kết quả tạo 60 giây mới. Save schema v3 mang `attemptRemainingMs`. |
+| D32 | Viền Pause là tiến trình thời gian; huy hiệu `còn/60s` và pulse vàng trong 10 giây cuối | Đồng hồ không đè thẻ gợi ý ở HUD; pulse mỗi giây, không dùng màu coral của cảm biến. |
+
+
 Ngày: 21/10/2026. Chỉ đạo mới nhất của chủ sản phẩm thay giả định web-first trong kế hoạch gốc.
 
 | ID | Quyết định | Lý do / giới hạn |

@@ -77,9 +77,131 @@ Future<void> _pumpM3(
     ),
   );
   await tester.pump();
+  if (find.text('Đã hiểu').evaluate().isNotEmpty) {
+    await tester.tap(find.text('Đã hiểu'));
+    await tester.pump();
+  }
+  if (find.text('Chơi ngay').evaluate().isNotEmpty) {
+    await tester.tap(find.text('Chơi ngay'));
+    await tester.pump();
+  }
 }
 
 void main() {
+  testWidgets('home appears each launch and guide only on fresh save', (
+    tester,
+  ) async {
+    setSize(tester, const Size(390, 844));
+    final store = _MemoryStore();
+    await tester.pumpWidget(
+      ShadowTheatreApp(saveStore: store, tabOwnership: _Writer()),
+    );
+    await tester.pump();
+    expect(find.text('RẠP BÓNG NHỎ'), findsOneWidget);
+    expect(find.text('Cách chơi'), findsOneWidget);
+    await tester.tap(find.text('Đã hiểu'));
+    await tester.pump();
+    expect(find.text('Cách chơi'), findsNothing);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpWidget(
+      ShadowTheatreApp(saveStore: store, tabOwnership: _Writer()),
+    );
+    await tester.pump();
+    expect(find.text('RẠP BÓNG NHỎ'), findsOneWidget);
+    expect(find.text('Cách chơi'), findsNothing);
+  });
+
+  testWidgets('guide stays open and shows save error for retry', (
+    tester,
+  ) async {
+    setSize(tester, const Size(390, 844));
+    final store = _MemoryStore();
+    await tester.pumpWidget(
+      ShadowTheatreApp(saveStore: store, tabOwnership: _Writer()),
+    );
+    await tester.pump();
+    store.failWrites = true;
+    await tester.tap(find.text('Đã hiểu'));
+    await tester.pump();
+    expect(find.text('Cách chơi'), findsOneWidget);
+    expect(find.textContaining('Không lưu được dữ liệu'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    store.failWrites = false;
+    await tester.tap(find.text('Đã hiểu'));
+    await tester.pump();
+    expect(find.text('Cách chơi'), findsNothing);
+  });
+
+  testWidgets('browse locked levels but cannot start them', (tester) async {
+    setSize(tester, const Size(390, 844));
+    await _pumpM3(tester);
+    await tester.tap(find.text('Màn sau'));
+    await tester.pump();
+    expect(currentAttempt(tester).level.id, 2);
+    expect(find.text('Chưa mở'), findsOneWidget);
+    expect(find.textContaining('Qua màn 01'), findsOneWidget);
+    expect(currentAttempt(tester).phase, AttemptPhase.preview);
+    await tester.tap(find.text('Màn trước'));
+    await tester.pump();
+    expect(find.text('Bắt đầu'), findsOneWidget);
+  });
+
+  testWidgets('choosing levels after restore shows level hint', (tester) async {
+    setSize(tester, const Size(390, 844));
+    final store = _MemoryStore()
+      ..value = SaveRecord.fresh
+          .change(activeLevel: 0, introSeen: true, attemptRemainingMs: 43000)
+          .encode();
+    await tester.pumpWidget(
+      ShadowTheatreApp(saveStore: store, tabOwnership: _Writer()),
+    );
+    await tester.pump();
+    await tester.tap(find.text('Xem màn'));
+    await tester.pump();
+    expect(find.textContaining('Đã khôi phục ván'), findsNothing);
+    expect(find.text(m2Levels[0].hint), findsOneWidget);
+  });
+
+  testWidgets('timer is visible and survives reset and app reopen', (
+    tester,
+  ) async {
+    setSize(tester, const Size(390, 844));
+    final store = _MemoryStore();
+    await _pumpM3(tester, store: store);
+    await tester.tap(find.text('Bắt đầu'));
+    await tester.pump();
+    expect(find.byKey(const Key('attempt-timer')), findsOneWidget);
+    expect(find.text('60/60s'), findsOneWidget);
+    expect(
+      tester.getBottomLeft(find.byKey(const Key('attempt-timer'))).dy,
+      lessThan(
+        currentMapper(tester).offsetY + 60 * currentMapper(tester).scale,
+      ),
+    );
+    await tester.pump(const Duration(seconds: 5));
+    final before = currentAttempt(tester).remainingMs;
+    expect(before, lessThanOrEqualTo(55000));
+    await tester.tap(find.byIcon(Icons.replay));
+    await tester.pump();
+    expect(currentAttempt(tester).remainingMs, closeTo(before, 1));
+    await tester.pumpWidget(const SizedBox.shrink());
+    await _pumpM3(tester, store: store);
+    expect(currentAttempt(tester).remainingMs, lessThanOrEqualTo(before));
+    expect(currentAttempt(tester).phase, AttemptPhase.playing);
+  });
+
+  testWidgets('timeout shows loss and consumes one life', (tester) async {
+    setSize(tester, const Size(390, 844));
+    await _pumpM3(tester);
+    await tester.tap(find.text('Bắt đầu'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 60));
+    await tester.pump();
+    expect(currentAttempt(tester).phase, AttemptPhase.lost);
+    expect(find.text('Hết 60 giây'), findsOneWidget);
+    expect(currentPainter(tester).lives, 2);
+  });
+
   testWidgets('Bóng Mơ animates at rest and responds to drag direction', (
     tester,
   ) async {
@@ -142,9 +264,9 @@ void main() {
     tester,
   ) async {
     setSize(tester, const Size(390, 844));
-    await _pumpM3(tester);
-    await tester.tap(find.text('Màn sau'));
-    await tester.pump();
+    final store = _MemoryStore()
+      ..value = SaveRecord.fresh.change(highestUnlocked: 1).encode();
+    await _pumpM3(tester, store: store);
     expect(currentAttempt(tester).level.id, 2);
     await tester.tap(find.text('Bắt đầu'));
     await tester.pump();
@@ -156,6 +278,7 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(currentAttempt(tester).phase, AttemptPhase.lost);
+    await tester.pump();
     expect(currentPainter(tester).lives, 2);
     await tester.pump();
     await tester.tap(find.text('Thử lại').first);

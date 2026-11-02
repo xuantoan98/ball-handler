@@ -38,10 +38,12 @@ class SaveRecord {
     required this.highestUnlocked,
     required this.soundEnabled,
     required this.lastObservedAtMs,
+    required this.introSeen,
+    required this.attemptRemainingMs,
     this.sourceVersion = schemaVersion,
   });
 
-  static const schemaVersion = 2;
+  static const schemaVersion = 3;
   static const fresh = SaveRecord(
     lives: 3,
     nextRefillAtMs: null,
@@ -50,6 +52,8 @@ class SaveRecord {
     highestUnlocked: 0,
     soundEnabled: true,
     lastObservedAtMs: 0,
+    introSeen: false,
+    attemptRemainingMs: null,
   );
 
   final int lives;
@@ -59,6 +63,8 @@ class SaveRecord {
   final int highestUnlocked;
   final bool soundEnabled;
   final int lastObservedAtMs;
+  final bool introSeen;
+  final int? attemptRemainingMs;
 
   /// Version read from storage; a v1 active attempt was charged at start.
   final int sourceVersion;
@@ -73,6 +79,8 @@ class SaveRecord {
     int? highestUnlocked,
     bool? soundEnabled,
     int? lastObservedAtMs,
+    bool? introSeen,
+    int? attemptRemainingMs,
   }) => SaveRecord(
     lives: lives ?? this.lives,
     nextRefillAtMs: clearRefill ? null : nextRefillAtMs ?? this.nextRefillAtMs,
@@ -81,6 +89,13 @@ class SaveRecord {
     highestUnlocked: highestUnlocked ?? this.highestUnlocked,
     soundEnabled: soundEnabled ?? this.soundEnabled,
     lastObservedAtMs: lastObservedAtMs ?? this.lastObservedAtMs,
+    introSeen: introSeen ?? this.introSeen,
+    attemptRemainingMs: clearAttempt
+        ? null
+        : attemptRemainingMs ??
+              (activeLevel != null && this.attemptRemainingMs == null
+                  ? 60000
+                  : this.attemptRemainingMs),
     sourceVersion: sourceVersion,
   );
 
@@ -93,6 +108,8 @@ class SaveRecord {
     'progression': {'highestUnlocked': highestUnlocked},
     'settings': {'soundEnabled': soundEnabled},
     'lastObservedAt': lastObservedAtMs,
+    'introSeen': introSeen,
+    'attemptRemainingMs': attemptRemainingMs,
   });
 
   static SaveRecord decode(String source) {
@@ -100,6 +117,7 @@ class SaveRecord {
       final data = jsonDecode(source);
       if (data is! Map<String, dynamic> ||
           (data['schemaVersion'] != 1 &&
+              data['schemaVersion'] != 2 &&
               data['schemaVersion'] != schemaVersion)) {
         throw const SaveFailure('Phiên bản dữ liệu lưu không được hỗ trợ.');
       }
@@ -110,6 +128,13 @@ class SaveRecord {
       final next = data['nextRefillAt'];
       final active = data['activeAttempt'];
       final observed = data['lastObservedAt'];
+      final v3 = data['schemaVersion'] == schemaVersion;
+      final intro = v3 ? data['introSeen'] : true;
+      final remaining = v3
+          ? data['attemptRemainingMs']
+          : active == null
+          ? null
+          : 60000;
       if (lives is! int ||
           next != null && next is! int ||
           active != null && active is! int ||
@@ -125,6 +150,13 @@ class SaveRecord {
           active != null && (active < 0 || active > 19)) {
         throw const SaveFailure('Dữ liệu lưu bị lỗi.');
       }
+      if (intro is! bool ||
+          remaining != null && remaining is! int ||
+          active != null &&
+              (remaining == null || remaining < 0 || remaining > 60000) ||
+          active == null && remaining != null) {
+        throw const SaveFailure('Dữ liệu lưu bị lỗi.');
+      }
       final oldActive = data['schemaVersion'] == 1 && active != null;
       final migratedLives = oldActive ? (lives + 1).clamp(0, 3) : lives;
       return SaveRecord(
@@ -135,6 +167,8 @@ class SaveRecord {
         highestUnlocked: progression['highestUnlocked'] as int,
         soundEnabled: settings['soundEnabled'] as bool,
         lastObservedAtMs: observed,
+        introSeen: intro,
+        attemptRemainingMs: remaining,
         sourceVersion: data['schemaVersion'] as int,
       );
     } on SaveFailure {

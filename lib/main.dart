@@ -15,7 +15,10 @@ import 'design_tokens.dart';
 import 'game/game_painter.dart';
 import 'game/board_ui_layout.dart';
 import 'game/theatre_components.dart';
+import 'game/home_screen.dart';
+import 'game/attempt_timer_button.dart';
 import 'services/lives_service.dart';
+import 'services/platform_rewarded_ads.dart';
 import 'services/rewarded_ads.dart';
 import 'services/save_service.dart';
 import 'services/tab_ownership.dart';
@@ -90,7 +93,8 @@ class _GamePageState extends State<GamePage>
   ui.Image? _backdrop;
   late final LivesService _lives;
   late final TabOwnership _ownership;
-  late final MockRewardedAds _ads;
+  late final MockRewardedAds _mockAds;
+  late final RewardedAdSource _ads;
   late final RewardedAdCoordinator _reward;
   Timer? _countdownTimer;
   bool _ready = false;
@@ -98,6 +102,13 @@ class _GamePageState extends State<GamePage>
   bool _terminalPending = false;
   bool _terminalSaveFailed = false;
   bool _adOpen = false;
+  bool _homeVisible = true;
+  bool _introVisible = false;
+  Future<void>? _timerSaveFuture;
+  int? _pendingTimerMs;
+  int _lastTimerSecond = 60;
+  bool get _nativeTestAds => !identical(_ads, _mockAds);
+  bool get _adsUnavailable => _nativeTestAds && !kDebugMode;
   String? _notice;
   String? _loadError;
 
@@ -111,7 +122,9 @@ class _GamePageState extends State<GamePage>
       widget.clock ?? const SystemGameClock(),
     );
     _ownership = widget.tabOwnership ?? createTabOwnership();
-    _ads = MockRewardedAds(widget.rewardIds ?? MockRewardIdFactory());
+    final ids = widget.rewardIds ?? MockRewardIdFactory();
+    _mockAds = MockRewardedAds(ids);
+    _ads = createPlatformRewardedAds(ids) ?? _mockAds;
     _reward = RewardedAdCoordinator(_ads, _lives);
     _drag = LampDrag(initial: _attempt.lamp);
     _ticker = Ticker(_onFrame);
@@ -128,7 +141,7 @@ class _GamePageState extends State<GamePage>
     WidgetsBinding.instance.removeObserver(this);
     _ticker.dispose();
     _countdownTimer?.cancel();
-    _ads.dispose();
+    _mockAds.dispose();
     _ownership.release();
     _visualAnimation.dispose();
     _backdrop?.dispose();
@@ -143,20 +156,25 @@ class _GamePageState extends State<GamePage>
       final active = writer ? _lives.activeLevel : null;
       setState(() {
         _ready = true;
+        _introVisible = writer && !_lives.record.introSeen;
         if (active != null) {
           _levelIndex = active;
-          _attempt = GameAttempt(m4Levels[active])..start();
+          _attempt =
+              GameAttempt(
+                  m4Levels[active],
+                  remainingMs: (_lives.record.attemptRemainingMs ?? 60000)
+                      .toDouble(),
+                )
+                ..start()
+                ..pause();
           _drag = LampDrag(initial: _attempt.lamp);
-          _notice = 'Đã khôi phục ván ở điểm đầu màn, không trừ thêm lượt.';
+          _lastTimerSecond = (_attempt.remainingMs / 1000).ceil();
+          _notice =
+              'Đã khôi phục ván và thời gian còn lại, không trừ thêm lượt.';
         }
       });
       if (active != null) {
         _loadBackdrop(active);
-        if (_phoneLandscape) {
-          _attempt.pause();
-        } else {
-          _runClock();
-        }
       }
       _countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
         if (!mounted) return;
@@ -222,16 +240,42 @@ class _GamePageState extends State<GamePage>
   }
 
   void _onFrame(Duration elapsed) {
-    final seconds = math.min(
-      (elapsed - _lastElapsed).inMicroseconds / 1000000,
-      .05,
-    );
+    final seconds = (elapsed - _lastElapsed).inMicroseconds / 1000000;
     _lastElapsed = elapsed;
     if (seconds <= 0 || _attempt.phase != AttemptPhase.playing) return;
     setState(() => _attempt.tick(seconds));
-    if (_attempt.phase == AttemptPhase.won) {
+    final currentSecond = (_attempt.remainingMs / 1000).ceil();
+    if (currentSecond != _lastTimerSecond) {
+      _lastTimerSecond = currentSecond;
+      _queueTimerSave();
+    }
+    if (_attempt.phase == AttemptPhase.won ||
+        _attempt.phase == AttemptPhase.lost) {
       _ticker.stop();
       unawaited(_finishTerminal());
+    }
+  }
+
+  void _queueTimerSave() {
+    if (!_ready || _lives.activeLevel == null) return;
+    _pendingTimerMs = _attempt.remainingMs.floor().clamp(0, 60000);
+    if (_timerSaveFuture != null) return;
+    _timerSaveFuture = _drainTimerSaves().whenComplete(() {
+      _timerSaveFuture = null;
+      if (_pendingTimerMs != null && mounted) _queueTimerSave();
+    });
+  }
+
+  Future<void> _drainTimerSaves() async {
+    while (_pendingTimerMs != null) {
+      final value = _pendingTimerMs!;
+      _pendingTimerMs = null;
+      try {
+        await _lives.setAttemptRemainingMs(value);
+      } on SaveFailure catch (error) {
+        if (mounted) setState(() => _notice = error.message);
+        break;
+      }
     }
   }
 
@@ -253,6 +297,7 @@ class _GamePageState extends State<GamePage>
         setState(() {
           _levelIndex = levelIndex;
           _attempt = GameAttempt(m4Levels[levelIndex])..start();
+          _lastTimerSecond = 60;
           _drag = LampDrag(initial: _attempt.lamp);
           _lastMovementMs = -10000;
           _travelDirection = Offset.zero;
@@ -263,10 +308,13 @@ class _GamePageState extends State<GamePage>
         setState(
           () => _notice = switch (result) {
             SessionResult.noLives =>
-              'Hết lượt. Đợi hồi lượt hoặc xem quảng cáo mô phỏng.',
+              _nativeTestAds
+                  ? 'Hết lượt. Đợi hồi lượt hoặc xem quảng cáo thử nghiệm.'
+                  : 'Hết lượt. Đợi hồi lượt hoặc xem quảng cáo mô phỏng.',
             SessionResult.readOnly =>
               'Tab này chỉ đọc. Hãy quay lại tab đang chơi.',
             SessionResult.alreadyActive => 'Đang có một ván chưa kết thúc.',
+            SessionResult.locked => 'Qua màn trước để mở màn này.',
             _ => 'Đang xử lý, vui lòng thử lại.',
           },
         );
@@ -280,6 +328,7 @@ class _GamePageState extends State<GamePage>
 
   void _pause() {
     _ticker.stop();
+    _queueTimerSave();
     _drag.end(_drag.activePointer ?? -1);
     setState(() {
       _attempt.pause();
@@ -298,7 +347,7 @@ class _GamePageState extends State<GamePage>
   void _resetCurrentAttempt() {
     if (_attempt.phase != AttemptPhase.playing) return;
     setState(() {
-      _attempt.retry();
+      _attempt.resetPuzzle();
       _drag = LampDrag(initial: _attempt.lamp);
       _lastMovementMs = -10000;
       _travelDirection = Offset.zero;
@@ -310,6 +359,8 @@ class _GamePageState extends State<GamePage>
     if (_attempt.phase == AttemptPhase.paused) {
       setState(() => _operationBusy = true);
       try {
+        final saving = _timerSaveFuture;
+        if (saving != null) await saving;
         await _lives.abandonAttempt();
       } on SaveFailure catch (error) {
         if (mounted) setState(() => _notice = error.message);
@@ -333,6 +384,8 @@ class _GamePageState extends State<GamePage>
     _terminalPending = true;
     setState(() => _operationBusy = true);
     try {
+      final saving = _timerSaveFuture;
+      if (saving != null) await saving;
       await _lives.finishAttempt(won: _attempt.phase == AttemptPhase.won);
       if (mounted) {
         setState(() {
@@ -371,7 +424,10 @@ class _GamePageState extends State<GamePage>
       _adOpen = false;
       _notice = switch (outcome) {
         AdOutcome.earned => 'Đã nhận +1 lượt.',
-        AdOutcome.cancelled => 'Đã đóng quảng cáo mô phỏng; không nhận lượt.',
+        AdOutcome.cancelled =>
+          _nativeTestAds
+              ? 'Đã đóng quảng cáo thử nghiệm; không nhận lượt.'
+              : 'Đã đóng quảng cáo mô phỏng; không nhận lượt.',
         AdOutcome.error => 'Quảng cáo hoặc lưu thưởng bị lỗi; không cộng lượt.',
         AdOutcome.full => 'Lượt đã đầy.',
         AdOutcome.busy => 'Quảng cáo đang chạy.',
@@ -408,6 +464,8 @@ class _GamePageState extends State<GamePage>
         setState(() {
           _loadError = null;
           _ready = true;
+          _homeVisible = true;
+          _introVisible = true;
           _notice = null;
         });
       }
@@ -429,8 +487,53 @@ class _GamePageState extends State<GamePage>
       _travelDirection = Offset.zero;
       _backdrop?.dispose();
       _backdrop = null;
+      _notice = null;
     });
     _loadBackdrop(index);
+  }
+
+  Future<void> _acknowledgeIntro() async {
+    if (_operationBusy || !_introVisible) return;
+    setState(() {
+      _operationBusy = true;
+      _notice = null;
+    });
+    try {
+      await _lives.setIntroSeen();
+      if (mounted) setState(() => _introVisible = false);
+    } on SaveFailure catch (error) {
+      if (mounted) setState(() => _notice = error.message);
+    } finally {
+      if (mounted) setState(() => _operationBusy = false);
+    }
+  }
+
+  void _openHomePlay() {
+    if (_introVisible || _operationBusy) return;
+    if (_lives.activeLevel != null) {
+      setState(() {
+        _homeVisible = false;
+        _notice = null;
+      });
+      if (_phoneLandscape) return;
+      _resume();
+      return;
+    }
+    _selectLevel(_lives.highestUnlocked);
+    setState(() {
+      _homeVisible = false;
+      _notice = null;
+    });
+  }
+
+  Future<void> _openHomeLevels() async {
+    if (_introVisible || _operationBusy) return;
+    if (_lives.activeLevel != null) {
+      await _showPreview();
+      if (_lives.activeLevel != null || !mounted) return;
+    }
+    _selectLevel(0);
+    if (mounted) setState(() => _homeVisible = false);
   }
 
   void _endPointer(int pointer) {
@@ -442,6 +545,18 @@ class _GamePageState extends State<GamePage>
     body: SafeArea(
       child: LayoutBuilder(
         builder: (context, constraints) {
+          if (_ready && _homeVisible && _loadError == null) {
+            return HomeScreen(
+              lives: _lives.lives,
+              refill: _lives.untilNextRefill,
+              introVisible: _introVisible,
+              busy: _operationBusy,
+              notice: _notice,
+              onPlay: _openHomePlay,
+              onLevels: _openHomeLevels,
+              onAcknowledgeIntro: _acknowledgeIntro,
+            );
+          }
           if (constraints.maxWidth > constraints.maxHeight &&
               constraints.maxHeight < 600) {
             return Center(
@@ -553,11 +668,14 @@ class _GamePageState extends State<GamePage>
               if (_attempt.phase == AttemptPhase.playing)
                 _placed(
                   mapper,
-                  311,
-                  11,
-                  59,
-                  44,
-                  _action('Tạm dừng', _pause, icon: Icons.pause),
+                  310,
+                  6,
+                  62,
+                  50,
+                  AttemptTimerButton(
+                    remainingMs: _attempt.remainingMs,
+                    onPause: _pause,
+                  ),
                 ),
               if (_attempt.phase == AttemptPhase.playing)
                 _placed(
@@ -576,10 +694,20 @@ class _GamePageState extends State<GamePage>
                   96,
                   46,
                   _action(
-                    _lives.lives == 3
+                    _adsUnavailable
+                        ? 'Ad chưa cấu hình'
+                        : _adOpen
+                        ? 'Đang tải ad…'
+                        : _lives.lives == 3
                         ? 'Lượt đã đầy'
+                        : _nativeTestAds
+                        ? 'Xem ad test\n+1 lượt'
                         : 'Xem quảng cáo\n+1 lượt',
-                    _lives.lives == 3 || _lives.isReadOnly || _operationBusy
+                    _adsUnavailable ||
+                            _adOpen ||
+                            _lives.lives == 3 ||
+                            _lives.isReadOnly ||
+                            _operationBusy
                         ? null
                         : _watchAd,
                     small: true,
@@ -608,7 +736,7 @@ class _GamePageState extends State<GamePage>
                   ),
                 ),
               if (_attempt.phase != AttemptPhase.playing) _panel(mapper),
-              if (_adOpen) _adOverlay(mapper),
+              if (_adOpen && identical(_ads, _mockAds)) _adOverlay(mapper),
               if (!_ready || _loadError != null || _lives.isReadOnly)
                 _statusOverlay(mapper),
             ],
@@ -668,14 +796,21 @@ class _GamePageState extends State<GamePage>
             AttemptPhase.preview => _attempt.level.title,
             AttemptPhase.paused => 'Tạm dừng',
             AttemptPhase.won => 'Qua cửa trăng!',
-            AttemptPhase.lost => 'Bóng chạm vùng đỏ',
+            AttemptPhase.lost =>
+              _attempt.remainingMs == 0 ? 'Hết 60 giây' : 'Bóng chạm vùng đỏ',
             AttemptPhase.playing => '',
           };
     final defaultDetail = switch (phase) {
-      AttemptPhase.preview => _attempt.level.hint,
-      AttemptPhase.paused => 'Đồng hồ cửa đã dừng. Tiếp tục khi sẵn sàng.',
+      AttemptPhase.preview =>
+        _levelIndex > _lives.highestUnlocked
+            ? 'Qua màn ${_levelIndex.toString().padLeft(2, '0')} để mở.'
+            : _attempt.level.hint,
+      AttemptPhase.paused => 'Đồng hồ ván đã dừng. Tiếp tục khi sẵn sàng.',
       AttemptPhase.won => 'Giữ toàn bộ bóng trong cửa đủ một giây.',
-      AttemptPhase.lost => 'Thử đường khác để tránh cảm biến.',
+      AttemptPhase.lost =>
+        _attempt.remainingMs == 0
+            ? 'Hết giờ tính thua. Thử lại với 60 giây mới.'
+            : 'Thử đường khác để tránh cảm biến.',
       AttemptPhase.playing => '',
     };
     final detail = _operationBusy && phase != AttemptPhase.preview
@@ -737,11 +872,16 @@ class _GamePageState extends State<GamePage>
                       Expanded(
                         flex: 2,
                         child: _action(
-                          _lives.lives == 0 ? 'Hết lượt' : 'Bắt đầu',
+                          _levelIndex > _lives.highestUnlocked
+                              ? 'Chưa mở'
+                              : _lives.lives == 0
+                              ? 'Hết lượt'
+                              : 'Bắt đầu',
                           !_ready ||
                                   _operationBusy ||
                                   _lives.isReadOnly ||
-                                  _lives.lives == 0
+                                  _lives.lives == 0 ||
+                                  _levelIndex > _lives.highestUnlocked
                               ? null
                               : () => _beginAttempt(_levelIndex),
                           primary: true,
@@ -851,7 +991,7 @@ class _GamePageState extends State<GamePage>
             child: Padding(
               padding: EdgeInsets.all(24 * map.scale),
               child: AnimatedBuilder(
-                animation: _ads,
+                animation: _mockAds,
                 builder: (context, _) => Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -864,7 +1004,7 @@ class _GamePageState extends State<GamePage>
                       ),
                     ),
                     Text(
-                      switch (_ads.phase) {
+                      switch (_mockAds.phase) {
                         AdPhase.loading => 'Đang tải…',
                         AdPhase.saving => 'Đang lưu thưởng…',
                         _ => 'Xem đủ 5 giây để nhận +1 lượt.',
@@ -876,14 +1016,14 @@ class _GamePageState extends State<GamePage>
                       ),
                     ),
                     LinearProgressIndicator(
-                      value: _ads.progress,
+                      value: _mockAds.progress,
                       color: StageColors.mint,
                       backgroundColor: StageColors.frameEdge,
                     ),
                     Text(
-                      _ads.phase == AdPhase.saving
+                      _mockAds.phase == AdPhase.saving
                           ? 'Đang lưu'
-                          : '${(5 - _ads.progress * 5).ceil().clamp(0, 5)} giây',
+                          : '${(5 - _mockAds.progress * 5).ceil().clamp(0, 5)} giây',
                       style: TextStyle(
                         color: StageColors.goldCore,
                         fontSize: 15 * map.scale,
@@ -893,15 +1033,17 @@ class _GamePageState extends State<GamePage>
                       height: 46 * map.scale,
                       width: double.infinity,
                       child: _action(
-                        _ads.phase == AdPhase.saving
+                        _mockAds.phase == AdPhase.saving
                             ? 'Đang lưu thưởng…'
                             : 'Đóng · không nhận lượt',
-                        _ads.phase == AdPhase.saving ? null : _reward.cancel,
+                        _mockAds.phase == AdPhase.saving
+                            ? null
+                            : _reward.cancel,
                       ),
                     ),
-                    if (kDebugMode && _ads.phase != AdPhase.saving)
+                    if (kDebugMode && _mockAds.phase != AdPhase.saving)
                       TextButton(
-                        onPressed: _ads.failForDebug,
+                        onPressed: _mockAds.failForDebug,
                         child: const Text('Giả lập lỗi tải'),
                       ),
                   ],
