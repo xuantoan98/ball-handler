@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('dragged hazard is exported as JSON geometry', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(home: EditorApp(initialLevel: m4Levels[3])),
+      MaterialApp(home: EditorApp(initialLevel: m4Levels[5])),
     );
     final board = tester.getTopLeft(find.byKey(const Key('editor-board')));
     final gesture = await tester.startGesture(board + const Offset(195, 200));
@@ -24,16 +24,16 @@ void main() {
     await tester.pumpAndSettle();
     final field = tester.widget<TextField>(find.byKey(const Key('json-text')));
     final json = jsonDecode(field.controller!.text) as Map<String, dynamic>;
-    expect((json['hazards'] as List).first[0], greaterThan(190.0));
+    expect((json['hazards'] as List).first[0], greaterThan(196.0));
   });
 
   testWidgets('dev editor can reorder switches and run a replay check', (
     tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(home: EditorApp(initialLevel: m4Levels[8])),
+      MaterialApp(home: EditorApp(initialLevel: m4Levels[10])),
     );
-    expect(find.text('Màn 09'), findsOneWidget);
+    expect(find.text('Màn 11'), findsOneWidget);
     await tester.ensureVisible(find.byKey(const Key('switch-down')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('switch-down')));

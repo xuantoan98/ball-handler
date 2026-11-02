@@ -95,6 +95,9 @@ List<String> validateLevel(Level level) {
   if (level.hazards.any((r) => overlaps(spawn, r))) {
     issues.add('spawn chạm vùng đỏ');
   }
+  if (level.solids.any((r) => overlaps(spawn, r))) {
+    issues.add('spawn chạm đạo cụ chắn');
+  }
   if (level.movingHazards.any((h) => overlaps(spawn, h.at(0)))) {
     issues.add('spawn chạm màn chớp');
   }

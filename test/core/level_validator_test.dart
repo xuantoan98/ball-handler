@@ -42,12 +42,17 @@ void main() {
 
   test('missing solution is unverified and a false solution is rejected', () {
     expect(
-      validateLevel(m4Levels.first.copyWith(solution: [])).join(' '),
+      validateLevel(m4Levels.first.copyWith(solution: [], solutionSteps: []))
+          .join(' '),
       contains('chưa xác minh'),
     );
     expect(
-      validateLevel(m4Levels.first.copyWith(solution: [const Point2(220, 715)]))
-          .join(' '),
+      validateLevel(
+        m4Levels.first.copyWith(
+          solution: [const Point2(220, 715)],
+          solutionSteps: [],
+        ),
+      ).join(' '),
       contains('replay'),
     );
   });
@@ -72,6 +77,14 @@ void main() {
       ],
     );
     expect(validateLevel(level).join(' '), contains('màn chớp'));
+  });
+
+  test('validator rejects a solid prop over the spawn', () {
+    final spawn = SandboxGeometry.shadowOnWall(m4Levels.first.initialLamp);
+    expect(
+      validateLevel(m4Levels.first.copyWith(solids: [spawn])).join(' '),
+      contains('spawn'),
+    );
   });
 
   test('timed reference replay must fit the 60 second attempt', () {
@@ -104,5 +117,25 @@ void main() {
     expect(decoded.movingHazards.single.periodSeconds, 4);
     expect(decoded.gateWindowSeconds, 8);
     expect(decoded.solutionSteps.length, 3);
+  });
+
+  test('chapters introduce distinct obstacles and authored timed routes', () {
+    expect(m4Levels.length, 20);
+    expect(m4Levels[3].solids, isNotEmpty);
+    expect(m4Levels[7].movingHazards, isNotEmpty);
+    expect(m4Levels[12].gateWindowSeconds, isNotNull);
+    expect(m4Levels[16].solids, isNotEmpty);
+    expect(m4Levels[16].movingHazards, isNotEmpty);
+    expect(m4Levels[16].hazards, isNotEmpty);
+    expect(m4Levels.every((level) => level.solutionSteps.isNotEmpty), isTrue);
+    expect(
+      {
+        for (final level in m4Levels)
+          '${level.exit.left}:${level.exit.top}:${level.solids.length}:'
+              '${level.hazards.length}:${level.switches.length}:'
+              '${level.movingHazards.length}:${level.gates.length}',
+      }.length,
+      greaterThanOrEqualTo(16),
+    );
   });
 }
