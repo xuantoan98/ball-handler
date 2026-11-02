@@ -13,6 +13,7 @@ import 'core/level.dart';
 import 'core/rules.dart';
 import 'design_tokens.dart';
 import 'game/game_painter.dart';
+import 'game/stage_backdrop.dart';
 import 'game/board_ui_layout.dart';
 import 'game/theatre_components.dart';
 import 'game/home_screen.dart';
@@ -196,9 +197,7 @@ class _GamePageState extends State<GamePage>
   }
 
   Future<void> _loadBackdrop(int index) async {
-    final data = await rootBundle.load(
-      'assets/backgrounds/stage-0${(index % 3) + 1}.png',
-    );
+    final data = await rootBundle.load(stageBackdropPath(index + 1));
     final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
     final frame = await codec.getNextFrame();
     codec.dispose();

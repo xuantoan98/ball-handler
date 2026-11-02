@@ -22,4 +22,4 @@ Chạy riêng: `flutter run -d chrome -t tool/editor_main.dart` hoặc target Fl
 - 13–16: Thư viện đêm, cửa sao có thời hạn.
 - 17–20: Sân khấu thiên hà, kết hợp cơ chế đã học.
 
-Màn 04–20 dùng lại nền và component sân khấu hiện tại; đã có key visual draft tại `docs/M4_KEY_VISUALS.md` nhưng chưa được duyệt hoặc tích hợp. Replay tự động không thay thế playtest. **Chưa có bằng chứng người thật chơi thử màn 01–20.** Chỉ màn 01 có lượt thắng bằng chuột trong browser ở giai đoạn M2; không phải playtest người mới hay thiết bị thật.
+20 màn hiện chọn 20 nền riêng v2 và component gameplay chung. `docs/M4_KEY_VISUALS.md` lưu bản draft cũ; concept mới trong `docs/superpowers/specs/2026-11-02-twenty-stage-redesign-design.md` đã được chủ sản phẩm duyệt. Replay tự động không thay thế playtest. **Chưa có bằng chứng người thật giải được màn 01–20 trên bản mới.**

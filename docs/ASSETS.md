@@ -29,3 +29,22 @@ Chưa đo dung lượng/memory và FPS trên điện thoại thật. Nếu asset
 `assets/backgrounds/home-stage-v2.png` (863 × 1823) được tạo bằng built-in `image_gen`, với ảnh do chủ sản phẩm cung cấp `design/Whimsical Shadow Theatre UI Kit.png` làm style reference. Bản concept gốc ở `docs/superpowers/specs/home-stage-concept-v2.png`; [preview có lớp chữ và nút](superpowers/specs/home-preview-v2.png) đã được chủ sản phẩm duyệt. Chỉ tranh sân khấu là bitmap; tiêu đề, câu giới thiệu, nút, lượt và popup là Flutter widget thật. Bóng/cửa/đèn trong tranh chỉ dùng nhận diện ở trang chủ, không có va chạm.
 
 Prompt gốc: “Create a NEW single portrait mobile game HOME SCREEN art plate, 9:19 aspect ratio, in the exact visual identity and craftsmanship of the reference Whimsical Shadow Theatre UI Kit. Rich layered paper-cut midnight theatre: deep navy and plum backdrop, hand-cut gold ornamental border with filigree corners, partially opened velvet burgundy curtains, warm hanging lanterns, tiny gold stars, distant purple castle silhouettes. In the central illustration, a cute small flat black shadow puppet with two warm cream eyes and a slightly tilted three-point gold paper crown; to its right a luminous mint crescent moon door, to its left a warm yellow sun-shaped lamp. Keep lower central area and top central area dark and clear for live Flutter text and controls. Absolutely no letters, words, numbers, button labels or UI text. No advertising, no phone mockup, no gameplay obstacle geometry.”
+
+## Hai mươi nền sân khấu v2 (02/11/2026)
+
+`assets/backgrounds/stage-01-v2.webp` đến `stage-20-v2.webp` được tạo bằng built-in `image_gen`, mỗi màn một lệnh/ảnh riêng, dùng `home-stage-v2.png` và `design/Whimsical Shadow Theatre UI Kit.png` làm **style reference**, không cắt ghép asset người khác. Tất cả là tường hậu cảnh trang trí; Bóng Mơ, đèn, cửa, đạo cụ, cảm biến, sao, chữ và hitbox được vẽ từ Flutter/rules. Ảnh gốc 863×1823 RGBA được chuyển sang WebP quality 92 bằng Pillow để đóng gói; 20 file còn 11.76 MB. Game giải mã từng ảnh khi đổi màn và giải phóng ảnh trước. Cần đo FPS/bộ nhớ trên máy trước khi coi là release-ready.
+
+| Màn | Cảnh riêng ở mép tường | Màn | Cảnh riêng ở mép tường |
+| --- | --- | --- | --- |
+| 01 | Rèm mở, lâu đài xa | 11 | Hai mặt đồng hồ cổ |
+| 02 | Vườn gai hổ phách | 12 | Đài thiên văn giấy |
+| 03 | Tháp đồng hồ mở màn | 13 | Sách mở đầu thư viện |
+| 04 | Gốc cây trăng | 14 | Hành lang giá sách |
+| 05 | Hồ lá tím | 15 | Phòng bản đồ trăng |
+| 06 | Nhà kính trăng | 16 | Gác chuông giấy |
+| 07 | Cổng hoa khuya | 17 | Rèm mở thiên hà |
+| 08 | Màn chớp đầu tiên ở xưởng | 18 | Quỹ đạo trăng giấy |
+| 09 | Bánh răng ngập sao | 19 | Rèm cuối và lâu đài xa |
+| 10 | Ròng rọc giấy | 20 | Đại cảnh Rạp bóng nhỏ |
+
+Prompt chung, với `{id}` và `{scene}` thay cho từng dòng trong bảng: “Use case: stylized-concept. Asset type: PRODUCTION DECORATIVE BACKGROUND WALL ONLY for level {id} of a portrait mobile shadow-puppet puzzle game. Style reference images: supplied home-stage and UI Kit. Unique scene: {scene}. Exquisite layered hand-cut paper theatre, deep navy and plum, restrained antique-gold filigree, fine grain, warm edge lantern light and depth equal to the polished home screen. Flat-on portrait wall, central 72 percent clean dark low-detail blue-violet paper for a small black projected shadow and separate collision objects; scenery concentrated along top, side and bottom perimeter. No walkable floor or platform illusion. No puppet, moon exit, sun lamp, coral/red danger, mint switch, gate, hazard, UI, text, letters, numbers, watermark. All interactive elements will be rendered separately from Flutter collision data.” Nhóm 01–04 dùng cùng ý nghĩa câu lệnh này với mô tả dài hơn cho từng cảnh và thêm ảnh Game Board làm reference chức năng.
