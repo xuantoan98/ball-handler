@@ -1,6 +1,40 @@
 import 'geometry.dart';
 export 'level_catalog.dart' show m4Levels;
 
+class MovingHazard {
+  const MovingHazard({
+    required this.bounds,
+    required this.travel,
+    required this.periodSeconds,
+    this.phaseSeconds = 0,
+  });
+
+  final Rect2 bounds;
+  final Point2 travel;
+  final double periodSeconds;
+  final double phaseSeconds;
+
+  Rect2 at(double elapsedSeconds) {
+    final phase =
+        ((elapsedSeconds + phaseSeconds) % periodSeconds) / periodSeconds;
+    final fraction = phase <= .5 ? phase * 2 : (1 - phase) * 2;
+    return Rect2(
+      bounds.left + travel.x * fraction,
+      bounds.top + travel.y * fraction,
+      bounds.width,
+      bounds.height,
+    );
+  }
+}
+
+class SolutionStep {
+  const SolutionStep.move(this.lamp, {this.seconds = 1});
+  const SolutionStep.wait(this.seconds) : lamp = null;
+
+  final Point2? lamp;
+  final double seconds;
+}
+
 /// Gameplay bounds are wall coordinates (360 x 480), never screen pixels.
 class Level {
   const Level({
@@ -10,6 +44,8 @@ class Level {
     required this.initialLamp,
     required this.exit,
     this.hazards = const [],
+    this.solids = const [],
+    this.movingHazards = const [],
     this.switches = const [],
     this.gates = const [],
     required this.solution,
@@ -20,6 +56,8 @@ class Level {
     this.switchIds = const [],
     this.gateRequires = const [],
     this.solutionHoldSeconds = 1,
+    this.gateWindowSeconds,
+    this.solutionSteps = const [],
   });
 
   final int id;
@@ -28,6 +66,8 @@ class Level {
   final Point2 initialLamp;
   final Rect2 exit;
   final List<Rect2> hazards;
+  final List<Rect2> solids;
+  final List<MovingHazard> movingHazards;
   final List<Rect2> switches;
   final List<Rect2> gates;
 
@@ -40,15 +80,22 @@ class Level {
   final List<String> switchIds;
   final List<List<String>> gateRequires;
   final double solutionHoldSeconds;
+  final double? gateWindowSeconds;
+  final List<SolutionStep> solutionSteps;
 
   Level copyWith({
     Rect2? exit,
     List<Rect2>? hazards,
+    List<Rect2>? solids,
+    List<MovingHazard>? movingHazards,
     List<Rect2>? switches,
     List<Rect2>? gates,
     List<Point2>? solution,
     List<String>? switchIds,
     List<List<String>>? gateRequires,
+    double? gateWindowSeconds,
+    List<SolutionStep>? solutionSteps,
+    int? schemaVersion,
   }) => Level(
     id: id,
     title: title,
@@ -56,16 +103,20 @@ class Level {
     initialLamp: initialLamp,
     exit: exit ?? this.exit,
     hazards: hazards ?? this.hazards,
+    solids: solids ?? this.solids,
+    movingHazards: movingHazards ?? this.movingHazards,
     switches: switches ?? this.switches,
     gates: gates ?? this.gates,
     solution: solution ?? this.solution,
-    schemaVersion: schemaVersion,
+    schemaVersion: schemaVersion ?? this.schemaVersion,
     logicalBounds: logicalBounds,
     lightBounds: lightBounds,
     caster: caster,
     switchIds: switchIds ?? this.switchIds,
     gateRequires: gateRequires ?? this.gateRequires,
     solutionHoldSeconds: solutionHoldSeconds,
+    gateWindowSeconds: gateWindowSeconds ?? this.gateWindowSeconds,
+    solutionSteps: solutionSteps ?? this.solutionSteps,
   );
 
   Map<String, Object?> toJson() => {
@@ -78,6 +129,17 @@ class Level {
     'initialLight': _pointJson(initialLamp),
     'caster': _rectJson(caster),
     'hazards': hazards.map(_rectJson).toList(),
+    'solids': solids.map(_rectJson).toList(),
+    'movingHazards': [
+      for (final hazard in movingHazards)
+        {
+          'bounds': _rectJson(hazard.bounds),
+          'travel': _pointJson(hazard.travel),
+          'periodSeconds': hazard.periodSeconds,
+          'phaseSeconds': hazard.phaseSeconds,
+        },
+    ],
+    if (gateWindowSeconds != null) 'gateWindowSeconds': gateWindowSeconds,
     'switches': [
       for (var i = 0; i < switches.length; i++)
         {'id': switchIds[i], 'bounds': _rectJson(switches[i]), 'order': i + 1},
@@ -89,6 +151,13 @@ class Level {
     'exit': _rectJson(exit),
     'solutionWaypoints': solution.map(_pointJson).toList(),
     'solutionHoldSeconds': solutionHoldSeconds,
+    'solutionSteps': [
+      for (final step in solutionSteps)
+        {
+          if (step.lamp != null) 'lamp': _pointJson(step.lamp!),
+          'seconds': step.seconds,
+        },
+    ],
   };
 
   factory Level.fromJson(Map<String, dynamic> json) {
@@ -108,6 +177,21 @@ class Level {
       initialLamp: _readPoint(json['initialLight']),
       caster: _readRect(json['caster']),
       hazards: list('hazards').map(_readRect).toList(),
+      solids: (json['solids'] as List<dynamic>? ?? const [])
+          .map(_readRect)
+          .toList(),
+      movingHazards: (json['movingHazards'] as List<dynamic>? ?? const []).map((
+        raw,
+      ) {
+        final item = obj(raw);
+        return MovingHazard(
+          bounds: _readRect(item['bounds']),
+          travel: _readPoint(item['travel']),
+          periodSeconds: (item['periodSeconds'] as num).toDouble(),
+          phaseSeconds: (item['phaseSeconds'] as num?)?.toDouble() ?? 0,
+        );
+      }).toList(),
+      gateWindowSeconds: (json['gateWindowSeconds'] as num?)?.toDouble(),
       switches: rawSwitches.map((s) => _readRect(s['bounds'])).toList(),
       switchIds: rawSwitches.map((s) => s['id'] as String).toList(),
       gates: rawGates.map((g) => _readRect(g['bounds'])).toList(),
@@ -117,6 +201,15 @@ class Level {
       exit: _readRect(json['exit']),
       solution: list('solutionWaypoints').map(_readPoint).toList(),
       solutionHoldSeconds: (json['solutionHoldSeconds'] as num).toDouble(),
+      solutionSteps: (json['solutionSteps'] as List<dynamic>? ?? const []).map((
+        raw,
+      ) {
+        final item = obj(raw);
+        final seconds = (item['seconds'] as num).toDouble();
+        return item['lamp'] == null
+            ? SolutionStep.wait(seconds)
+            : SolutionStep.move(_readPoint(item['lamp']), seconds: seconds);
+      }).toList(),
     );
   }
 }

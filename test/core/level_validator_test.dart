@@ -60,4 +60,49 @@ void main() {
     expect(decoded.solution.length, level.solution.length);
     expect(validateLevel(decoded), isEmpty);
   });
+
+  test('validator rejects moving danger outside wall at either endpoint', () {
+    final level = m4Levels.first.copyWith(
+      movingHazards: [
+        const MovingHazard(
+          bounds: Rect2(330, 200, 20, 40),
+          travel: Point2(20, 0),
+          periodSeconds: 3,
+        ),
+      ],
+    );
+    expect(validateLevel(level).join(' '), contains('màn chớp'));
+  });
+
+  test('timed reference replay must fit the 60 second attempt', () {
+    final level = m4Levels.first.copyWith(
+      solutionSteps: [
+        const SolutionStep.wait(60),
+        SolutionStep.move(m4Levels.first.solution.single, seconds: 1),
+      ],
+    );
+    expect(validateLevel(level).join(' '), contains('replay'));
+  });
+
+  test('moving and timed level round trips without losing its rules', () {
+    final level = m4Levels[2].copyWith(
+      movingHazards: [
+        const MovingHazard(
+          bounds: Rect2(180, 100, 20, 50),
+          travel: Point2(20, 0),
+          periodSeconds: 4,
+        ),
+      ],
+      gateWindowSeconds: 8,
+      solutionSteps: [
+        SolutionStep.move(m4Levels[2].solution.first, seconds: 1),
+        const SolutionStep.wait(1),
+        SolutionStep.move(m4Levels[2].solution.last, seconds: 2),
+      ],
+    );
+    final decoded = Level.fromJson(level.toJson());
+    expect(decoded.movingHazards.single.periodSeconds, 4);
+    expect(decoded.gateWindowSeconds, 8);
+    expect(decoded.solutionSteps.length, 3);
+  });
 }

@@ -5,7 +5,9 @@ import 'rules.dart';
 /// Static checks plus a deterministic replay through the shipping rules.
 List<String> validateLevel(Level level) {
   final issues = <String>[];
-  if (level.schemaVersion != 1) issues.add('schemaVersion không hỗ trợ');
+  if (level.schemaVersion != 1 && level.schemaVersion != 2) {
+    issues.add('schemaVersion không hỗ trợ');
+  }
   if (level.id < 1) issues.add('id không hợp lệ');
   if (level.title.trim().isEmpty || level.hint.trim().isEmpty) {
     issues.add('thiếu tên hoặc hướng dẫn');
@@ -35,12 +37,36 @@ List<String> validateLevel(Level level) {
   for (final entry in <MapEntry<String, Rect2>>[
     MapEntry('exit', level.exit),
     for (final r in level.hazards) MapEntry('hazard', r),
+    for (final r in level.solids) MapEntry('đạo cụ chắn', r),
     for (final r in level.switches) MapEntry('switch', r),
     for (final r in level.gates) MapEntry('gate', r),
   ]) {
     if (!validRect(entry.value)) {
       issues.add('${entry.key} ngoài biên hoặc rỗng');
     }
+  }
+  for (final hazard in level.movingHazards) {
+    if (!hazard.periodSeconds.isFinite ||
+        hazard.periodSeconds <= 0 ||
+        !hazard.phaseSeconds.isFinite ||
+        !validRect(hazard.bounds) ||
+        !validRect(
+          Rect2(
+            hazard.bounds.left + hazard.travel.x,
+            hazard.bounds.top + hazard.travel.y,
+            hazard.bounds.width,
+            hazard.bounds.height,
+          ),
+        )) {
+      issues.add('màn chớp ngoài biên hoặc nhịp không hợp lệ');
+    }
+  }
+  if (level.gateWindowSeconds != null &&
+      (!level.gateWindowSeconds!.isFinite ||
+          level.gateWindowSeconds! <= 1 ||
+          level.switches.isEmpty ||
+          level.gates.isEmpty)) {
+    issues.add('thời hạn sao không hợp lệ');
   }
   if (!level.lightBounds.contains(level.initialLamp) ||
       !finite(level.initialLamp.x) ||
@@ -69,7 +95,10 @@ List<String> validateLevel(Level level) {
   if (level.hazards.any((r) => overlaps(spawn, r))) {
     issues.add('spawn chạm vùng đỏ');
   }
-  if (level.solution.isEmpty) {
+  if (level.movingHazards.any((h) => overlaps(spawn, h.at(0)))) {
+    issues.add('spawn chạm màn chớp');
+  }
+  if (level.solution.isEmpty && level.solutionSteps.isEmpty) {
     issues.add('chưa xác minh: thiếu solutionWaypoints');
     return issues;
   }
@@ -81,13 +110,37 @@ List<String> validateLevel(Level level) {
       issues.add('solution waypoint ngoài biên');
     }
   }
+  for (final step in level.solutionSteps) {
+    if (!finite(step.seconds) ||
+        step.seconds <= 0 ||
+        (step.lamp != null &&
+            (!finite(step.lamp!.x) ||
+                !finite(step.lamp!.y) ||
+                !level.lightBounds.contains(step.lamp!)))) {
+      issues.add('solution step không hợp lệ');
+    }
+  }
   if (issues.isNotEmpty) return issues;
   final attempt = GameAttempt(level)..start();
-  for (final point in level.solution) {
-    attempt.moveLamp(point);
-    if (attempt.phase != AttemptPhase.playing) {
-      issues.add('replay thua trước cửa');
-      return issues;
+  if (level.solutionSteps.isNotEmpty) {
+    for (final step in level.solutionSteps) {
+      if (step.lamp == null) {
+        attempt.tick(step.seconds);
+      } else {
+        attempt.moveLampTimed(step.lamp!, step.seconds);
+      }
+      if (attempt.phase != AttemptPhase.playing) {
+        issues.add('replay thua trước cửa');
+        return issues;
+      }
+    }
+  } else {
+    for (final point in level.solution) {
+      attempt.moveLamp(point);
+      if (attempt.phase != AttemptPhase.playing) {
+        issues.add('replay thua trước cửa');
+        return issues;
+      }
     }
   }
   attempt.tick(level.solutionHoldSeconds);

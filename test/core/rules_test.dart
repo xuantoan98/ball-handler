@@ -151,4 +151,66 @@ void main() {
     expect(sweptAabb(moving, const Point2(-40, 0), wall), isNull);
     expect(sweptAabb(moving, const Point2(40, 0), wall), 0);
   });
+
+  test('solid prop stops a fast drag without losing the attempt', () {
+    final level = m2Levels.first.copyWith(
+      solids: [const Rect2(190, 295, 20, 110)],
+    );
+    final attempt = GameAttempt(level)..start();
+    attempt.moveLamp(controlForShadow(285, 320));
+    expect(attempt.phase, AttemptPhase.playing);
+    expect(attempt.shadow.right, lessThanOrEqualTo(190.001));
+  });
+
+  test('moving danger reaches a stationary shadow during a long tick', () {
+    final level = m2Levels.first.copyWith(
+      movingHazards: [
+        const MovingHazard(
+          bounds: Rect2(180, 320, 20, 60),
+          travel: Point2(-60, 0),
+          periodSeconds: 2,
+        ),
+      ],
+    );
+    final attempt = GameAttempt(level)..start();
+    attempt.tick(1);
+    expect(attempt.phase, AttemptPhase.lost);
+    expect(attempt.feedback, contains('chớp'));
+  });
+
+  test('pause freezes moving danger and reset restarts its phase', () {
+    final level = m2Levels.first.copyWith(
+      movingHazards: [
+        const MovingHazard(
+          bounds: Rect2(250, 100, 20, 60),
+          travel: Point2(-40, 0),
+          periodSeconds: 4,
+        ),
+      ],
+    );
+    final attempt = GameAttempt(level)..start();
+    attempt.tick(1);
+    final left = attempt.movingHazardBounds.single.left;
+    attempt.pause();
+    attempt.tick(2);
+    expect(attempt.movingHazardBounds.single.left, left);
+    attempt.resume();
+    attempt.resetPuzzle();
+    expect(attempt.movingHazardBounds.single.left, 250);
+    expect(attempt.remainingMs, 59000);
+  });
+
+  test('timed star gate expires and can be reopened in one attempt', () {
+    final level = m2Levels[2].copyWith(gateWindowSeconds: 3);
+    final attempt = GameAttempt(level)..start();
+    attempt.moveLamp(level.solution.first);
+    expect(attempt.gateOpen, isTrue);
+    attempt.tick(3);
+    expect(attempt.gateOpen, isFalse);
+    expect(attempt.activatedSwitches, 0);
+    attempt.moveLamp(level.initialLamp);
+    attempt.moveLamp(level.solution.first);
+    expect(attempt.gateOpen, isTrue);
+    expect(attempt.remainingMs, 57000);
+  });
 }

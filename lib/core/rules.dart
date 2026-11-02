@@ -64,10 +64,20 @@ class GameAttempt {
   int activatedSwitches = 0;
   double exitHoldSeconds = 0;
   double remainingMs;
+  double elapsedSeconds = 0;
+  double gateWindowRemaining = 0;
+  bool _gateClosingPending = false;
   String feedback = '';
 
   Rect2 get shadow => SandboxGeometry.shadowOnWall(lamp);
-  bool get gateOpen => activatedSwitches == level.switches.length;
+  List<Rect2> get movingHazardBounds => [
+    for (final hazard in level.movingHazards) hazard.at(elapsedSeconds),
+  ];
+  bool get gateOpen =>
+      activatedSwitches == level.switches.length &&
+      (level.gateWindowSeconds == null ||
+          gateWindowRemaining > 0 ||
+          _gateClosingPending);
   bool get insideExit => gateOpen && containsRect(level.exit, shadow);
 
   void start() {
@@ -98,6 +108,9 @@ class GameAttempt {
     lamp = level.initialLamp;
     activatedSwitches = 0;
     exitHoldSeconds = 0;
+    elapsedSeconds = 0;
+    gateWindowRemaining = 0;
+    _gateClosingPending = false;
     feedback = '';
   }
 
@@ -118,6 +131,14 @@ class GameAttempt {
     for (var i = 0; i < level.hazards.length; i++) {
       final t = sweptAabb(from, delta, level.hazards[i]);
       if (t != null) contacts.add(_Contact(t, 0, 'hazard', i));
+    }
+    for (var i = 0; i < level.movingHazards.length; i++) {
+      final t = sweptAabb(from, delta, movingHazardBounds[i]);
+      if (t != null) contacts.add(_Contact(t, 0, 'movingHazard', i));
+    }
+    for (var i = 0; i < level.solids.length; i++) {
+      final t = sweptAabb(from, delta, level.solids[i]);
+      if (t != null) contacts.add(_Contact(t, 1, 'solid', i));
     }
     for (var i = 0; i < level.gates.length; i++) {
       final t = sweptAabb(from, delta, level.gates[i]);
@@ -141,6 +162,19 @@ class GameAttempt {
         feedback = 'Bóng chạm cảm biến đỏ.';
         return;
       }
+      if (contact.kind == 'movingHazard') {
+        lamp = _lerp(oldLamp, target, contact.time);
+        exitHoldSeconds = 0;
+        phase = AttemptPhase.lost;
+        feedback = 'Bóng chạm màn chớp.';
+        return;
+      }
+      if (contact.kind == 'solid') {
+        lamp = _lerp(oldLamp, target, math.max(0, contact.time - 1e-6));
+        exitHoldSeconds = 0;
+        feedback = 'Đạo cụ đang chắn đường bóng.';
+        return;
+      }
       if (contact.kind == 'gate' && !gateOpen) {
         lamp = _lerp(oldLamp, target, math.max(0, contact.time - 1e-6));
         exitHoldSeconds = 0;
@@ -150,6 +184,11 @@ class GameAttempt {
       if (contact.kind == 'switch') {
         if (contact.index == activatedSwitches) {
           activatedSwitches++;
+          if (activatedSwitches == level.switches.length &&
+              level.gateWindowSeconds != null) {
+            gateWindowRemaining = level.gateWindowSeconds!;
+            _gateClosingPending = false;
+          }
           feedback = 'Đã bật công tắc $activatedSwitches.';
         } else if (contact.index > activatedSwitches) {
           feedback = 'Hãy bật công tắc ${activatedSwitches + 1} trước.';
@@ -158,15 +197,30 @@ class GameAttempt {
     }
     lamp = target;
     if (!insideExit) exitHoldSeconds = 0;
+    _closeExpiredGateIfClear();
   }
 
   void tick(double seconds) {
     if (phase != AttemptPhase.playing || seconds <= 0) return;
+    final effectiveSeconds = math.min(seconds, remainingMs / 1000);
+    if (_movingHazardHits(elapsedSeconds, elapsedSeconds + effectiveSeconds)) {
+      elapsedSeconds += effectiveSeconds;
+      phase = AttemptPhase.lost;
+      feedback = 'Bóng chạm màn chớp.';
+      return;
+    }
+    elapsedSeconds += effectiveSeconds;
     remainingMs = math.max(0, remainingMs - seconds * 1000);
     if (remainingMs == 0) {
       phase = AttemptPhase.lost;
       feedback = 'Hết 60 giây.';
       return;
+    }
+    if (level.gateWindowSeconds != null &&
+        activatedSwitches == level.switches.length) {
+      gateWindowRemaining = math.max(0, gateWindowRemaining - seconds);
+      if (gateWindowRemaining == 0) _gateClosingPending = true;
+      _closeExpiredGateIfClear();
     }
     if (!insideExit) {
       exitHoldSeconds = 0;
@@ -178,6 +232,51 @@ class GameAttempt {
       phase = AttemptPhase.won;
       feedback = 'Bóng đã qua cửa trăng!';
     }
+  }
+
+  void moveLampTimed(Point2 target, double seconds) {
+    if (phase != AttemptPhase.playing || seconds <= 0) return;
+    final origin = lamp;
+    final slices = math.max(1, (seconds * 60).ceil());
+    for (var i = 1; i <= slices && phase == AttemptPhase.playing; i++) {
+      moveLamp(_lerp(origin, target, i / slices));
+      if (phase == AttemptPhase.playing) tick(seconds / slices);
+    }
+  }
+
+  void _closeExpiredGateIfClear() {
+    if (!_gateClosingPending) return;
+    if (insideExit || level.gates.any((gate) => overlaps(gate, shadow))) {
+      return;
+    }
+    activatedSwitches = 0;
+    _gateClosingPending = false;
+    gateWindowRemaining = 0;
+    feedback = 'Cửa đã khép. Hãy bật lại các sao.';
+  }
+
+  bool _movingHazardHits(double start, double end) {
+    for (final hazard in level.movingHazards) {
+      var t = start;
+      while (t < end - 1e-9) {
+        final half = hazard.periodSeconds / 2;
+        final phase = (t + hazard.phaseSeconds) % half;
+        final untilTurn = phase < 1e-9 ? half : half - phase;
+        final next = math.min(end, t + untilTurn);
+        final before = hazard.at(t);
+        final after = hazard.at(next);
+        if (sweptAabb(
+              before,
+              Point2(after.left - before.left, after.top - before.top),
+              shadow,
+            ) !=
+            null) {
+          return true;
+        }
+        t = next;
+      }
+    }
+    return false;
   }
 
   static Point2 _lerp(Point2 from, Point2 to, double t) =>
