@@ -8,6 +8,8 @@ Lệnh cuối: `dart format lib test` → 40 files, 0 changed; `dart run tool/ex
 
 `adb devices -l` tại lần kiểm tra cuối chỉ hiện `List of devices attached` rỗng. APK v2 **chưa cài/chạy trên Android thật**; chưa có ảnh, đo FPS/bộ nhớ, kiểm cảm ứng một ngón, hay người mới giải các màn v2. Các replay tự động chỉ chứng minh đường tham chiếu hợp lệ trong rules. Bản này chưa phát hành và chưa push.
 
+Đã thử mở `build/web` qua browser automation, nhưng inventory trả `browsers: []`; chưa có smoke tương tác bản web v2. Không quy kết `flutter build web` thành kiểm thử UI trên trình duyệt.
+
 ## Phản hồi sau thử máy — trang chủ v2, khóa màn, đồng hồ (02/11/2026)
 
 Chủ sản phẩm duyệt [thiết kế v2](superpowers/specs/2026-11-02-home-level-timer-design.md) và quy tắc 60 giây/hết giờ thua/giữ giờ khi Đặt lại hoặc mở app lại. Đã thêm trang chủ art Kit + nút Flutter thật, popup lần đầu, duyệt 1–20 với Play disabled khi chưa mở, vòng thời gian và huy hiệu `còn/60s` quanh Pause, pulse vàng 10 giây cuối. Save schema v3 thêm `introSeen` và `attemptRemainingMs` với migration v1/v2; `LivesService` chặn start màn khóa. Code M7 trong worktree được giữ nguyên. Không push hoặc công bố công khai.

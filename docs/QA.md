@@ -8,6 +8,7 @@
 | Art và bố cục | 20 WebP riêng được nạp từ asset bundle, tổng 11.76 MB. Đã xem từng nền qua contact sheet và render từ `GamePainter` bảy màn 01/04/08/10/13/17/20 ở 390×844. Flutter test dùng font thay thế, nên bản render chỉ dùng rà vị trí/độ tương phản vật thể, không phải ảnh app thật. |
 | Lệnh xác minh | `dart format lib test`: 40 files, 0 changed; `dart run tool/export_levels.dart`: 20 validated levels; `flutter test`: **84/84 pass**; `flutter analyze`: No issues found; `flutter build web`: pass; `flutter build apk --debug`: pass. APK debug 177 MiB, SHA-256 `e61798339eae84420674476f21221ab16327aa722dd159a7fc6444f3a73fc4ad`. Web build có cảnh báo CupertinoIcons template nhưng vẫn thành công. |
 | Android thật bản v2 | **NOT VERIFIED**: `adb devices -l` không liệt kê thiết bị ở lần kiểm cuối. Chưa cài APK v2, đo FPS/heap, kiểm kéo một ngón hoặc quan sát chớp/cửa có hạn trên máy. |
+| Web tương tác bản v2 | **NOT VERIFIED**: `flutter build web` qua, nhưng inventory của công cụ browser không có trình duyệt/tab để mở bản cuối. Ảnh render Flutter test ở trên chỉ là kiểm tra bố cục. |
 | Playtest độ khó 20 màn | **NOT VERIFIED**: chưa có người chơi mới thử từng màn; cần đo thời gian giải, số lần chết, nhận biết coral/vật chắn và khoảng hở với ngón tay. |
 
 Bản v2 chưa có bằng chứng đủ để nghiệm thu chất lượng trải nghiệm trên Android thật. Không xuất bản công khai.
