@@ -165,34 +165,34 @@ class GamePainter extends CustomPainter {
     );
 
     for (final hazard in attempt.level.hazards) {
-      final box = _wall(hazard);
-      _drop(c, box, 3, const Color(0xFFEF536A), 8, offset: const Offset(0, 4));
-      _round(c, box, 2, const Color(0xFF9C3F59));
-      c.save();
-      c.clipRect(box);
-      for (
-        double x = box.left - box.height;
-        x < box.right + box.height;
-        x += 18
-      ) {
+      _paintDanger(c, _wall(hazard));
+    }
+    for (final hazard in attempt.movingHazardBounds) {
+      _paintDanger(c, _wall(hazard), moving: true);
+    }
+
+    for (final solid in attempt.level.solids) {
+      final box = _wall(solid);
+      _round(c, box, 5, StageColors.ink);
+      _stroke(c, box, 5, StageColors.goldEdge, 2);
+      _stroke(c, box.deflate(4), 3, StageColors.frameEdge, 1);
+      for (double y = box.top + 11; y < box.bottom - 5; y += 18) {
         _line(
           c,
-          Offset(x, box.bottom),
-          Offset(x + box.height, box.top),
-          const Color(0xFFF4777A),
-          7,
+          Offset(box.left + 5, y),
+          Offset(box.right - 5, y),
+          StageColors.frameEdge.withValues(alpha: .65),
+          1.5,
         );
       }
-      c.restore();
-      _stroke(c, box, 2, const Color(0xFFF4777A), 2);
-      _text(
-        c,
-        '!',
-        box.center.dx - 5,
-        box.center.dy - 15,
-        28,
-        StageColors.cream,
-      );
+      for (final point in [
+        box.topLeft + const Offset(5, 5),
+        box.topRight + const Offset(-5, 5),
+        box.bottomLeft + const Offset(5, -5),
+        box.bottomRight + const Offset(-5, -5),
+      ]) {
+        _circle(c, point, 1.5, StageColors.gold);
+      }
     }
 
     for (var i = 0; i < attempt.level.switches.length; i++) {
@@ -224,6 +224,26 @@ class GamePainter extends CustomPainter {
           StageColors.mint.withValues(alpha: .45),
           2,
         );
+        if (attempt.level.gateWindowSeconds != null) {
+          final progress =
+              (attempt.gateWindowRemaining / attempt.level.gateWindowSeconds!)
+                  .clamp(0.0, 1.0);
+          final ring = Rect.fromCircle(
+            center: Offset(box.center.dx, box.top + 19),
+            radius: 11,
+          );
+          c.drawArc(
+            ring,
+            -math.pi / 2,
+            math.pi * 2 * progress,
+            false,
+            Paint()
+              ..color = StageColors.mint
+              ..style = PaintingStyle.stroke
+              ..strokeCap = StrokeCap.round
+              ..strokeWidth = 3,
+          );
+        }
       } else {
         _drop(c, box, 2, StageColors.goldEdge, 7);
         _round(c, box, 2, StageColors.ink);
@@ -249,6 +269,48 @@ class GamePainter extends CustomPainter {
     }
   }
 
+  void _paintDanger(Canvas c, Rect box, {bool moving = false}) {
+    _drop(c, box, 3, const Color(0xFFEF536A), 8, offset: const Offset(0, 4));
+    _round(c, box, 2, const Color(0xFF9C3F59));
+    c.save();
+    c.clipRect(box);
+    for (
+      double x = box.left - box.height;
+      x < box.right + box.height;
+      x += 18
+    ) {
+      _line(
+        c,
+        Offset(x, box.bottom),
+        Offset(x + box.height, box.top),
+        const Color(0xFFF4777A),
+        7,
+      );
+    }
+    c.restore();
+    _stroke(c, box, 2, const Color(0xFFF4777A), 2);
+    if (moving) {
+      _stroke(c, box.deflate(3), 2, StageColors.cream, 1);
+      _text(
+        c,
+        '↕',
+        box.center.dx - 7,
+        box.center.dy - 11,
+        18,
+        StageColors.cream,
+      );
+    } else {
+      _text(
+        c,
+        '!',
+        box.center.dx - 5,
+        box.center.dy - 15,
+        28,
+        StageColors.cream,
+      );
+    }
+  }
+
   void _shadow(Canvas c) {
     final box = _wall(attempt.shadow);
     _puppet(
@@ -271,7 +333,7 @@ class GamePainter extends CustomPainter {
     }
     _puppet(
       c,
-      const Rect.fromLTWH(176, 583, 38, 38),
+      const Rect.fromLTWH(181, 580, 28, 42),
       activity: PuppetMotion.activity(
         motionClock.elapsedMilliseconds,
         lastMovementMs,
@@ -301,8 +363,8 @@ class GamePainter extends CustomPainter {
     final top = box.top;
     final w = box.width;
     final h = box.height;
-    for (var i = 0; i < 4; i++) {
-      final anchor = left + w * (.25 + i * .165);
+    for (var i = 0; i < 2; i++) {
+      final anchor = left + w * (.38 + i * .22);
       final tip = PuppetMotion.footTip(i, cycle, activity, direction);
       final leg = Path()
         ..moveTo(anchor - 2, top + h * .67)
@@ -328,75 +390,94 @@ class GamePainter extends CustomPainter {
           ..strokeWidth = .8,
       );
     }
-    final silhouette = Path()
-      ..moveTo(left + w * .12, top + h * .24)
-      ..lineTo(left + w * .08, top + h * .45)
+    final cape = Path()
+      ..moveTo(left + w * .36, top + h * .54)
       ..quadraticBezierTo(
-        left + w * .02,
-        top + h * .72,
-        left + w * .2,
-        top + h * .74,
-      )
-      ..quadraticBezierTo(
-        left + w * .32,
-        top + h * .7,
-        left + w * .5,
-        top + h * .76,
-      )
-      ..quadraticBezierTo(
-        left + w * .7,
-        top + h * .7,
-        left + w * .8,
-        top + h * .74,
-      )
-      ..quadraticBezierTo(
-        left + w * .99,
-        top + h * .72,
-        left + w * .88,
-        top + h * .24,
-      )
-      ..quadraticBezierTo(
-        left + w * .78,
-        top + h * .13,
-        left + w * .5,
-        top + h * .15,
+        left + w * .18,
+        top + h * .55,
+        left + w * .04,
+        top + h * .88,
       )
       ..quadraticBezierTo(
         left + w * .22,
-        top + h * .12,
-        left + w * .12,
-        top + h * .24,
+        top + h * .82,
+        left + w * .27,
+        top + h * .95,
+      )
+      ..quadraticBezierTo(
+        left + w * .42,
+        top + h * .84,
+        left + w * .5,
+        top + h * .94,
+      )
+      ..quadraticBezierTo(
+        left + w * .64,
+        top + h * .85,
+        left + w * .77,
+        top + h * .95,
+      )
+      ..quadraticBezierTo(
+        left + w * .85,
+        top + h * .75,
+        left + w * .97,
+        top + h * .83,
+      )
+      ..quadraticBezierTo(
+        left + w * .8,
+        top + h * .58,
+        left + w * .65,
+        top + h * .54,
       )
       ..close();
-    c.drawPath(silhouette, Paint()..color = StageColors.shadow);
+    c.drawPath(cape, Paint()..color = StageColors.shadow);
     c.drawPath(
-      silhouette,
+      cape,
       Paint()
-        ..color = StageColors.goldEdge.withValues(alpha: .7)
+        ..color = StageColors.frameEdge.withValues(alpha: .9)
         ..style = PaintingStyle.stroke
         ..strokeWidth = .9,
     );
+    _circle(
+      c,
+      Offset(left + w * .08, top + h * .65),
+      w * .065,
+      StageColors.shadow,
+    );
+    _circle(
+      c,
+      Offset(left + w * .92, top + h * .65),
+      w * .065,
+      StageColors.shadow,
+    );
+    final head = Rect.fromLTWH(left + w * .1, top + h * .14, w * .8, h * .53);
+    c.drawOval(head, Paint()..color = StageColors.shadow);
+    c.drawOval(
+      head,
+      Paint()
+        ..color = StageColors.goldEdge.withValues(alpha: .75)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = .8,
+    );
     final crown = Path()
-      ..moveTo(left + w * .2, top + h * .22)
-      ..lineTo(left + w * .15, top + h * .05)
-      ..lineTo(left + w * .36, top + h * .13)
-      ..lineTo(left + w * .46, top)
-      ..lineTo(left + w * .62, top + h * .12)
-      ..lineTo(left + w * .82, top + h * .04)
-      ..lineTo(left + w * .79, top + h * .23)
+      ..moveTo(left + w * .15, top + h * .22)
+      ..lineTo(left + w * .11, top + h * .045)
+      ..lineTo(left + w * .34, top + h * .125)
+      ..lineTo(left + w * .43, top)
+      ..lineTo(left + w * .61, top + h * .105)
+      ..lineTo(left + w * .85, top + h * .035)
+      ..lineTo(left + w * .8, top + h * .24)
       ..close();
-    c.drawPath(crown, Paint()..color = StageColors.shadow);
+    c.drawPath(crown, Paint()..color = StageColors.gold);
     c.drawPath(
       crown,
       Paint()
-        ..color = StageColors.gold
+        ..color = StageColors.goldEdge
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.3,
+        ..strokeWidth = 1,
     );
-    for (final x in [.37, .65]) {
-      final eye = Offset(left + w * x, top + h * .43);
-      _circle(c, eye, w * .075, StageColors.goldCore);
-      _circle(c, eye, w * .035, StageColors.gold);
+    for (final x in [.36, .65]) {
+      final eye = Offset(left + w * x, top + h * .4);
+      _circle(c, eye, w * .085, StageColors.goldCore);
     }
     c.restore();
   }
@@ -404,6 +485,17 @@ class GamePainter extends CustomPainter {
   void _desk(Canvas c) {
     _round(c, _deskRect, 18, StageColors.frame);
     _stroke(c, _deskRect, 18, StageColors.goldEdge, 2);
+    _stroke(
+      c,
+      _deskRect.deflate(4),
+      15,
+      StageColors.gold.withValues(alpha: .48),
+      1,
+    );
+    _curl(c, const Offset(23, 671));
+    _curl(c, const Offset(367, 671), mirror: true);
+    _curl(c, const Offset(23, 808));
+    _curl(c, const Offset(367, 808), mirror: true);
     if (attempt.phase != AttemptPhase.preview) {
       _stroke(c, _deskRect.deflate(5), 14, StageColors.frameEdge, 1.5);
     }
@@ -444,6 +536,26 @@ class GamePainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.6,
     );
+    for (final x in [48.0, 342.0]) {
+      for (final y in [709.0, 775.0]) {
+        _star(c, Offset(x, y), 4, StageColors.goldEdge);
+      }
+    }
+    for (var i = 0; i <= 12; i++) {
+      final x = 78.0 + i * 19.5;
+      _circle(
+        c,
+        Offset(x, 693),
+        i == 6 ? 2.2 : 1,
+        StageColors.goldEdge.withValues(alpha: .8),
+      );
+      _circle(
+        c,
+        Offset(x, 787),
+        i == 6 ? 2.2 : 1,
+        StageColors.goldEdge.withValues(alpha: .8),
+      );
+    }
     _line(
       c,
       const Offset(70, 755),
@@ -469,7 +581,9 @@ class GamePainter extends CustomPainter {
     _circle(c, center, 28, StageColors.frame);
     _circle(c, center, 26, StageColors.goldEdge);
     _circle(c, center, 23, StageColors.gold);
-    _circle(c, center, 12, StageColors.goldCore);
+    _circle(c, center, 18, StageColors.goldCore);
+    _circle(c, center, 12, StageColors.gold);
+    _circle(c, center, 7, StageColors.goldCore);
     if (pressed) {
       c.drawCircle(
         center,
@@ -488,6 +602,12 @@ class GamePainter extends CustomPainter {
         center + Offset(math.cos(a) * 20, math.sin(a) * 20),
         StageColors.goldEdge,
         2,
+      );
+      _star(
+        c,
+        center + Offset(math.cos(a) * 25, math.sin(a) * 25),
+        2.6,
+        StageColors.goldCore,
       );
     }
     _text(c, 'Kéo đèn · Dẫn bóng về cửa', 84, 814, 14, StageColors.cream);
