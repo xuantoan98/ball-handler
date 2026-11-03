@@ -12,7 +12,7 @@ Nguồn đầy đủ và tiêu chí từng mốc: [SHADOW_CONTROLLER_PLAN.md](..
 | M3 | Lượt, save và ad mô phỏng | Đã triển khai/test tự động; chờ kiểm tra thiết bị thật |
 | M4 | Validator/editor và 20 màn có lời giải | Thiết kế 20 màn v2 và concept đã duyệt; code/art/replay v2 qua test, chờ playtest và kiểm trên máy bản mới |
 | M5 | UI, âm thanh, hướng dẫn và art | Trang chủ v2/popup/huy hiệu thời gian đã triển khai theo duyệt; các phần M5 khác còn theo kế hoạch |
-| M6 | QA Flutter trên các target được chọn và bản candidate | Test/build bản điều chỉnh qua; smoke Redmi giới hạn, chưa đủ điều kiện phát hành (xem QA) |
+| M6 | QA Flutter trên các target được chọn và bản candidate | Đã đo profile/30 chu kỳ trên Redmi và kiểm touch web trong Android Chrome; chờ playtest 3–5 người mới, kiểm dài hạn và Safari nếu có thiết bị (xem QA) |
 | M7 | Adapter quảng cáo Android và chuẩn bị phát hành Google Play | Đang làm spike với quảng cáo test trên thiết bị thật; phát hành/ads live chưa đủ điều kiện |
 
 M2 tạm thời chưa tính lượt để tập trung kiểm chứng gameplay. Lượt, lưu game và quảng cáo mô phỏng thuộc M3.

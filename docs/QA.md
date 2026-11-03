@@ -1,5 +1,20 @@
 # QA và bằng chứng Flutter
 
+## M6 tiếp tục — Redmi profile và Android Chrome (03/11/2026)
+
+Thiết bị thật: Redmi K30 5G `9d9af905`, Android 10/API 29, 1080×2400. Lần này kiểm bản profile native và bản web trong **Chrome Beta trên chính điện thoại**, không gọi viewport desktop là máy thật. Save native gốc 271 byte đã sao lưu trước thử; sau cùng cài lại APK debug, force-stop và khôi phục đúng file, SHA-256 trước/sau `5a177d4f8ff3fcbe015039c468a7684c947f4179d96ea325359e22bdae126ce6`. Không xóa app data, không công bố bản build.
+
+| Hạng mục | Lệnh / kết quả thực tế |
+| --- | --- |
+| Build và rules | `flutter test --reporter compact` → **84/84 pass**; `flutter analyze` → No issues found; `dart run tool/export_levels.dart` → 20 validated levels; `flutter build web --no-wasm-dry-run` → pass (còn cảnh báo font CupertinoIcons); `flutter build apk --profile --no-pub` → pass. APK profile SHA-256 `7acd19f45e0caa25c038c81b215005e3b5efeec0ecf6e978054587f1290c6719`. |
+| Lỗi chặn bản profile | Lần `flutter run --profile` đầu crash ở `MobileAdsInitProvider`: merged manifest có provider nhưng không có `com.google.android.gms.ads.APPLICATION_ID`. `aapt dump xmltree ... app-profile.apk AndroidManifest.xml | rg -q` test ID trả exit 1 trước sửa. Đã thêm **Google sample app ID chỉ vào `src/profile/AndroidManifest.xml`** như debug; build lại, `aapt` thấy ID và app profile mở trên máy. Release vẫn cần app ID thật và kiểm riêng trong M7. |
+| Frame time native | Flutter VM timeline (`clearVMTimeline`/`getVMTimeline`, sự kiện `Animator::BeginFrame` và `Rasterizer::DoDraw`) trên APK profile: màn 01 đứng yên 2 giây: UI p99 **5,125 ms** (238 frame), raster p99 **8,952 ms** (238). Màn 20 đứng yên, 8 cửa sổ × 1,8 giây: UI p99 **7,184 ms** (1.699), raster p99 **11,173 ms** (1.575), không có thời gian xử lý UI/raster >16,67 ms trong mẫu; [số liệu](qa/m6/profile-redmi-stage20-2026-11-03.json). Màn 20 khi ADB kéo đèn 2,2 giây: UI p99 **11,450 ms** (237), raster p99 **15,463 ms** (221), cũng 0 mẫu >16,67 ms. Đây là thời gian xử lý từng luồng trong các cửa sổ ngắn, chưa phải phép chứng minh FPS ổn định suốt 20 màn hoặc chơi lâu/nóng máy. |
+| 30 chu kỳ native | Trên profile, ADB lặp **30 lần Bắt đầu → Tạm dừng → Bỏ ván về preview** ở màn 01. Sau 5 và 30 chu kỳ, preview vẫn có nút Bắt đầu; process PID 568 không đổi. `dumpsys meminfo` TOTAL PSS trước 260449 KB, sau 5 lần 265640 KB, sau 30 lần 273059 KB (+12610 KB so với đầu); không crash, nhưng phép đo này chưa tách cache khỏi leak dài hạn. |
+| Background native | Bắt đầu màn 01, UI báo còn 57 giây; đưa app về Home 5 giây rồi mở lại thấy popup Tạm dừng. Bấm Tiếp tục, UI báo còn 53 giây sau thêm thời gian thao tác; không thấy đồng hồ chạy suốt 5 giây nền. Đây là một lượt quan sát, không phải stress test nhiều loại kill. |
+| Android Chrome Beta | `adb reverse tcp:8765 tcp:8765`, host `build/web` qua HTTP cục bộ, mở `http://127.0.0.1:8765/` trong `com.chrome.beta`. Flutter tải asset và hiện [home](qa/m6/m6-android-chrome-home-v2.png), [preview 01](qa/m6/m6-android-chrome-preview-v2.png), [chạm kéo đèn ở màn 01](qa/m6/m6-android-chrome-touch-v2.png). Touch được CDP tiêm vào Chrome **trên thiết bị thật**; bóng và đèn đổi vị trí. Trong cửa sổ 3 giây sau khi gửi touch tới vùng Pause, CDP ghi 0 `Runtime.exceptionThrown`, 0 log mức error và 0 `Network.loadingFailed`. Chưa thắng màn 01 trên Chrome Beta trong phiên này. Web save thử nằm riêng trong browser, không thay save native. |
+
+**Chưa đạt cổng nghiệm thu M6:** chưa có 3–5 người mới tự chơi 01–20, chưa kiểm Safari iPhone (không có thiết bị), và chưa đo frame time khi chơi dài hoặc mọi màn trên profile. [Phiếu playtest 20 màn](M6_PLAYTEST_V2.md) đã chuẩn bị nhưng chưa có dữ liệu; không điền PASS thay người chơi. M5 còn phần chưa nghiệm thu. Không gọi candidate này là production-ready hoặc tự triển khai công khai.
+
 ## Thiết kế lại 20 màn v2 (02/11/2026)
 
 | Kiểm tra | Kết quả / giới hạn |

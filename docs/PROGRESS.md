@@ -1,5 +1,13 @@
 # Tiến độ và task board
 
+## M6 tiếp tục trên Redmi và Android Chrome (03/11/2026)
+
+Trên Redmi K30 5G đã đo Flutter VM timeline bằng APK profile ở màn 01/20. Phát hiện profile crash trước khi vào Flutter do thiếu AdMob application ID trong merged manifest; đã thêm Google sample ID **chỉ cho biến thể profile**, build lại và xác nhận app chạy. Màn 20 đứng yên qua 8 mẫu ×1,8 giây có UI p99 7,184 ms, raster p99 11,173 ms; mẫu kéo đèn 2,2 giây có UI p99 11,450 ms, raster p99 15,463 ms. Chưa đủ dữ liệu để khẳng định FPS ổn định khi chơi dài. ADB hoàn tất 30 chu kỳ Bắt đầu/Tạm dừng/Bỏ ván về preview, PID giữ nguyên; PSS tăng 260449→273059 KB. Background 5 giây hiện pause khi trở lại. Chrome Beta trên máy mở bản web, popup/home/preview/play và kéo đèn bằng CDP touch; chưa thắng màn web trong phiên này. Chi tiết lệnh, ảnh và giới hạn ở [QA](QA.md).
+
+Lệnh sau sửa: `flutter test --reporter compact` → **84/84 pass**; `flutter analyze` → No issues found; `dart run tool/export_levels.dart` → 20 validated levels; `flutter build web --no-wasm-dry-run` → pass; `flutter build apk --profile --no-pub` → pass. Đã cài lại APK debug cuối và khôi phục save native gốc; SHA-256 trước/sau cùng `5a177d4f8ff3fcbe015039c468a7684c947f4179d96ea325359e22bdae126ce6`. Không push hay xuất bản.
+
+M6 vẫn **DOING**: cần 3–5 người mới chơi thử 01–20 theo [phiếu](M6_PLAYTEST_V2.md), ghi màn khó hiểu/thời gian/lượt thua thực, rồi sửa các điểm lặp lại và đo lại. Chưa có iPhone/Safari để kiểm. Không đánh dấu M6 hoặc bản phát hành DONE khi thiếu dữ liệu người chơi.
+
 ## Thiết kế lại 20 màn v2 (02/11/2026)
 
 Chủ sản phẩm đã duyệt [thiết kế và ba concept](superpowers/specs/2026-11-02-twenty-stage-redesign-design.md). Trong cùng codebase Flutter đã thêm đạo cụ chắn không gây thua, màn chớp nguy hiểm di chuyển, sao/cửa có thời hạn; author lại 20 layout, lời giải có bước thời gian; vẽ lại Bóng Mơ và bàn đèn; thêm 20 hậu cảnh WebP riêng. Level ID 01–20, tiến độ/lượt/60 giây và adapter quảng cáo M7 giữ nguyên. Các ảnh nền chỉ trang trí, không chứa hitbox.

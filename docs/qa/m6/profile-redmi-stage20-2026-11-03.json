@@ -1,0 +1,25 @@
+{
+  "device": "Redmi K30 5G",
+  "stage": "20",
+  "mode": "profile",
+  "samples": 8,
+  "window_s_each": 1.8,
+  "ui": {
+    "frames": 1699,
+    "p50_ms": 3.957,
+    "p90_ms": 5.202,
+    "p99_ms": 7.184,
+    "max_ms": 9.055,
+    "over_16_67": 0,
+    "over_8_33": 4
+  },
+  "raster": {
+    "frames": 1575,
+    "p50_ms": 8.541,
+    "p90_ms": 9.367,
+    "p99_ms": 11.173,
+    "max_ms": 14.131,
+    "over_16_67": 0,
+    "over_8_33": 1020
+  }
+}
