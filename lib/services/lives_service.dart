@@ -44,6 +44,7 @@ class LivesService {
   int get lives => record.lives;
   int? get activeLevel => record.activeLevel;
   int get highestUnlocked => record.highestUnlocked;
+  int get currentLevel => record.currentLevel;
 
   Duration? get untilNextRefill {
     final target = record.nextRefillAtMs;
@@ -118,6 +119,7 @@ class LivesService {
       final now = _effectiveNow(current);
       final candidate = current.change(
         activeLevel: levelIndex,
+        currentLevel: levelIndex,
         lastObservedAtMs: now,
       );
       await _commit(candidate);
@@ -150,6 +152,9 @@ class LivesService {
                   math.max(current.highestUnlocked, current.activeLevel! + 1),
                 )
               : current.highestUnlocked,
+          currentLevel: won
+              ? math.min(19, current.activeLevel! + 1)
+              : current.activeLevel!,
           lastObservedAtMs: now,
         ),
       );
@@ -265,7 +270,10 @@ class LivesService {
   SaveRecord _normalize(SaveRecord value) {
     final lives = value.lives.clamp(0, maxLives);
     final unlocked = value.highestUnlocked.clamp(0, 19);
-    if (lives != value.lives || unlocked != value.highestUnlocked) {
+    final currentLevel = value.currentLevel.clamp(0, unlocked);
+    if (lives != value.lives ||
+        unlocked != value.highestUnlocked ||
+        currentLevel != value.currentLevel) {
       // Keep the original on disk until this repaired record is saved.
       assert(() {
         // ignore: avoid_print
@@ -276,6 +284,7 @@ class LivesService {
     return value.change(
       lives: lives,
       highestUnlocked: unlocked,
+      currentLevel: currentLevel,
       clearRefill: lives == maxLives,
       nextRefillAtMs: lives < maxLives && value.nextRefillAtMs == null
           ? _effectiveNow(value) + refillMs

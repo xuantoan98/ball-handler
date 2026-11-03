@@ -1,5 +1,9 @@
 # Tiến độ và task board
 
+## Sửa màn khởi động và lưu màn tiếp tục (03/11/2026)
+
+Chủ sản phẩm báo game mở ở màn 20 dù muốn bắt đầu từ màn 1, đồng thời yêu cầu thoát khi đang chơi màn 10 thì lần sau tiếp tục màn 10. Đã tách `currentLevel` khỏi `highestUnlocked` trong save v4: save mới và save cũ chỉ có tiến độ mở khóa mở “Chơi ngay” ở màn 1; ván đang chơi được khôi phục đúng màn và thời gian còn lại; bắt đầu màn nào lưu màn đó, thắng lưu màn kế tiếp. Test **99/99 pass**, `flutter analyze --no-pub` sạch, build web và APK debug qua. Redmi đã cài APK mới, migration save v3 giữ `highestUnlocked=19` và đặt `currentLevel=0`; “Chơi ngay” hiện preview màn 1. Thử bắt đầu màn 10, force-stop/mở lại cho thấy save `activeAttempt=9`, `currentLevel=9` và ván khôi phục với đồng hồ còn 55 giây; đã khôi phục save trước lượt thử, hash khớp. Chi tiết ở [QA](QA.md).
+
 ## M5 — triển khai bàn đèn, âm thanh và hiệu ứng (03/11/2026)
 
 Âm thanh: chủ sản phẩm nghe được nhạc sau sửa audio focus nhưng còn nhỏ; đã tăng volume nhạc lên 1,0, được phản hồi mức âm ổn. Theo yêu cầu tiếp theo, Android hiện bắt đầu nhạc ngay ở home khi save bật âm, web vẫn chờ gesture. Chủ sản phẩm xác nhận nhạc phát ở home. Phản hồi tiếp: bấm loa làm hai nút home nháy vì trạng thái save tạm vô hiệu hóa chúng; test tái hiện đỏ và sửa để nút giữ visual ổn định. Test 96/96, analyze, build web/APK đều qua; chủ sản phẩm kiểm lại trên Redmi và xác nhận không còn nháy. M5 vẫn DOING vì QA hiệu ứng/performance còn mở.

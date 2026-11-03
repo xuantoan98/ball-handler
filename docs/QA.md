@@ -1,5 +1,11 @@
 # QA và bằng chứng Flutter
 
+## Màn khởi động và lưu màn tiếp tục (03/11/2026)
+
+- `dart format` → 5 file kiểm tra, 2 file đổi; `flutter test --reporter compact --no-pub` → **99/99 pass**; `flutter analyze --no-pub` → No issues found; `flutter build web --no-wasm-dry-run --no-pub` → tạo `build/web`; `flutter build apk --debug --no-pub` → tạo APK SHA-256 `f640ee975c9a5d4345e9b58416a7f72c35039c133bca8a5e86037d83cae518ac`.
+- Redmi `9d9af905`: save v3 trước cài có `highestUnlocked=19`, `activeAttempt=null`, SHA-256 `50d442494f30c70375bcee72425e9cf2891c1c6adbaa6c882ba6af8491e2cc0f`; `adb install -r` → Success. Mở app chuyển sang schema v4 với `highestUnlocked=19`, `currentLevel=0`, giữ lives/âm thanh/reward; chạm `Chơi ngay` thấy preview “Đánh thức ánh sáng” (màn 1), `Màn trước` disabled.
+- Duyệt đến “Ròng rọc giấy” (màn 10), chạm `Bắt đầu`: save có `activeAttempt=9`, `currentLevel=9`, `attemptRemainingMs=58989`. Force-stop/mở lại: home thông báo khôi phục; chạm `Chơi ngay` vào ván đang chơi, đồng hồ còn 55 giây. Sau thử nghiệm, đã trả save về trạng thái v4 trước thử nghiệm (`activeAttempt=null`, `currentLevel=0`), hash trước/sau cùng `28bff0f12d40ea3e9fae20b266fefa50153d84659c6e094d918e7f648b7066ee`.
+
 ## M5 bàn đèn/âm thanh/chuyển động (03/11/2026)
 
 - Chủ sản phẩm xác nhận nhạc phát ngay ở home và âm lượng **ổn** trên Redmi; sau đó báo bấm loa làm hai nút `Chơi ngay`/`Xem màn` nháy. Test widget giữ lệnh save âm thanh chờ bằng `writeGate`, ban đầu fail vì `onPressed` của `Chơi ngay` thành null. Nguyên nhân: `_operationBusy` tạm thời vô hiệu hóa hai nút khi chỉ đang lưu lựa chọn loa. Đã tách `_soundSaveBusy` khỏi trạng thái bận hiển thị; logic vẫn chặn thao tác đồng thời, hai nút giữ trạng thái visual và `Opacity=1` trong lúc lưu. Test mới qua; toàn suite `flutter test --reporter compact --no-pub` → **96/96 pass**, `flutter analyze --no-pub` → No issues found, build web/APK debug pass. APK SHA-256 `60d0aead5b976d426cdb7e9d8a3ac3cd938a694d6988bf7a0a9d6b167dc130c9`, `adb install -r` → Success, cold start home có loa bật và hai nút enabled; save trước/sau cài cùng hash `50d442494f30c70375bcee72425e9cf2891c1c6adbaa6c882ba6af8491e2cc0f`. Chủ sản phẩm bấm loa vài lần trên APK mới và xác nhận **không còn nháy**.

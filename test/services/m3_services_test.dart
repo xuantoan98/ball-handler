@@ -99,7 +99,7 @@ void main() {
     await lives.initialize();
     expect(lives.record.introSeen, true);
     expect(lives.record.attemptRemainingMs, 60000);
-    expect(jsonDecode(store.value!)['schemaVersion'], 3);
+    expect(jsonDecode(store.value!)['schemaVersion'], 4);
   });
 
   test('saved progress and active attempt can reach level twenty', () async {
@@ -116,6 +116,41 @@ void main() {
     final restored = LivesService(SaveService(store), FakeClock(origin));
     await restored.initialize();
     expect(restored.highestUnlocked, 19);
+  });
+
+  test(
+    'legacy unlocked stage twenty starts at one without losing unlocks',
+    () async {
+      final old = jsonDecode(
+        SaveRecord.fresh.change(highestUnlocked: 19).encode(),
+      ) as Map<String, dynamic>;
+      old['schemaVersion'] = 3;
+      (old['progression'] as Map<String, dynamic>).remove('currentLevel');
+      final store = MemoryStore()..value = jsonEncode(old);
+      final lives = LivesService(SaveService(store), FakeClock(origin));
+      await lives.initialize();
+      expect(lives.currentLevel, 0);
+      expect(lives.highestUnlocked, 19);
+      expect(jsonDecode(store.value!)['schemaVersion'], 4);
+    },
+  );
+
+  test('played stage and next stage survive closing the app', () async {
+    final store = MemoryStore()
+      ..value = SaveRecord.fresh.change(highestUnlocked: 9).encode();
+    final first = LivesService(SaveService(store), FakeClock(origin));
+    await first.initialize();
+    expect(await first.startAttempt(9), SessionResult.ok);
+    final reopened = LivesService(SaveService(store), FakeClock(origin));
+    await reopened.initialize();
+    expect(reopened.activeLevel, 9);
+    expect(reopened.currentLevel, 9);
+    await reopened.finishAttempt(won: true);
+    final afterWin = LivesService(SaveService(store), FakeClock(origin));
+    await afterWin.initialize();
+    expect(afterWin.activeLevel, isNull);
+    expect(afterWin.currentLevel, 10);
+    expect(afterWin.highestUnlocked, 10);
   });
 
   test(
@@ -242,7 +277,7 @@ void main() {
       expect(first.lives, 3);
       expect(first.activeLevel, 1);
       expect(first.untilNextRefill, isNull);
-      expect(jsonDecode(store.value!)['schemaVersion'], 3);
+      expect(jsonDecode(store.value!)['schemaVersion'], 4);
       final again = LivesService(SaveService(store), FakeClock(origin));
       await again.initialize();
       expect(again.lives, 3);
@@ -264,7 +299,7 @@ void main() {
     store.failWrite = false;
     await lives.initialize();
     expect(lives.lives, 2);
-    expect(jsonDecode(store.value!)['schemaVersion'], 3);
+    expect(jsonDecode(store.value!)['schemaVersion'], 4);
   });
 
   test('reward ID is durable and duplicate callback earns once', () async {

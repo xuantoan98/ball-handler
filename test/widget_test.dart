@@ -185,6 +185,21 @@ void main() {
     expect(find.text('Cách chơi'), findsNothing);
   });
 
+  testWidgets('home play opens saved stage, not highest unlocked stage', (
+    tester,
+  ) async {
+    setSize(tester, const Size(390, 844));
+    final store = _MemoryStore()
+      ..value = SaveRecord.fresh
+          .change(highestUnlocked: 19, currentLevel: 9, introSeen: true)
+          .encode();
+    await _pumpM3(tester, store: store);
+    expect(currentAttempt(tester).level.id, 10);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await _pumpM3(tester, store: store);
+    expect(currentAttempt(tester).level.id, 10);
+  });
+
   testWidgets('guide stays open and shows save error for retry', (
     tester,
   ) async {
@@ -340,7 +355,9 @@ void main() {
   ) async {
     setSize(tester, const Size(390, 844));
     final store = _MemoryStore()
-      ..value = SaveRecord.fresh.change(highestUnlocked: 1).encode();
+      ..value = SaveRecord.fresh
+          .change(highestUnlocked: 1, currentLevel: 1)
+          .encode();
     await _pumpM3(tester, store: store);
     expect(currentAttempt(tester).level.id, 2);
     await tester.tap(find.text('Bắt đầu'));

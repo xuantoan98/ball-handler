@@ -1,5 +1,11 @@
 # Quyết định M0
 
+## Lưu màn tiếp tục (03/11/2026)
+
+| ID | Quyết định | Hệ quả / giới hạn |
+| --- | --- | --- |
+| D35 | `currentLevel` tách khỏi `highestUnlocked`; save mới bắt đầu ở màn 1, ván đang chơi tiếp tục ở chính màn đó, thắng lưu màn kế tiếp | Save schema v4. Save v1–v3 có ván đang chơi lấy màn của ván; save cũ chỉ có tiến độ mở khóa chọn màn 1, vẫn giữ toàn bộ màn đã mở. Duyệt màn không tự đổi màn tiếp tục. |
+
 ## Thiết kế lại 20 màn (02/11/2026)
 
 | ID | Quyết định | Hệ quả / giới hạn |

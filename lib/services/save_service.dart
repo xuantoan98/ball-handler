@@ -36,6 +36,7 @@ class SaveRecord {
     required this.activeLevel,
     required this.processedRewardIds,
     required this.highestUnlocked,
+    required this.currentLevel,
     required this.soundEnabled,
     required this.lastObservedAtMs,
     required this.introSeen,
@@ -43,13 +44,14 @@ class SaveRecord {
     this.sourceVersion = schemaVersion,
   });
 
-  static const schemaVersion = 3;
+  static const schemaVersion = 4;
   static const fresh = SaveRecord(
     lives: 3,
     nextRefillAtMs: null,
     activeLevel: null,
     processedRewardIds: {},
     highestUnlocked: 0,
+    currentLevel: 0,
     soundEnabled: true,
     lastObservedAtMs: 0,
     introSeen: false,
@@ -61,6 +63,9 @@ class SaveRecord {
   final int? activeLevel;
   final Set<String> processedRewardIds;
   final int highestUnlocked;
+
+  /// Stage selected for the next launch; independent of unlocked progress.
+  final int currentLevel;
   final bool soundEnabled;
   final int lastObservedAtMs;
   final bool introSeen;
@@ -77,6 +82,7 @@ class SaveRecord {
     bool clearAttempt = false,
     Set<String>? processedRewardIds,
     int? highestUnlocked,
+    int? currentLevel,
     bool? soundEnabled,
     int? lastObservedAtMs,
     bool? introSeen,
@@ -87,6 +93,7 @@ class SaveRecord {
     activeLevel: clearAttempt ? null : activeLevel ?? this.activeLevel,
     processedRewardIds: processedRewardIds ?? this.processedRewardIds,
     highestUnlocked: highestUnlocked ?? this.highestUnlocked,
+    currentLevel: currentLevel ?? this.currentLevel,
     soundEnabled: soundEnabled ?? this.soundEnabled,
     lastObservedAtMs: lastObservedAtMs ?? this.lastObservedAtMs,
     introSeen: introSeen ?? this.introSeen,
@@ -105,7 +112,10 @@ class SaveRecord {
     'nextRefillAt': nextRefillAtMs,
     'activeAttempt': activeLevel,
     'processedRewardIds': processedRewardIds.toList()..sort(),
-    'progression': {'highestUnlocked': highestUnlocked},
+    'progression': {
+      'highestUnlocked': highestUnlocked,
+      'currentLevel': currentLevel,
+    },
     'settings': {'soundEnabled': soundEnabled},
     'lastObservedAt': lastObservedAtMs,
     'introSeen': introSeen,
@@ -118,6 +128,7 @@ class SaveRecord {
       if (data is! Map<String, dynamic> ||
           (data['schemaVersion'] != 1 &&
               data['schemaVersion'] != 2 &&
+              data['schemaVersion'] != 3 &&
               data['schemaVersion'] != schemaVersion)) {
         throw const SaveFailure('Phiên bản dữ liệu lưu không được hỗ trợ.');
       }
@@ -128,7 +139,7 @@ class SaveRecord {
       final next = data['nextRefillAt'];
       final active = data['activeAttempt'];
       final observed = data['lastObservedAt'];
-      final v3 = data['schemaVersion'] == schemaVersion;
+      final v3 = (data['schemaVersion'] as int) >= 3;
       final intro = v3 ? data['introSeen'] : true;
       final remaining = v3
           ? data['attemptRemainingMs']
@@ -142,6 +153,8 @@ class SaveRecord {
           rewards.any((item) => item is! String || item.isEmpty) ||
           progression is! Map ||
           progression['highestUnlocked'] is! int ||
+          data['schemaVersion'] == schemaVersion &&
+              progression['currentLevel'] is! int ||
           settings is! Map ||
           settings['soundEnabled'] is! bool ||
           observed is! int ||
@@ -158,6 +171,12 @@ class SaveRecord {
         throw const SaveFailure('Dữ liệu lưu bị lỗi.');
       }
       final oldActive = data['schemaVersion'] == 1 && active != null;
+      final currentLevel = data['schemaVersion'] == schemaVersion
+          ? progression['currentLevel'] as int
+          : active ?? 0;
+      if (currentLevel < 0 || currentLevel > 19) {
+        throw const SaveFailure('Dữ liệu lưu bị lỗi.');
+      }
       final migratedLives = oldActive ? (lives + 1).clamp(0, 3) : lives;
       return SaveRecord(
         lives: migratedLives,
@@ -165,6 +184,7 @@ class SaveRecord {
         activeLevel: active,
         processedRewardIds: rewards.cast<String>().toSet(),
         highestUnlocked: progression['highestUnlocked'] as int,
+        currentLevel: currentLevel,
         soundEnabled: settings['soundEnabled'] as bool,
         lastObservedAtMs: observed,
         introSeen: intro,

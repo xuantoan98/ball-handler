@@ -648,7 +648,7 @@ class _GamePageState extends State<GamePage>
       _resume();
       return;
     }
-    _selectLevel(_lives.highestUnlocked);
+    _selectLevel(_lives.currentLevel);
     setState(() {
       _homeVisible = false;
       _notice = null;
