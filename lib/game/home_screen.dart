@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../design_tokens.dart';
 import 'theatre_components.dart';
+import 'entrance_motion.dart';
 
 /// Decorative stage art stays separate from live, accessible Flutter controls.
 class HomeScreen extends StatelessWidget {
@@ -76,43 +77,45 @@ class HomeScreen extends StatelessWidget {
         top: 119,
         width: 314,
         height: 102,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: StageColors.background.withValues(alpha: .91),
-            border: Border.all(color: StageColors.goldEdge, width: 2.3),
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black54,
-                blurRadius: 12,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: const Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'RẠP BÓNG NHỎ',
-                maxLines: 1,
-                style: TextStyle(
-                  color: StageColors.text,
-                  fontSize: 27,
-                  fontWeight: FontWeight.w900,
+        child: EntranceMotion(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: StageColors.background.withValues(alpha: .91),
+              border: Border.all(color: StageColors.goldEdge, width: 2.3),
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black54,
+                  blurRadius: 12,
+                  offset: Offset(0, 4),
                 ),
-              ),
-              SizedBox(height: 3),
-              Text(
-                'Một ngọn đèn. Cả thế giới chuyển động.',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: StageColors.lilacLight,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
+              ],
+            ),
+            child: const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'RẠP BÓNG NHỎ',
+                  maxLines: 1,
+                  style: TextStyle(
+                    color: StageColors.text,
+                    fontSize: 27,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
-              ),
-            ],
+                SizedBox(height: 3),
+                Text(
+                  'Một ngọn đèn. Cả thế giới chuyển động.',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: StageColors.lilacLight,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -121,11 +124,14 @@ class HomeScreen extends StatelessWidget {
         top: 594,
         width: 268,
         height: 60,
-        child: TheatreButton(
-          label: 'Chơi ngay',
-          onPressed: busy ? null : onPlay,
-          leading: Icons.play_arrow,
-          tone: TheatreButtonTone.gold,
+        child: EntranceMotion(
+          delayFraction: .12,
+          child: TheatreButton(
+            label: 'Chơi ngay',
+            onPressed: busy ? null : onPlay,
+            leading: Icons.play_arrow,
+            tone: TheatreButtonTone.gold,
+          ),
         ),
       ),
       Positioned(
@@ -133,10 +139,13 @@ class HomeScreen extends StatelessWidget {
         top: 668,
         width: 268,
         height: 60,
-        child: TheatreButton(
-          label: 'Xem màn',
-          onPressed: busy ? null : onLevels,
-          leading: Icons.theaters,
+        child: EntranceMotion(
+          delayFraction: .24,
+          child: TheatreButton(
+            label: 'Xem màn',
+            onPressed: busy ? null : onLevels,
+            leading: Icons.theaters,
+          ),
         ),
       ),
       Positioned(

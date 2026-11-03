@@ -10,6 +10,7 @@ import '../design_tokens.dart';
 import 'board_ui_layout.dart';
 import 'moon_door_painter.dart';
 import 'puppet_motion.dart';
+import 'result_effect.dart';
 
 /// The same wall rectangles used by GameAttempt are drawn without extra padding.
 class GamePainter extends CustomPainter {
@@ -23,12 +24,14 @@ class GamePainter extends CustomPainter {
     required this.lives,
     this.backdrop,
     this.deskBackdrop,
+    this.resultEffect,
   }) : super(repaint: animation);
 
   final GameAttempt attempt;
   final bool pressed;
   final ui.Image? backdrop;
   final ui.Image? deskBackdrop;
+  final ResultEffect? resultEffect;
   final Animation<double> animation;
   final Stopwatch motionClock;
   final int lastMovementMs;
@@ -77,6 +80,7 @@ class GamePainter extends CustomPainter {
     canvas.clipRect(_stageRect);
     _objects(canvas);
     _shadow(canvas);
+    _paintResultEffect(canvas);
     canvas.restore();
     _stroke(canvas, _stageRect.inflate(2), 8, StageColors.goldEdge, 1.6);
     _stroke(
@@ -98,6 +102,45 @@ class GamePainter extends CustomPainter {
       _debug(canvas);
     }
     canvas.restore();
+  }
+
+  void _paintResultEffect(Canvas canvas) {
+    final effect = resultEffect;
+    if (effect == null || !effect.active) return;
+    final progress = effect.progressAt(effect.elapsed);
+    if (progress >= 1) return;
+    final exit = _wall(attempt.level.exit);
+    if (effect.phase == AttemptPhase.won) {
+      final pulse = (1 - progress) * 5;
+      canvas.drawOval(
+        exit.inflate(pulse),
+        Paint()
+          ..color = StageColors.mint.withValues(alpha: (1 - progress) * .5)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2,
+      );
+      for (final particle in effect.particles) {
+        canvas.drawCircle(
+          exit.center + Offset(particle.dx * progress, particle.dy * progress),
+          particle.radius * (1 - progress),
+          Paint()
+            ..color =
+                (particle.gold ? StageColors.goldCore : StageColors.lilacLight)
+                    .withValues(alpha: 1 - progress),
+        );
+      }
+    } else if (effect.collisionHaptic) {
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          _stageRect.deflate(2),
+          const Radius.circular(6),
+        ),
+        Paint()
+          ..color = StageColors.coral.withValues(alpha: (1 - progress) * .65)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 3,
+      );
+    }
   }
 
   /// Keep the illustrated top/bottom proscenium at its native proportions.

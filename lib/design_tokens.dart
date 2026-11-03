@@ -15,6 +15,7 @@ abstract final class StageColors {
   static const goldEdge = Color(0xFFD78C32);
   static const mint = Color(0xFF79F2CF);
   static const mintDeep = Color(0xFF174F50);
+  static const coral = Color(0xFFF4777A);
   static const lilac = Color(0xFFC4B5E0);
   static const lilacLight = Color(0xFFE6DCF4);
   static const text = Color(0xFFFFF3D8);

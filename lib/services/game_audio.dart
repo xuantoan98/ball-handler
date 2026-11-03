@@ -13,12 +13,20 @@ abstract class GameAudioBackend {
 
 class PlayerAudioBackend implements GameAudioBackend {
   final AudioPlayer _music = AudioPlayer();
-  final AudioPlayer _effects = AudioPlayer();
+  final Map<GameSound, AudioPlayer> _effects = {
+    for (final sound in GameSound.values) sound: AudioPlayer(),
+  };
+  bool _musicStarted = false;
 
   @override
   Future<void> startMusic() async {
-    await _music.setReleaseMode(ReleaseMode.loop);
-    await _music.play(AssetSource('audio/music.ogg'), volume: .12);
+    if (_musicStarted) {
+      await _music.resume();
+    } else {
+      await _music.setReleaseMode(ReleaseMode.loop);
+      await _music.play(AssetSource('audio/music.ogg'), volume: .12);
+      _musicStarted = true;
+    }
   }
 
   @override
@@ -34,14 +42,17 @@ class PlayerAudioBackend implements GameAudioBackend {
       GameSound.collision => 'collision.ogg',
       GameSound.win => 'win.ogg',
     };
-    await _effects.stop();
-    await _effects.play(AssetSource('audio/$file'), volume: .32);
+    final player = _effects[sound]!;
+    await player.stop();
+    await player.play(AssetSource('audio/$file'), volume: .32);
   }
 
   @override
   Future<void> dispose() async {
     await _music.dispose();
-    await _effects.dispose();
+    for (final player in _effects.values) {
+      await player.dispose();
+    }
   }
 }
 

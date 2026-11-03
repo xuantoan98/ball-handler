@@ -1,5 +1,12 @@
 # Tiến độ và task board
 
+## M5 — triển khai bàn đèn, âm thanh và hiệu ứng (03/11/2026)
+
+Theo yêu cầu tiếp tục, đã đưa nền bàn v3 trống mặt trời vào `GamePainter`; đèn và hitbox kéo vẫn do Flutter/rules điều khiển. Đã thêm nhạc/hiệu ứng CC0 cục bộ, nút âm thanh trên home/pause lưu qua `LivesService`, điều khiển phát một loop sau tương tác đầu tiên, dừng khi pause/background/ad. Thêm hiệu ứng giấy vàng/lilac khi thắng, viền coral khi bóng chạm nguy hiểm, rung Android một lần sau khi lưu kết quả va chạm, và nhịp vào nhẹ cho tiêu đề/nút/panel; chế độ giảm chuyển động bỏ hạt/rung/dịch chuyển. Không thay level, lượt, save schema, đồng hồ hoặc adapter quảng cáo.
+
+APK debug có artifact thực và đã cài trên Redmi. Ảnh máy xác nhận bàn trong ván và nút loa home; đã bật/tắt nút, rồi trả về bật, save cuối cho thấy `soundEnabled:true`, `activeAttempt:null`, 1/3 lượt. **Chưa nghe thẩm định chất lượng/mức âm bằng tai, chưa xác nhận cue/haptic thắng-thua trên máy, chưa đo frame time sau hiệu ứng, chưa smoke tương tác web vì browser inventory rỗng, chưa có Safari/playtest người mới.** M5 vẫn **DOING / chờ QA cảm nhận**; không phát hành/push. Lệnh và kết quả ở [QA](QA.md).
+
+
 ## M5 — thiết kế bàn đèn, âm thanh, chuyển động v3 (03/11/2026)
 
 Đã đối chiếu ảnh Game Board, UI Kit, ảnh bàn đèn chủ sản phẩm chỉ định và screenshot Redmi đang chơi màn 08. Chủ sản phẩm chọn nhạc nền nhẹ cùng hiệu ứng ngắn, và nền bàn trang trí từ ảnh với đèn Flutter di động; [preview v3](superpowers/specs/m5-control-preview-v3.png) đã được xác nhận đúng hướng. [Thiết kế M5](superpowers/specs/2026-11-03-m5-control-audio-motion-design.md) ghi nguồn CC0, nút âm thanh, chuyển cảnh, confetti và rung có điều kiện; **đang chờ duyệt tài liệu trước khi sửa code/asset production**. Kiểm tra độc lập tài liệu: không còn câu hỏi quan trọng để lập kế hoạch. Chưa tích hợp âm thanh hay hiệu ứng, chưa kiểm trên máy cho bản M5 này.

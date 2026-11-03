@@ -1,5 +1,13 @@
 # QA và bằng chứng Flutter
 
+## M5 bàn đèn/âm thanh/chuyển động (03/11/2026)
+
+- TDD: `flutter test test/game/game_painter_test.dart` ban đầu fail vì thiếu `deskBackdrop`, sau triển khai 2/2 pass; test audio/widget và effect/entrance cũng được chạy đỏ trước khi thêm code. Lệnh cuối: `dart format lib test` → 46 file, 2 file format; `flutter analyze --no-pub` → No issues found; `flutter test --reporter compact --no-pub` → 93/93 pass; `git diff --check` → exit 0. `flutter build web --no-wasm-dry-run --no-pub` → `Built build/web` (cảnh báo CupertinoIcons còn); `flutter build apk --debug --no-pub` → `Built build/app/outputs/flutter-apk/app-debug.apk`, SHA-256 `8c46d4229d281073e8a58b995869377cc23207070814a0f407daf4de0f6a7bac`.
+- Redmi K30 5G qua ADB: `adb install -r .../app-debug.apk` sau build cuối → `Success`; `adb shell am start -n ...` → process PID 9198. Mở app thấy home cùng nút loa, bấm đổi biểu tượng tắt, bấm lại đổi về bật; `adb logcat` không thấy `FATAL EXCEPTION`, `E/flutter` hoặc `AudioPlayerException` trong 300 dòng cuối. Datastore sau force-stop chứa `soundEnabled:true`, `activeAttempt:null`, 1/3 lượt. Ảnh màn chơi sau asset bàn xác nhận đèn vẽ trên mặt oval, nút reset và sân khấu không bị che. Không chấm âm lượng/loop bằng tai hoặc haptic thắng-thua là PASS.
+- Browser UI smoke: thử inventory Computer Use → `browsers: []`; Chrome automation không khả dụng trong phiên này. Chỉ build web pass, chưa xác nhận first-gesture autoplay trên browser. Safari và định dạng Ogg trên Safari chưa kiểm chứng.
+- Chưa có phép đo Flutter frame time sau asset/effect, test người mới, hoặc xác nhận trực quan hiệu ứng thắng/thua trên thiết bị; những hạng mục này vẫn mở.
+
+
 ## M6 mô phỏng sai số thao tác — không thay playtest (03/11/2026)
 
 Theo yêu cầu khi chưa thu xếp được người thử thật, `dart run tool/m6_simulate_inputs.dart` đã phát sinh **5 cấu hình đầu vào tổng hợp × 20 màn × 25 seed = 2.500 lượt** qua `GameAttempt` của game. Mỗi cấu hình đi theo `solutionSteps` đã author, chỉ thay tọa độ mốc đèn trong vùng điều khiển và tốc độ/chờ; không nhìn ảnh, tự tìm đường hay sửa sau khi hụt cửa. Seed cố định `20261103`; [dữ liệu từng màn](qa/m6/simulated-inputs-2026-11-03.json) có số thắng/thua/chưa hoàn thành và lý do. `px` ở đây là đơn vị logic của bàn điều khiển 390×844, không phải sai số đo từ ngón tay người.

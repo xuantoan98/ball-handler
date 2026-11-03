@@ -13,6 +13,8 @@ import 'core/level.dart';
 import 'core/rules.dart';
 import 'design_tokens.dart';
 import 'game/game_painter.dart';
+import 'game/entrance_motion.dart';
+import 'game/result_effect.dart';
 import 'game/stage_backdrop.dart';
 import 'game/board_ui_layout.dart';
 import 'game/theatre_components.dart';
@@ -105,6 +107,8 @@ class _GamePageState extends State<GamePage>
   late final RewardedAdSource _ads;
   late final RewardedAdCoordinator _reward;
   late final GameAudio _audio;
+  final ResultEffect _resultEffect = ResultEffect();
+  bool _hapticDone = false;
   bool _soundEnabled = true;
   Timer? _countdownTimer;
   bool _ready = false;
@@ -244,7 +248,7 @@ class _GamePageState extends State<GamePage>
     _audio.setForeground(state == AppLifecycleState.resumed);
     if (state != AppLifecycleState.resumed) _reward.cancel();
     if (state == AppLifecycleState.resumed) {
-      _visualAnimation.repeat();
+      if (_attempt.phase != AttemptPhase.paused) _visualAnimation.repeat();
     } else {
       _visualAnimation.stop();
     }
@@ -271,7 +275,17 @@ class _GamePageState extends State<GamePage>
     final seconds = (elapsed - _lastElapsed).inMicroseconds / 1000000;
     _lastElapsed = elapsed;
     if (seconds <= 0 || _attempt.phase != AttemptPhase.playing) return;
+    final previousPhase = _attempt.phase;
+    final previousSwitches = _attempt.activatedSwitches;
+    final previousGate = _attempt.gateOpen;
+    final previousFeedback = _attempt.feedback;
     setState(() => _attempt.tick(seconds));
+    _handleAttemptUpdate(
+      previousPhase,
+      previousSwitches,
+      previousGate,
+      previousFeedback,
+    );
     final currentSecond = (_attempt.remainingMs / 1000).ceil();
     if (currentSecond != _lastTimerSecond) {
       _lastTimerSecond = currentSecond;
@@ -281,6 +295,41 @@ class _GamePageState extends State<GamePage>
         _attempt.phase == AttemptPhase.lost) {
       _ticker.stop();
       unawaited(_finishTerminal());
+    }
+  }
+
+  void _handleAttemptUpdate(
+    AttemptPhase previousPhase,
+    int previousSwitches,
+    bool previousGate,
+    String previousFeedback,
+  ) {
+    if (_attempt.activatedSwitches > previousSwitches) {
+      _audio.play(GameSound.switchOn);
+    } else if (_attempt.feedback != previousFeedback &&
+        _attempt.feedback.startsWith('Hãy bật công tắc')) {
+      _audio.play(GameSound.wrong);
+    }
+    if (!previousGate && _attempt.gateOpen) _audio.play(GameSound.gate);
+    if (previousPhase != AttemptPhase.playing ||
+        (_attempt.phase != AttemptPhase.won &&
+            _attempt.phase != AttemptPhase.lost)) {
+      return;
+    }
+    final collision =
+        _attempt.phase == AttemptPhase.lost &&
+        _attempt.feedback.startsWith('Bóng chạm');
+    final reduced = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    if (_resultEffect.begin(
+      _attempt.phase,
+      collision: collision,
+      reducedMotion: reduced,
+    )) {
+      if (_attempt.phase == AttemptPhase.won) {
+        _audio.play(GameSound.win);
+      } else if (collision) {
+        _audio.play(GameSound.collision);
+      }
     }
   }
 
@@ -322,6 +371,8 @@ class _GamePageState extends State<GamePage>
       final result = await _lives.startAttempt(levelIndex);
       if (!mounted) return;
       if (result == SessionResult.ok) {
+        _resultEffect.reset();
+        _hapticDone = false;
         setState(() {
           _levelIndex = levelIndex;
           _attempt = GameAttempt(m4Levels[levelIndex])..start();
@@ -356,6 +407,7 @@ class _GamePageState extends State<GamePage>
 
   void _pause() {
     _audio.setMusicActive(false);
+    _visualAnimation.stop();
     _ticker.stop();
     _queueTimerSave();
     _drag.end(_drag.activePointer ?? -1);
@@ -367,6 +419,7 @@ class _GamePageState extends State<GamePage>
 
   void _resume() {
     _audio.setMusicActive(true);
+    _visualAnimation.repeat();
     setState(() {
       _attempt.resume();
       _notice = null;
@@ -376,6 +429,7 @@ class _GamePageState extends State<GamePage>
 
   void _resetCurrentAttempt() {
     if (_attempt.phase != AttemptPhase.playing) return;
+    _resultEffect.reset();
     setState(() {
       _attempt.resetPuzzle();
       _drag = LampDrag(initial: _attempt.lamp);
@@ -401,6 +455,8 @@ class _GamePageState extends State<GamePage>
     }
     if (!mounted) return;
     _audio.setMusicActive(true);
+    _visualAnimation.repeat();
+    _resultEffect.reset();
     _ticker.stop();
     setState(() {
       _attempt.reset();
@@ -418,6 +474,13 @@ class _GamePageState extends State<GamePage>
       final saving = _timerSaveFuture;
       if (saving != null) await saving;
       await _lives.finishAttempt(won: _attempt.phase == AttemptPhase.won);
+      if (_resultEffect.collisionHaptic &&
+          !_hapticDone &&
+          !kIsWeb &&
+          defaultTargetPlatform == TargetPlatform.android) {
+        _hapticDone = true;
+        unawaited(HapticFeedback.mediumImpact());
+      }
       if (mounted) {
         setState(() {
           _notice = null;
@@ -512,6 +575,7 @@ class _GamePageState extends State<GamePage>
   void _selectLevel(int index) {
     if (index < 0 || index >= m4Levels.length) return;
     _ticker.stop();
+    _resultEffect.reset();
     setState(() {
       _levelIndex = index;
       _attempt = GameAttempt(m4Levels[index]);
@@ -682,6 +746,10 @@ class _GamePageState extends State<GamePage>
                       allowOutside: true,
                     );
                     if (at == null || !_drag.move(event.pointer, at)) return;
+                    final previousPhase = _attempt.phase;
+                    final previousSwitches = _attempt.activatedSwitches;
+                    final previousGate = _attempt.gateOpen;
+                    final previousFeedback = _attempt.feedback;
                     setState(() {
                       final before = _attempt.shadow.center;
                       _attempt.moveLamp(_drag.position);
@@ -699,6 +767,12 @@ class _GamePageState extends State<GamePage>
                         _ticker.stop();
                       }
                     });
+                    _handleAttemptUpdate(
+                      previousPhase,
+                      previousSwitches,
+                      previousGate,
+                      previousFeedback,
+                    );
                     if (_attempt.phase == AttemptPhase.lost) {
                       unawaited(_finishTerminal());
                     }
@@ -718,6 +792,7 @@ class _GamePageState extends State<GamePage>
                           pressed: _drag.activePointer != null,
                           backdrop: _backdrop,
                           deskBackdrop: _deskBackdrop,
+                          resultEffect: _resultEffect,
                           animation: _visualAnimation,
                           motionClock: _motionClock,
                           lastMovementMs: _lastMovementMs,
@@ -904,156 +979,159 @@ class _GamePageState extends State<GamePage>
       preview ? BoardUiLayout.preview.top : 251,
       preview ? BoardUiLayout.preview.width : 330,
       preview ? BoardUiLayout.preview.height : 278,
-      TheatrePanel(
-        compact: preview,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            (preview ? 12 : 18) * scale,
-            (preview ? 22 : 62) * scale,
-            (preview ? 12 : 18) * scale,
-            (preview ? 11 : 20) * scale,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                key: const Key('panel-title'),
-                textAlign: TextAlign.center,
-                maxLines: preview ? 2 : 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: StageColors.goldCore,
-                  fontSize: (preview ? 17 : 22) * scale,
-                  fontWeight: FontWeight.w900,
-                  shadows: const [
-                    Shadow(color: StageColors.goldEdge, blurRadius: 8),
-                  ],
-                ),
-              ),
-              Flexible(
-                child: Text(
-                  detail,
+      EntranceMotion(
+        key: ValueKey('panel-$phase'),
+        child: TheatrePanel(
+          compact: preview,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(
+              (preview ? 12 : 18) * scale,
+              (preview ? 22 : 62) * scale,
+              (preview ? 12 : 18) * scale,
+              (preview ? 11 : 20) * scale,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  title,
+                  key: const Key('panel-title'),
                   textAlign: TextAlign.center,
-                  maxLines: preview ? 2 : 4,
+                  maxLines: preview ? 2 : 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: StageColors.secondaryText,
-                    fontSize: (preview ? 14 : 15) * scale,
-                    height: preview ? 1.08 : 1.2,
-                  ),
-                ),
-              ),
-              if (preview)
-                SizedBox(
-                  height: 49 * scale,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: _action(
-                          _levelIndex > _lives.highestUnlocked
-                              ? 'Chưa mở'
-                              : _lives.lives == 0
-                              ? 'Hết lượt'
-                              : 'Bắt đầu',
-                          !_ready ||
-                                  _operationBusy ||
-                                  _lives.isReadOnly ||
-                                  _lives.lives == 0 ||
-                                  _levelIndex > _lives.highestUnlocked
-                              ? null
-                              : () => _beginAttempt(_levelIndex),
-                          primary: true,
-                        ),
-                      ),
-                      SizedBox(width: 7 * scale),
-                      Expanded(
-                        child: _action(
-                          'Màn trước',
-                          _operationBusy || _levelIndex == 0
-                              ? null
-                              : () => _selectLevel(_levelIndex - 1),
-                          small: true,
-                        ),
-                      ),
-                      SizedBox(width: 7 * scale),
-                      Expanded(
-                        child: _action(
-                          'Màn sau',
-                          _operationBusy || _levelIndex == m4Levels.length - 1
-                              ? null
-                              : () => _selectLevel(_levelIndex + 1),
-                          small: true,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              else ...[
-                SizedBox(
-                  height: 49 * scale,
-                  width: double.infinity,
-                  child: _action(
-                    _terminalSaveFailed
-                        ? 'Thử lưu lại'
-                        : switch (phase) {
-                            AttemptPhase.paused => 'Tiếp tục',
-                            AttemptPhase.won =>
-                              _levelIndex < m4Levels.length - 1
-                                  ? 'Màn tiếp theo'
-                                  : 'Chơi lại',
-                            AttemptPhase.lost => 'Thử lại',
-                            _ => '',
-                          },
-                    _operationBusy
-                        ? null
-                        : _terminalSaveFailed
-                        ? _finishTerminal
-                        : switch (phase) {
-                            AttemptPhase.paused => _resume,
-                            AttemptPhase.won =>
-                              _levelIndex < m4Levels.length - 1
-                                  ? () => _beginAttempt(_levelIndex + 1)
-                                  : () => _beginAttempt(_levelIndex),
-                            AttemptPhase.lost => () => _beginAttempt(
-                              _levelIndex,
-                            ),
-                            _ => null,
-                          },
-                    primary: true,
-                  ),
-                ),
-                SizedBox(
-                  height: 43 * scale,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _action(
-                          'Xem màn',
-                          _operationBusy || _terminalSaveFailed
-                              ? null
-                              : _showPreview,
-                          small: true,
-                        ),
-                      ),
-                      SizedBox(width: 8 * scale),
-                      Expanded(
-                        child: _action(
-                          phase == AttemptPhase.paused ? 'Bỏ ván' : 'Thử lại',
-                          _operationBusy || _terminalSaveFailed
-                              ? null
-                              : phase == AttemptPhase.paused
-                              ? _showPreview
-                              : () => _beginAttempt(_levelIndex),
-                          small: true,
-                        ),
-                      ),
+                    color: StageColors.goldCore,
+                    fontSize: (preview ? 17 : 22) * scale,
+                    fontWeight: FontWeight.w900,
+                    shadows: const [
+                      Shadow(color: StageColors.goldEdge, blurRadius: 8),
                     ],
                   ),
                 ),
+                Flexible(
+                  child: Text(
+                    detail,
+                    textAlign: TextAlign.center,
+                    maxLines: preview ? 2 : 4,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: StageColors.secondaryText,
+                      fontSize: (preview ? 14 : 15) * scale,
+                      height: preview ? 1.08 : 1.2,
+                    ),
+                  ),
+                ),
+                if (preview)
+                  SizedBox(
+                    height: 49 * scale,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: _action(
+                            _levelIndex > _lives.highestUnlocked
+                                ? 'Chưa mở'
+                                : _lives.lives == 0
+                                ? 'Hết lượt'
+                                : 'Bắt đầu',
+                            !_ready ||
+                                    _operationBusy ||
+                                    _lives.isReadOnly ||
+                                    _lives.lives == 0 ||
+                                    _levelIndex > _lives.highestUnlocked
+                                ? null
+                                : () => _beginAttempt(_levelIndex),
+                            primary: true,
+                          ),
+                        ),
+                        SizedBox(width: 7 * scale),
+                        Expanded(
+                          child: _action(
+                            'Màn trước',
+                            _operationBusy || _levelIndex == 0
+                                ? null
+                                : () => _selectLevel(_levelIndex - 1),
+                            small: true,
+                          ),
+                        ),
+                        SizedBox(width: 7 * scale),
+                        Expanded(
+                          child: _action(
+                            'Màn sau',
+                            _operationBusy || _levelIndex == m4Levels.length - 1
+                                ? null
+                                : () => _selectLevel(_levelIndex + 1),
+                            small: true,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else ...[
+                  SizedBox(
+                    height: 49 * scale,
+                    width: double.infinity,
+                    child: _action(
+                      _terminalSaveFailed
+                          ? 'Thử lưu lại'
+                          : switch (phase) {
+                              AttemptPhase.paused => 'Tiếp tục',
+                              AttemptPhase.won =>
+                                _levelIndex < m4Levels.length - 1
+                                    ? 'Màn tiếp theo'
+                                    : 'Chơi lại',
+                              AttemptPhase.lost => 'Thử lại',
+                              _ => '',
+                            },
+                      _operationBusy
+                          ? null
+                          : _terminalSaveFailed
+                          ? _finishTerminal
+                          : switch (phase) {
+                              AttemptPhase.paused => _resume,
+                              AttemptPhase.won =>
+                                _levelIndex < m4Levels.length - 1
+                                    ? () => _beginAttempt(_levelIndex + 1)
+                                    : () => _beginAttempt(_levelIndex),
+                              AttemptPhase.lost => () => _beginAttempt(
+                                _levelIndex,
+                              ),
+                              _ => null,
+                            },
+                      primary: true,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 43 * scale,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _action(
+                            'Xem màn',
+                            _operationBusy || _terminalSaveFailed
+                                ? null
+                                : _showPreview,
+                            small: true,
+                          ),
+                        ),
+                        SizedBox(width: 8 * scale),
+                        Expanded(
+                          child: _action(
+                            phase == AttemptPhase.paused ? 'Bỏ ván' : 'Thử lại',
+                            _operationBusy || _terminalSaveFailed
+                                ? null
+                                : phase == AttemptPhase.paused
+                                ? _showPreview
+                                : () => _beginAttempt(_levelIndex),
+                            small: true,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),
