@@ -4,7 +4,9 @@ import 'package:ball_handler/core/geometry.dart';
 import 'package:ball_handler/core/level.dart';
 import 'package:ball_handler/core/rules.dart';
 import 'package:ball_handler/game/game_painter.dart';
+import 'package:ball_handler/core/lamp_drag.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Future<List<int>> _pixel(GameAttempt attempt, Rect2 wallRect) async {
@@ -31,6 +33,42 @@ Future<List<int>> _pixel(GameAttempt attempt, Rect2 wallRect) async {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  test(
+    'desk art renders at target widths without changing lamp hit area',
+    () async {
+      final data = await rootBundle.load('assets/controls/lamp-desk-v3.webp');
+      final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+      final frame = await codec.getNextFrame();
+      addTearDown(frame.image.dispose);
+      codec.dispose();
+      final attempt = GameAttempt(m2Levels.first)..start();
+      for (final width in [390.0, 360.0]) {
+        final recorder = ui.PictureRecorder();
+        GamePainter(
+          attempt: attempt,
+          pressed: false,
+          animation: const AlwaysStoppedAnimation<double>(0),
+          motionClock: Stopwatch(),
+          lastMovementMs: 0,
+          travelDirection: Offset.zero,
+          lives: 3,
+          deskBackdrop: frame.image,
+        ).paint(Canvas(recorder), Size(width, width * 844 / 390));
+        final image = await recorder.endRecording().toImage(
+          width.round(),
+          (width * 844 / 390).round(),
+        );
+        expect(image.width, width.round());
+        image.dispose();
+      }
+      final drag = LampDrag(initial: attempt.lamp);
+      expect(drag.begin(1, attempt.lamp), isTrue);
+      expect(drag.hitRadius, 35);
+      expect(drag.bounds, SandboxGeometry.controlCenters);
+    },
+  );
+
   test(
     'solid prop and moving danger are visibly drawn from level bounds',
     () async {

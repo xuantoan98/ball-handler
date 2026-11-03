@@ -22,11 +22,13 @@ class GamePainter extends CustomPainter {
     required this.travelDirection,
     required this.lives,
     this.backdrop,
+    this.deskBackdrop,
   }) : super(repaint: animation);
 
   final GameAttempt attempt;
   final bool pressed;
   final ui.Image? backdrop;
+  final ui.Image? deskBackdrop;
   final Animation<double> animation;
   final Stopwatch motionClock;
   final int lastMovementMs;
@@ -550,6 +552,26 @@ class GamePainter extends CustomPainter {
   }
 
   void _desk(Canvas c) {
+    if (deskBackdrop != null && attempt.phase != AttemptPhase.preview) {
+      c.save();
+      c.clipRRect(
+        RRect.fromRectAndRadius(_deskRect, const Radius.circular(18)),
+      );
+      c.drawImageRect(
+        deskBackdrop!,
+        Rect.fromLTWH(
+          0,
+          0,
+          deskBackdrop!.width.toDouble(),
+          deskBackdrop!.height.toDouble(),
+        ),
+        _deskRect,
+        Paint()..filterQuality = FilterQuality.medium,
+      );
+      c.restore();
+      _lamp(c);
+      return;
+    }
     _round(c, _deskRect, 18, StageColors.frame);
     _stroke(c, _deskRect, 18, StageColors.goldEdge, 2);
     _stroke(
@@ -637,6 +659,10 @@ class GamePainter extends CustomPainter {
       StageColors.frame,
       2,
     );
+    _lamp(c);
+  }
+
+  void _lamp(Canvas c) {
     final center = Offset(attempt.lamp.x, attempt.lamp.y);
     c.drawCircle(
       center,

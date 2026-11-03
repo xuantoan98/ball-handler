@@ -26,3 +26,4 @@ flutter:
         - asset: assets/fonts/Nunito.ttf
   assets:
     - assets/backgrounds/
+    - assets/controls/

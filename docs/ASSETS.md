@@ -1,5 +1,9 @@
 # Asset nền sân khấu M2
 
+## Bàn đèn M5 v3 (03/11/2026)
+
+`assets/controls/lamp-desk-v3.webp` là ảnh trang trí 1121×510 RGB, WebP quality 84, SHA-256 `e58da7093888fefa40f6a2674a2436b4c99d36a65ea1618b8fae7d39c2a897a0`. Dùng built-in `image_gen` để chỉnh từ [preview v3](superpowers/specs/m5-control-preview-v3.png) đã duyệt: giữ viền vàng, mặt giấy lilac, lá và đèn lồng; xóa hình mặt trời, hào quang và hai trục chấm. Prompt yêu cầu mặt oval rộng, yên tĩnh và không có chữ/nút/vật có nghĩa va chạm. Đèn vàng thật tiếp tục vẽ bằng Flutter tại `attempt.lamp`; bitmap không quyết định vị trí hay hitbox.
+
 Ngày tạo: 21/10/2026. Công cụ: built-in `image_gen` (không dùng API key/CLI). Ảnh `design/Midnight Shadow Theatre Game Board.png` do chủ sản phẩm cung cấp được dùng làm **tham chiếu phong cách**, không cắt thành sprite hoặc dùng làm dữ liệu va chạm. Ba file 1024 × 1536 RGB được đưa vào `assets/backgrounds/` và chỉ vẽ ở lớp hậu cảnh. Vật thể gameplay, chữ và nút vẫn được vẽ riêng bằng Flutter.
 
 | Màn | File | Chủ đề |

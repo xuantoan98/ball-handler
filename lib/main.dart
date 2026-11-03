@@ -92,6 +92,7 @@ class _GamePageState extends State<GamePage>
   Offset _travelDirection = Offset.zero;
   Duration _lastElapsed = Duration.zero;
   ui.Image? _backdrop;
+  ui.Image? _deskBackdrop;
   late final LivesService _lives;
   late final TabOwnership _ownership;
   late final MockRewardedAds _mockAds;
@@ -134,6 +135,7 @@ class _GamePageState extends State<GamePage>
       duration: const Duration(milliseconds: 1800),
     )..repeat();
     _loadBackdrop(_levelIndex);
+    unawaited(_loadDeskBackdrop());
     unawaited(_initializeSession());
   }
 
@@ -146,6 +148,7 @@ class _GamePageState extends State<GamePage>
     _ownership.release();
     _visualAnimation.dispose();
     _backdrop?.dispose();
+    _deskBackdrop?.dispose();
     super.dispose();
   }
 
@@ -209,6 +212,18 @@ class _GamePageState extends State<GamePage>
       _backdrop?.dispose();
       _backdrop = frame.image;
     });
+  }
+
+  Future<void> _loadDeskBackdrop() async {
+    final data = await rootBundle.load('assets/controls/lamp-desk-v3.webp');
+    final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+    final frame = await codec.getNextFrame();
+    codec.dispose();
+    if (!mounted) {
+      frame.image.dispose();
+      return;
+    }
+    setState(() => _deskBackdrop = frame.image);
   }
 
   @override
@@ -654,6 +669,7 @@ class _GamePageState extends State<GamePage>
                         attempt: _attempt,
                         pressed: _drag.activePointer != null,
                         backdrop: _backdrop,
+                        deskBackdrop: _deskBackdrop,
                         animation: _visualAnimation,
                         motionClock: _motionClock,
                         lastMovementMs: _lastMovementMs,
