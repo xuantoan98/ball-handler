@@ -77,6 +77,7 @@ Future<void> _pumpM3(
     ),
   );
   await tester.pump();
+  await tester.pump(const Duration(milliseconds: 650));
   if (find.text('Đã hiểu').evaluate().isNotEmpty) {
     await tester.tap(find.text('Đã hiểu'));
     await tester.pump();
@@ -97,6 +98,7 @@ void main() {
       ShadowTheatreApp(saveStore: store, tabOwnership: _Writer()),
     );
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 650));
     await tester.tap(find.text('Đã hiểu'));
     await tester.pump();
     await tester.tap(find.byTooltip('Tắt âm thanh'));
@@ -122,6 +124,8 @@ void main() {
     );
     await tester.pump();
     expect(find.text('RẠP BÓNG NHỎ'), findsOneWidget);
+    expect(find.text('Cách chơi'), findsNothing);
+    await tester.pump(const Duration(milliseconds: 650));
     expect(find.text('Cách chơi'), findsOneWidget);
     await tester.tap(find.text('Đã hiểu'));
     await tester.pump();
@@ -144,6 +148,7 @@ void main() {
       ShadowTheatreApp(saveStore: store, tabOwnership: _Writer()),
     );
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 650));
     store.failWrites = true;
     await tester.tap(find.text('Đã hiểu'));
     await tester.pump();
@@ -302,6 +307,8 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(currentAttempt(tester).phase, AttemptPhase.lost);
+    expect(find.text('Thử lại'), findsNothing);
+    await tester.pump(const Duration(milliseconds: 650));
     await tester.pump();
     expect(currentPainter(tester).lives, 2);
     await tester.pump();
@@ -360,6 +367,9 @@ void main() {
     }
     expect(currentAttempt(tester).phase, AttemptPhase.won);
     expect(currentPainter(tester).lives, 3);
+    expect(find.text('Qua cửa trăng!'), findsNothing);
+    await tester.pump(const Duration(milliseconds: 650));
+    expect(find.text('Qua cửa trăng!'), findsOneWidget);
     await tester.pump();
     await tester.tap(find.text('Màn tiếp theo'));
     await tester.pump();

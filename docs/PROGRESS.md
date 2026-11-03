@@ -2,6 +2,8 @@
 
 ## M5 — triển khai bàn đèn, âm thanh và hiệu ứng (03/11/2026)
 
+Tiếp tục M5: đã sửa lỗi biên dịch popup hướng dẫn do thiếu `BuildContext` trong `HomeScreen._stage`, và hai cảnh báo analyze trong audio/test. Kiểm tra cuối: `flutter analyze --no-pub` sạch, `flutter test --reporter compact --no-pub` **94/94 pass**, `flutter build web --no-wasm-dry-run --no-pub` và `flutter build apk --debug --no-pub` đều thành công. APK debug mới đã cài trên Redmi, lệnh mở được nhận và process chạy; máy đang khóa nên chưa xác nhận hình UI bản cuối. Chưa đo frame time hoặc kiểm âm thanh/hiệu ứng bằng cảm nhận trên máy. Chi tiết và hash artifact ở [QA](QA.md). Không push/phát hành.
+
 Theo yêu cầu tiếp tục, đã đưa nền bàn v3 trống mặt trời vào `GamePainter`; đèn và hitbox kéo vẫn do Flutter/rules điều khiển. Đã thêm nhạc/hiệu ứng CC0 cục bộ, nút âm thanh trên home/pause lưu qua `LivesService`, điều khiển phát một loop sau tương tác đầu tiên, dừng khi pause/background/ad. Thêm hiệu ứng giấy vàng/lilac khi thắng, viền coral khi bóng chạm nguy hiểm, rung Android một lần sau khi lưu kết quả va chạm, và nhịp vào nhẹ cho tiêu đề/nút/panel; chế độ giảm chuyển động bỏ hạt/rung/dịch chuyển. Không thay level, lượt, save schema, đồng hồ hoặc adapter quảng cáo.
 
 APK debug có artifact thực và đã cài trên Redmi. Ảnh máy xác nhận bàn trong ván và nút loa home; đã bật/tắt nút, rồi trả về bật, save cuối cho thấy `soundEnabled:true`, `activeAttempt:null`, 1/3 lượt. **Chưa nghe thẩm định chất lượng/mức âm bằng tai, chưa xác nhận cue/haptic thắng-thua trên máy, chưa đo frame time sau hiệu ứng, chưa smoke tương tác web vì browser inventory rỗng, chưa có Safari/playtest người mới.** M5 vẫn **DOING / chờ QA cảm nhận**; không phát hành/push. Lệnh và kết quả ở [QA](QA.md).

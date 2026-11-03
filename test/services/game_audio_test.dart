@@ -4,12 +4,15 @@ import 'package:flutter_test/flutter_test.dart';
 class _Backend implements GameAudioBackend {
   int starts = 0;
   int stops = 0;
+  int effectsStopped = 0;
   final sounds = <GameSound>[];
 
   @override
   Future<void> startMusic() async => starts++;
   @override
   Future<void> stopMusic() async => stops++;
+  @override
+  Future<void> stopEffects() async => effectsStopped++;
   @override
   Future<void> play(GameSound sound) async => sounds.add(sound);
   @override
@@ -50,6 +53,24 @@ void main() {
     audio.play(GameSound.collision);
     await audio.flush();
     expect(backend.sounds, [GameSound.collision]);
+    await audio.dispose();
+  });
+
+  test('mute and background cancel a cue already playing', () async {
+    final backend = _Backend();
+    final audio = GameAudio(backend: backend);
+    audio.unlock();
+    audio.play(GameSound.win);
+    await audio.flush();
+    audio.setEnabled(false);
+    await audio.flush();
+    expect(backend.effectsStopped, 1);
+    audio.setEnabled(true);
+    audio.play(GameSound.gate);
+    await audio.flush();
+    audio.setForeground(false);
+    await audio.flush();
+    expect(backend.effectsStopped, 2);
     await audio.dispose();
   });
 }

@@ -7,6 +7,7 @@ enum GameSound { menu, switchOn, gate, wrong, collision, win }
 abstract class GameAudioBackend {
   Future<void> startMusic();
   Future<void> stopMusic();
+  Future<void> stopEffects();
   Future<void> play(GameSound sound);
   Future<void> dispose();
 }
@@ -31,6 +32,13 @@ class PlayerAudioBackend implements GameAudioBackend {
 
   @override
   Future<void> stopMusic() => _music.pause();
+
+  @override
+  Future<void> stopEffects() async {
+    for (final player in _effects.values) {
+      await player.stop();
+    }
+  }
 
   @override
   Future<void> play(GameSound sound) async {
@@ -69,6 +77,7 @@ class GameAudio {
   bool _unlocked = false;
   bool _playing = false;
   bool _disposed = false;
+  int _cueGeneration = 0;
   Future<void> _pending = Future.value();
   final Map<GameSound, DateTime> _lastCue = {};
 
@@ -78,11 +87,13 @@ class GameAudio {
   }
 
   void setEnabled(bool value) {
+    if (_enabled && !value) _suppressEffects();
     _enabled = value;
     _reconcile();
   }
 
   void setForeground(bool value) {
+    if (_foreground && !value) _suppressEffects();
     _foreground = value;
     _reconcile();
   }
@@ -93,8 +104,18 @@ class GameAudio {
   }
 
   void setAdOpen(bool value) {
+    if (!_adOpen && value) _suppressEffects();
     _adOpen = value;
     _reconcile();
+  }
+
+  void _suppressEffects() {
+    _cueGeneration++;
+    _pending = _pending.then((_) async {
+      try {
+        await _backend.stopEffects();
+      } catch (_) {}
+    });
   }
 
   void _reconcile() {
@@ -122,8 +143,15 @@ class GameAudio {
     final last = _lastCue[sound];
     if (last != null && now.difference(last).inMilliseconds < 150) return;
     _lastCue[sound] = now;
+    final generation = _cueGeneration;
     _pending = _pending.then((_) async {
-      if (!_enabled || !_foreground || _adOpen || _disposed) return;
+      if (!_enabled ||
+          !_foreground ||
+          _adOpen ||
+          _disposed ||
+          generation != _cueGeneration) {
+        return;
+      }
       try {
         await _backend.play(sound);
       } catch (_) {

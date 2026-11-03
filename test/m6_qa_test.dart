@@ -37,6 +37,7 @@ Future<void> _open(WidgetTester tester, _Store store) async {
     ShadowTheatreApp(saveStore: store, tabOwnership: _Writer()),
   );
   await tester.pump();
+  await tester.pump(const Duration(milliseconds: 650));
   if (find.text('Đã hiểu').evaluate().isNotEmpty) {
     await tester.tap(find.text('Đã hiểu'));
     await tester.pump();

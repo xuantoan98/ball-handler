@@ -46,14 +46,14 @@ class HomeScreen extends StatelessWidget {
           height: 844 * scale,
           child: FittedBox(
             fit: BoxFit.fill,
-            child: SizedBox(width: 390, height: 844, child: _stage()),
+            child: SizedBox(width: 390, height: 844, child: _stage(context)),
           ),
         ),
       );
     },
   );
 
-  Widget _stage() => Stack(
+  Widget _stage(BuildContext context) => Stack(
     key: const Key('home-screen'),
     children: [
       const Positioned.fill(
@@ -184,7 +184,15 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
         ),
-      if (introVisible) _intro(),
+      if (introVisible)
+        TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: 1),
+          duration: (MediaQuery.maybeOf(context)?.disableAnimations ?? false)
+              ? Duration.zero
+              : const Duration(milliseconds: 600),
+          builder: (context, progress, child) =>
+              progress < 1 ? const SizedBox.shrink() : _intro(),
+        ),
     ],
   );
 

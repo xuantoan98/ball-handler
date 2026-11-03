@@ -25,6 +25,7 @@ class GamePainter extends CustomPainter {
     this.backdrop,
     this.deskBackdrop,
     this.resultEffect,
+    this.reducedMotion = false,
   }) : super(repaint: animation);
 
   final GameAttempt attempt;
@@ -32,6 +33,7 @@ class GamePainter extends CustomPainter {
   final ui.Image? backdrop;
   final ui.Image? deskBackdrop;
   final ResultEffect? resultEffect;
+  final bool reducedMotion;
   final Animation<double> animation;
   final Stopwatch motionClock;
   final int lastMovementMs;
@@ -106,7 +108,7 @@ class GamePainter extends CustomPainter {
 
   void _paintResultEffect(Canvas canvas) {
     final effect = resultEffect;
-    if (effect == null || !effect.active) return;
+    if (effect == null || !effect.active || !effect.visualsEnabled) return;
     final progress = effect.progressAt(effect.elapsed);
     if (progress >= 1) return;
     final exit = _wall(attempt.level.exit);
@@ -416,10 +418,12 @@ class GamePainter extends CustomPainter {
     _puppet(
       c,
       box,
-      activity: PuppetMotion.activity(
-        motionClock.elapsedMilliseconds,
-        lastMovementMs,
-      ),
+      activity: reducedMotion
+          ? 0
+          : PuppetMotion.activity(
+              motionClock.elapsedMilliseconds,
+              lastMovementMs,
+            ),
       direction: travelDirection,
     );
   }
@@ -434,10 +438,12 @@ class GamePainter extends CustomPainter {
     _puppet(
       c,
       const Rect.fromLTWH(181, 580, 28, 42),
-      activity: PuppetMotion.activity(
-        motionClock.elapsedMilliseconds,
-        lastMovementMs,
-      ),
+      activity: reducedMotion
+          ? 0
+          : PuppetMotion.activity(
+              motionClock.elapsedMilliseconds,
+              lastMovementMs,
+            ),
       direction: travelDirection,
     );
     final plaque = const Rect.fromLTWH(154, 622, 82, 16);

@@ -109,7 +109,10 @@ class _GamePageState extends State<GamePage>
   late final GameAudio _audio;
   final ResultEffect _resultEffect = ResultEffect();
   bool _hapticDone = false;
+  bool _terminalPanelVisible = true;
+  Timer? _terminalPanelTimer;
   bool _soundEnabled = true;
+  bool _reduceMotion = false;
   Timer? _countdownTimer;
   bool _ready = false;
   bool _operationBusy = false;
@@ -153,10 +156,22 @@ class _GamePageState extends State<GamePage>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _reduceMotion = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    if (_reduceMotion) {
+      _visualAnimation.stop();
+    } else if (_attempt.phase != AttemptPhase.paused) {
+      _visualAnimation.repeat();
+    }
+  }
+
+  @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _ticker.dispose();
     _countdownTimer?.cancel();
+    _terminalPanelTimer?.cancel();
     _mockAds.dispose();
     _ownership.release();
     _visualAnimation.dispose();
@@ -248,7 +263,9 @@ class _GamePageState extends State<GamePage>
     _audio.setForeground(state == AppLifecycleState.resumed);
     if (state != AppLifecycleState.resumed) _reward.cancel();
     if (state == AppLifecycleState.resumed) {
-      if (_attempt.phase != AttemptPhase.paused) _visualAnimation.repeat();
+      if (_attempt.phase != AttemptPhase.paused && !_reduceMotion) {
+        _visualAnimation.repeat();
+      }
     } else {
       _visualAnimation.stop();
     }
@@ -319,18 +336,31 @@ class _GamePageState extends State<GamePage>
     final collision =
         _attempt.phase == AttemptPhase.lost &&
         _attempt.feedback.startsWith('Bóng chạm');
-    final reduced = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
     if (_resultEffect.begin(
       _attempt.phase,
       collision: collision,
-      reducedMotion: reduced,
+      reducedMotion: _reduceMotion,
     )) {
+      if (_resultEffect.panelDelay > Duration.zero) {
+        _terminalPanelVisible = false;
+        _terminalPanelTimer?.cancel();
+        _terminalPanelTimer = Timer(_resultEffect.panelDelay, () {
+          if (mounted) setState(() => _terminalPanelVisible = true);
+        });
+      }
       if (_attempt.phase == AttemptPhase.won) {
         _audio.play(GameSound.win);
       } else if (collision) {
         _audio.play(GameSound.collision);
       }
     }
+  }
+
+  void _clearResultEffect() {
+    _terminalPanelTimer?.cancel();
+    _terminalPanelTimer = null;
+    _terminalPanelVisible = true;
+    _resultEffect.reset();
   }
 
   void _queueTimerSave() {
@@ -371,7 +401,7 @@ class _GamePageState extends State<GamePage>
       final result = await _lives.startAttempt(levelIndex);
       if (!mounted) return;
       if (result == SessionResult.ok) {
-        _resultEffect.reset();
+        _clearResultEffect();
         _hapticDone = false;
         setState(() {
           _levelIndex = levelIndex;
@@ -419,7 +449,7 @@ class _GamePageState extends State<GamePage>
 
   void _resume() {
     _audio.setMusicActive(true);
-    _visualAnimation.repeat();
+    if (!_reduceMotion) _visualAnimation.repeat();
     setState(() {
       _attempt.resume();
       _notice = null;
@@ -429,7 +459,7 @@ class _GamePageState extends State<GamePage>
 
   void _resetCurrentAttempt() {
     if (_attempt.phase != AttemptPhase.playing) return;
-    _resultEffect.reset();
+    _clearResultEffect();
     setState(() {
       _attempt.resetPuzzle();
       _drag = LampDrag(initial: _attempt.lamp);
@@ -455,8 +485,8 @@ class _GamePageState extends State<GamePage>
     }
     if (!mounted) return;
     _audio.setMusicActive(true);
-    _visualAnimation.repeat();
-    _resultEffect.reset();
+    if (!_reduceMotion) _visualAnimation.repeat();
+    _clearResultEffect();
     _ticker.stop();
     setState(() {
       _attempt.reset();
@@ -575,7 +605,7 @@ class _GamePageState extends State<GamePage>
   void _selectLevel(int index) {
     if (index < 0 || index >= m4Levels.length) return;
     _ticker.stop();
-    _resultEffect.reset();
+    _clearResultEffect();
     setState(() {
       _levelIndex = index;
       _attempt = GameAttempt(m4Levels[index]);
@@ -793,6 +823,7 @@ class _GamePageState extends State<GamePage>
                           backdrop: _backdrop,
                           deskBackdrop: _deskBackdrop,
                           resultEffect: _resultEffect,
+                          reducedMotion: _reduceMotion,
                           animation: _visualAnimation,
                           motionClock: _motionClock,
                           lastMovementMs: _lastMovementMs,
@@ -877,7 +908,9 @@ class _GamePageState extends State<GamePage>
                       ),
                     ),
                   ),
-                if (_attempt.phase != AttemptPhase.playing) _panel(mapper),
+                if (_attempt.phase != AttemptPhase.playing &&
+                    _terminalPanelVisible)
+                  _panel(mapper),
                 if (_attempt.phase == AttemptPhase.paused)
                   _placed(
                     mapper,

@@ -26,6 +26,7 @@ void main() {
     effect.reset();
     expect(effect.begin(AttemptPhase.lost, collision: true), isTrue);
     expect(effect.collisionHaptic, isTrue);
+    expect(effect.panelDelay, const Duration(milliseconds: 200));
     effect.reset();
     expect(effect.active, isFalse);
   });
@@ -34,6 +35,7 @@ void main() {
     final effect = ResultEffect();
     effect.begin(AttemptPhase.won, reducedMotion: true);
     expect(effect.particles, isEmpty);
+    expect(effect.visualsEnabled, isFalse);
     effect.reset();
     effect.begin(AttemptPhase.lost, collision: true, reducedMotion: true);
     expect(effect.collisionHaptic, isFalse);

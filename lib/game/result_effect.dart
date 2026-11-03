@@ -19,6 +19,14 @@ class ResultEffect {
   bool _collision = false;
 
   bool get active => _phase != null;
+  bool get visualsEnabled => !_reducedMotion;
+  Duration get panelDelay => _reducedMotion
+      ? Duration.zero
+      : _phase == AttemptPhase.won
+      ? duration
+      : collisionHaptic
+      ? const Duration(milliseconds: 200)
+      : Duration.zero;
   AttemptPhase? get phase => _phase;
   bool get collisionHaptic =>
       _phase == AttemptPhase.lost && _collision && !_reducedMotion;
@@ -55,8 +63,12 @@ class ResultEffect {
     return true;
   }
 
-  double progressAt(Duration elapsed) =>
-      (elapsed.inMicroseconds / duration.inMicroseconds).clamp(0, 1).toDouble();
+  double progressAt(Duration elapsed) {
+    final span = panelDelay == Duration.zero ? duration : panelDelay;
+    return (elapsed.inMicroseconds / span.inMicroseconds)
+        .clamp(0, 1)
+        .toDouble();
+  }
 
   void reset() {
     _clock?.stop();
