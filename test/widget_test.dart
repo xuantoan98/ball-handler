@@ -88,6 +88,30 @@ Future<void> _pumpM3(
 }
 
 void main() {
+  testWidgets('sound toggle persists from home and is available while paused', (
+    tester,
+  ) async {
+    setSize(tester, const Size(390, 844));
+    final store = _MemoryStore();
+    await tester.pumpWidget(
+      ShadowTheatreApp(saveStore: store, tabOwnership: _Writer()),
+    );
+    await tester.pump();
+    await tester.tap(find.text('Đã hiểu'));
+    await tester.pump();
+    await tester.tap(find.byTooltip('Tắt âm thanh'));
+    await tester.pump();
+    expect(SaveRecord.decode(store.value!).soundEnabled, isFalse);
+    expect(find.byTooltip('Bật âm thanh'), findsOneWidget);
+    await tester.tap(find.text('Chơi ngay'));
+    await tester.pump();
+    await tester.tap(find.text('Bắt đầu'));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('attempt-timer')));
+    await tester.pump();
+    expect(find.byTooltip('Bật âm thanh'), findsOneWidget);
+  });
+
   testWidgets('home appears each launch and guide only on fresh save', (
     tester,
   ) async {

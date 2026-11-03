@@ -19,6 +19,7 @@ import 'game/theatre_components.dart';
 import 'game/home_screen.dart';
 import 'game/attempt_timer_button.dart';
 import 'services/lives_service.dart';
+import 'services/game_audio.dart';
 import 'services/platform_rewarded_ads.dart';
 import 'services/rewarded_ads.dart';
 import 'services/save_service.dart';
@@ -33,12 +34,14 @@ class ShadowTheatreApp extends StatelessWidget {
     this.clock,
     this.rewardIds,
     this.tabOwnership,
+    this.gameAudio,
   });
 
   final SaveStore? saveStore;
   final GameClock? clock;
   final RewardIdFactory? rewardIds;
   final TabOwnership? tabOwnership;
+  final GameAudio? gameAudio;
 
   @override
   Widget build(BuildContext context) => MaterialApp(
@@ -58,6 +61,7 @@ class ShadowTheatreApp extends StatelessWidget {
       clock: clock,
       rewardIds: rewardIds,
       tabOwnership: tabOwnership,
+      gameAudio: gameAudio,
     ),
   );
 }
@@ -69,12 +73,14 @@ class GamePage extends StatefulWidget {
     this.clock,
     this.rewardIds,
     this.tabOwnership,
+    this.gameAudio,
   });
 
   final SaveStore? saveStore;
   final GameClock? clock;
   final RewardIdFactory? rewardIds;
   final TabOwnership? tabOwnership;
+  final GameAudio? gameAudio;
 
   @override
   State<GamePage> createState() => _GamePageState();
@@ -98,6 +104,8 @@ class _GamePageState extends State<GamePage>
   late final MockRewardedAds _mockAds;
   late final RewardedAdSource _ads;
   late final RewardedAdCoordinator _reward;
+  late final GameAudio _audio;
+  bool _soundEnabled = true;
   Timer? _countdownTimer;
   bool _ready = false;
   bool _operationBusy = false;
@@ -128,6 +136,7 @@ class _GamePageState extends State<GamePage>
     _mockAds = MockRewardedAds(ids);
     _ads = createPlatformRewardedAds(ids) ?? _mockAds;
     _reward = RewardedAdCoordinator(_ads, _lives);
+    _audio = widget.gameAudio ?? GameAudio();
     _drag = LampDrag(initial: _attempt.lamp);
     _ticker = Ticker(_onFrame);
     _visualAnimation = AnimationController(
@@ -149,6 +158,7 @@ class _GamePageState extends State<GamePage>
     _visualAnimation.dispose();
     _backdrop?.dispose();
     _deskBackdrop?.dispose();
+    if (widget.gameAudio == null) unawaited(_audio.dispose());
     super.dispose();
   }
 
@@ -156,6 +166,9 @@ class _GamePageState extends State<GamePage>
     try {
       final writer = await _ownership.acquire();
       await _lives.initialize(readOnly: !writer);
+      _soundEnabled = _lives.record.soundEnabled;
+      _audio.setEnabled(_soundEnabled);
+      _audio.setMusicActive(true);
       if (!mounted) return;
       final active = writer ? _lives.activeLevel : null;
       setState(() {
@@ -228,6 +241,7 @@ class _GamePageState extends State<GamePage>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    _audio.setForeground(state == AppLifecycleState.resumed);
     if (state != AppLifecycleState.resumed) _reward.cancel();
     if (state == AppLifecycleState.resumed) {
       _visualAnimation.repeat();
@@ -341,6 +355,7 @@ class _GamePageState extends State<GamePage>
   }
 
   void _pause() {
+    _audio.setMusicActive(false);
     _ticker.stop();
     _queueTimerSave();
     _drag.end(_drag.activePointer ?? -1);
@@ -351,6 +366,7 @@ class _GamePageState extends State<GamePage>
   }
 
   void _resume() {
+    _audio.setMusicActive(true);
     setState(() {
       _attempt.resume();
       _notice = null;
@@ -384,6 +400,7 @@ class _GamePageState extends State<GamePage>
       }
     }
     if (!mounted) return;
+    _audio.setMusicActive(true);
     _ticker.stop();
     setState(() {
       _attempt.reset();
@@ -432,7 +449,9 @@ class _GamePageState extends State<GamePage>
       _adOpen = true;
       _notice = null;
     });
+    _audio.setAdOpen(true);
     final outcome = await _reward.watch();
+    _audio.setAdOpen(false);
     if (!mounted) return;
     setState(() {
       _adOpen = false;
@@ -540,6 +559,30 @@ class _GamePageState extends State<GamePage>
     });
   }
 
+  Future<void> _toggleSound() async {
+    if (!_ready || _operationBusy || _lives.isReadOnly) return;
+    final next = !_soundEnabled;
+    setState(() {
+      _soundEnabled = next;
+      _operationBusy = true;
+    });
+    _audio.setEnabled(next);
+    try {
+      await _lives.setSoundEnabled(next);
+      _audio.play(GameSound.menu);
+    } on SaveFailure catch (error) {
+      _audio.setEnabled(!next);
+      if (mounted) {
+        setState(() {
+          _soundEnabled = !next;
+          _notice = error.message;
+        });
+      }
+    } finally {
+      if (mounted) setState(() => _operationBusy = false);
+    }
+  }
+
   Future<void> _openHomeLevels() async {
     if (_introVisible || _operationBusy) return;
     if (_lives.activeLevel != null) {
@@ -556,207 +599,229 @@ class _GamePageState extends State<GamePage>
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    body: SafeArea(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          if (_ready && _homeVisible && _loadError == null) {
-            return HomeScreen(
-              lives: _lives.lives,
-              refill: _lives.untilNextRefill,
-              introVisible: _introVisible,
-              busy: _operationBusy,
-              notice: _notice,
-              onPlay: _openHomePlay,
-              onLevels: _openHomeLevels,
-              onAcknowledgeIntro: _acknowledgeIntro,
-            );
-          }
-          if (constraints.maxWidth > constraints.maxHeight &&
-              constraints.maxHeight < 600) {
-            return Center(
-              child: SizedBox(
-                width: math.min(360, constraints.maxWidth - 32),
-                height: 150,
-                child: TheatrePanel(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.screen_rotation,
-                          color: StageColors.goldCore,
-                          size: 32,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          _attempt.phase == AttemptPhase.paused
-                              ? 'Xoay dọc để tiếp tục'
-                              : 'Xoay dọc để chơi',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: StageColors.text,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
+    body: Listener(
+      behavior: HitTestBehavior.deferToChild,
+      onPointerDown: (_) => _audio.unlock(),
+      child: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            if (_ready && _homeVisible && _loadError == null) {
+              return HomeScreen(
+                lives: _lives.lives,
+                refill: _lives.untilNextRefill,
+                introVisible: _introVisible,
+                busy: _operationBusy,
+                notice: _notice,
+                onPlay: _openHomePlay,
+                onLevels: _openHomeLevels,
+                onAcknowledgeIntro: _acknowledgeIntro,
+                soundEnabled: _soundEnabled,
+                onToggleSound: _toggleSound,
+              );
+            }
+            if (constraints.maxWidth > constraints.maxHeight &&
+                constraints.maxHeight < 600) {
+              return Center(
+                child: SizedBox(
+                  width: math.min(360, constraints.maxWidth - 32),
+                  height: 150,
+                  child: TheatrePanel(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.screen_rotation,
+                            color: StageColors.goldCore,
+                            size: 32,
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 8),
+                          Text(
+                            _attempt.phase == AttemptPhase.paused
+                                ? 'Xoay dọc để tiếp tục'
+                                : 'Xoay dọc để chơi',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: StageColors.text,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
+              );
+            }
+            final mapper = ViewportMapper.contain(
+              viewportWidth: constraints.maxWidth,
+              viewportHeight: constraints.maxHeight,
+              boardWidth: SandboxGeometry.boardWidth,
+              boardHeight: SandboxGeometry.boardHeight,
             );
-          }
-          final mapper = ViewportMapper.contain(
-            viewportWidth: constraints.maxWidth,
-            viewportHeight: constraints.maxHeight,
-            boardWidth: SandboxGeometry.boardWidth,
-            boardHeight: SandboxGeometry.boardHeight,
-          );
-          return Stack(
-            children: [
-              Listener(
-                key: const Key('game-input'),
-                behavior: HitTestBehavior.opaque,
-                onPointerDown: (event) {
-                  if (_attempt.phase != AttemptPhase.playing) return;
-                  final at = mapper.viewportToBoard(
-                    Point2(event.localPosition.dx, event.localPosition.dy),
-                  );
-                  if (at != null && _drag.begin(event.pointer, at)) {
-                    setState(() {});
-                  }
-                },
-                onPointerMove: (event) {
-                  if (_attempt.phase != AttemptPhase.playing) return;
-                  final at = mapper.viewportToBoard(
-                    Point2(event.localPosition.dx, event.localPosition.dy),
-                    allowOutside: true,
-                  );
-                  if (at == null || !_drag.move(event.pointer, at)) return;
-                  setState(() {
-                    final before = _attempt.shadow.center;
-                    _attempt.moveLamp(_drag.position);
-                    final after = _attempt.shadow.center;
-                    final dx = after.x - before.x;
-                    final dy = after.y - before.y;
-                    final distance = math.sqrt(dx * dx + dy * dy);
-                    if (distance > .2) {
-                      _lastMovementMs = _motionClock.elapsedMilliseconds;
-                      _travelDirection = Offset(dx / distance, dy / distance);
+            return Stack(
+              children: [
+                Listener(
+                  key: const Key('game-input'),
+                  behavior: HitTestBehavior.opaque,
+                  onPointerDown: (event) {
+                    if (_attempt.phase != AttemptPhase.playing) return;
+                    final at = mapper.viewportToBoard(
+                      Point2(event.localPosition.dx, event.localPosition.dy),
+                    );
+                    if (at != null && _drag.begin(event.pointer, at)) {
+                      setState(() {});
                     }
-                    _drag.correctPosition(event.pointer, at, _attempt.lamp);
+                  },
+                  onPointerMove: (event) {
+                    if (_attempt.phase != AttemptPhase.playing) return;
+                    final at = mapper.viewportToBoard(
+                      Point2(event.localPosition.dx, event.localPosition.dy),
+                      allowOutside: true,
+                    );
+                    if (at == null || !_drag.move(event.pointer, at)) return;
+                    setState(() {
+                      final before = _attempt.shadow.center;
+                      _attempt.moveLamp(_drag.position);
+                      final after = _attempt.shadow.center;
+                      final dx = after.x - before.x;
+                      final dy = after.y - before.y;
+                      final distance = math.sqrt(dx * dx + dy * dy);
+                      if (distance > .2) {
+                        _lastMovementMs = _motionClock.elapsedMilliseconds;
+                        _travelDirection = Offset(dx / distance, dy / distance);
+                      }
+                      _drag.correctPosition(event.pointer, at, _attempt.lamp);
+                      if (_attempt.phase == AttemptPhase.lost) {
+                        _drag.end(event.pointer);
+                        _ticker.stop();
+                      }
+                    });
                     if (_attempt.phase == AttemptPhase.lost) {
-                      _drag.end(event.pointer);
-                      _ticker.stop();
+                      unawaited(_finishTerminal());
                     }
-                  });
-                  if (_attempt.phase == AttemptPhase.lost) {
-                    unawaited(_finishTerminal());
-                  }
-                },
-                onPointerUp: (event) => _endPointer(event.pointer),
-                onPointerCancel: (event) => _endPointer(event.pointer),
-                child: Semantics(
-                  label:
-                      'Sân khấu của Bóng Mơ. '
-                      'Cửa trăng ${_attempt.gateOpen ? 'đang mở' : 'đang khóa'}. '
-                      'Kéo đèn vàng bằng một ngón để dẫn bóng.',
-                  child: SizedBox.expand(
-                    child: CustomPaint(
-                      key: const Key('game-canvas'),
-                      painter: GamePainter(
-                        attempt: _attempt,
-                        pressed: _drag.activePointer != null,
-                        backdrop: _backdrop,
-                        deskBackdrop: _deskBackdrop,
-                        animation: _visualAnimation,
-                        motionClock: _motionClock,
-                        lastMovementMs: _lastMovementMs,
-                        travelDirection: _travelDirection,
-                        lives: _lives.lives,
+                  },
+                  onPointerUp: (event) => _endPointer(event.pointer),
+                  onPointerCancel: (event) => _endPointer(event.pointer),
+                  child: Semantics(
+                    label:
+                        'Sân khấu của Bóng Mơ. '
+                        'Cửa trăng ${_attempt.gateOpen ? 'đang mở' : 'đang khóa'}. '
+                        'Kéo đèn vàng bằng một ngón để dẫn bóng.',
+                    child: SizedBox.expand(
+                      child: CustomPaint(
+                        key: const Key('game-canvas'),
+                        painter: GamePainter(
+                          attempt: _attempt,
+                          pressed: _drag.activePointer != null,
+                          backdrop: _backdrop,
+                          deskBackdrop: _deskBackdrop,
+                          animation: _visualAnimation,
+                          motionClock: _motionClock,
+                          lastMovementMs: _lastMovementMs,
+                          travelDirection: _travelDirection,
+                          lives: _lives.lives,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              if (_attempt.phase == AttemptPhase.playing)
-                _placed(
-                  mapper,
-                  310,
-                  6,
-                  62,
-                  50,
-                  AttemptTimerButton(
-                    remainingMs: _attempt.remainingMs,
-                    onPause: _pause,
+                if (_attempt.phase == AttemptPhase.playing)
+                  _placed(
+                    mapper,
+                    310,
+                    6,
+                    62,
+                    50,
+                    AttemptTimerButton(
+                      remainingMs: _attempt.remainingMs,
+                      onPause: _pause,
+                    ),
                   ),
-                ),
-              if (_attempt.phase == AttemptPhase.playing)
-                _placed(
-                  mapper,
-                  311,
-                  586,
-                  59,
-                  44,
-                  _action('Đặt lại', _resetCurrentAttempt, icon: Icons.replay),
-                ),
-              if (_ready && _attempt.phase != AttemptPhase.playing)
-                _placed(
-                  mapper,
-                  27,
-                  585,
-                  96,
-                  46,
-                  _action(
-                    _adsUnavailable
-                        ? 'Ad chưa cấu hình'
-                        : _adOpen
-                        ? 'Đang tải ad…'
-                        : _lives.lives == 3
-                        ? 'Lượt đã đầy'
-                        : _nativeTestAds
-                        ? 'Xem ad test\n+1 lượt'
-                        : 'Xem quảng cáo\n+1 lượt',
-                    _adsUnavailable ||
-                            _adOpen ||
-                            _lives.lives == 3 ||
-                            _lives.isReadOnly ||
-                            _operationBusy
-                        ? null
-                        : _watchAd,
-                    small: true,
-                    primary: _lives.lives < 3,
+                if (_attempt.phase == AttemptPhase.playing)
+                  _placed(
+                    mapper,
+                    311,
+                    586,
+                    59,
+                    44,
+                    _action(
+                      'Đặt lại',
+                      _resetCurrentAttempt,
+                      icon: Icons.replay,
+                    ),
                   ),
-                ),
-              if (_ready &&
-                  _attempt.phase != AttemptPhase.playing &&
-                  _lives.untilNextRefill != null)
-                _placed(
-                  mapper,
-                  270,
-                  588,
-                  92,
-                  42,
-                  Center(
-                    child: Text(
-                      'Hồi sau\n${_countdown(_lives.untilNextRefill!)}',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: StageColors.goldCore,
-                        fontSize: 11 * mapper.scale,
-                        fontWeight: FontWeight.bold,
+                if (_ready && _attempt.phase != AttemptPhase.playing)
+                  _placed(
+                    mapper,
+                    27,
+                    585,
+                    96,
+                    46,
+                    _action(
+                      _adsUnavailable
+                          ? 'Ad chưa cấu hình'
+                          : _adOpen
+                          ? 'Đang tải ad…'
+                          : _lives.lives == 3
+                          ? 'Lượt đã đầy'
+                          : _nativeTestAds
+                          ? 'Xem ad test\n+1 lượt'
+                          : 'Xem quảng cáo\n+1 lượt',
+                      _adsUnavailable ||
+                              _adOpen ||
+                              _lives.lives == 3 ||
+                              _lives.isReadOnly ||
+                              _operationBusy
+                          ? null
+                          : _watchAd,
+                      small: true,
+                      primary: _lives.lives < 3,
+                    ),
+                  ),
+                if (_ready &&
+                    _attempt.phase != AttemptPhase.playing &&
+                    _lives.untilNextRefill != null)
+                  _placed(
+                    mapper,
+                    270,
+                    588,
+                    92,
+                    42,
+                    Center(
+                      child: Text(
+                        'Hồi sau\n${_countdown(_lives.untilNextRefill!)}',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: StageColors.goldCore,
+                          fontSize: 11 * mapper.scale,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              if (_attempt.phase != AttemptPhase.playing) _panel(mapper),
-              if (_adOpen && identical(_ads, _mockAds)) _adOverlay(mapper),
-              if (!_ready || _loadError != null || _lives.isReadOnly)
-                _statusOverlay(mapper),
-            ],
-          );
-        },
+                if (_attempt.phase != AttemptPhase.playing) _panel(mapper),
+                if (_attempt.phase == AttemptPhase.paused)
+                  _placed(
+                    mapper,
+                    316,
+                    258,
+                    40,
+                    40,
+                    SoundButton(
+                      enabled: _soundEnabled,
+                      onPressed: _operationBusy ? null : _toggleSound,
+                    ),
+                  ),
+                if (_adOpen && identical(_ads, _mockAds)) _adOverlay(mapper),
+                if (!_ready || _loadError != null || _lives.isReadOnly)
+                  _statusOverlay(mapper),
+              ],
+            );
+          },
+        ),
       ),
     ),
   );

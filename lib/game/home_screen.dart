@@ -14,6 +14,8 @@ class HomeScreen extends StatelessWidget {
     required this.onLevels,
     required this.introVisible,
     required this.onAcknowledgeIntro,
+    required this.soundEnabled,
+    required this.onToggleSound,
     this.refill,
     this.busy = false,
     this.notice,
@@ -27,6 +29,8 @@ class HomeScreen extends StatelessWidget {
   final VoidCallback? onAcknowledgeIntro;
   final bool busy;
   final String? notice;
+  final bool soundEnabled;
+  final VoidCallback? onToggleSound;
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
@@ -55,6 +59,16 @@ class HomeScreen extends StatelessWidget {
         child: Image(
           image: AssetImage('assets/backgrounds/home-stage-v2.png'),
           fit: BoxFit.cover,
+        ),
+      ),
+      Positioned(
+        right: 29,
+        top: 48,
+        width: 50,
+        height: 50,
+        child: SoundButton(
+          enabled: soundEnabled,
+          onPressed: busy ? null : onToggleSound,
         ),
       ),
       Positioned(
@@ -232,6 +246,28 @@ class HomeScreen extends StatelessWidget {
     final seconds = (duration.inMilliseconds / 1000).ceil();
     return '${(seconds ~/ 60).toString().padLeft(2, '0')}:${(seconds % 60).toString().padLeft(2, '0')}';
   }
+}
+
+class SoundButton extends StatelessWidget {
+  const SoundButton({
+    super.key,
+    required this.enabled,
+    required this.onPressed,
+  });
+  final bool enabled;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) => IconButton.filledTonal(
+    tooltip: enabled ? 'Tắt âm thanh' : 'Bật âm thanh',
+    onPressed: onPressed,
+    icon: Icon(enabled ? Icons.volume_up : Icons.volume_off),
+    style: IconButton.styleFrom(
+      backgroundColor: StageColors.ink,
+      foregroundColor: StageColors.goldCore,
+      side: const BorderSide(color: StageColors.goldEdge, width: 2),
+    ),
+  );
 }
 
 class _GuideLine extends StatelessWidget {

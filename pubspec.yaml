@@ -7,6 +7,7 @@ environment:
   sdk: ^3.13.5
 
 dependencies:
+  audioplayers: ^6.5.1
   flutter:
     sdk: flutter
   google_mobile_ads: ^9.2.0
@@ -27,3 +28,4 @@ flutter:
   assets:
     - assets/backgrounds/
     - assets/controls/
+    - assets/audio/

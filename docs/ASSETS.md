@@ -4,6 +4,21 @@
 
 `assets/controls/lamp-desk-v3.webp` là ảnh trang trí 1121×510 RGB, WebP quality 84, SHA-256 `e58da7093888fefa40f6a2674a2436b4c99d36a65ea1618b8fae7d39c2a897a0`. Dùng built-in `image_gen` để chỉnh từ [preview v3](superpowers/specs/m5-control-preview-v3.png) đã duyệt: giữ viền vàng, mặt giấy lilac, lá và đèn lồng; xóa hình mặt trời, hào quang và hai trục chấm. Prompt yêu cầu mặt oval rộng, yên tĩnh và không có chữ/nút/vật có nghĩa va chạm. Đèn vàng thật tiếp tục vẽ bằng Flutter tại `attempt.lamp`; bitmap không quyết định vị trí hay hitbox.
 
+## Âm thanh M5 (03/11/2026)
+
+Nhạc `music.ogg` lấy nguyên bản `Heavenly Loop_0.ogg` của isaiah658 tại [OpenGameArt](https://opengameart.org/content/heavenly-loop), tác giả ghi CC0. Sáu file hiệu ứng lấy nguyên bản từ `ui_ogg.zip` của Robin Lamb tại [OpenGameArt](https://opengameart.org/content/ui-sound-effects-button-clicks-user-feedback-notifications), trang ghi CC0; nguồn gốc ban đầu là VCSL/VSCO 2 CE theo tác giả. Không biên tập hoặc đổi format; `win.ogg` và `gate.ogg` cùng dùng `chimes.ogg`. Quyền CC0-1.0 và URL gốc ghi thêm tại `assets/audio/LICENSE.md`. Âm lượng giảm trong code: nhạc 0,12, hiệu ứng 0,32.
+
+| File | File gốc | SHA-256 |
+| --- | --- | --- |
+| `music.ogg` | `Heavenly Loop_0.ogg` | `a842e9e054019132cacc8fd352e7b31c000ebb51e0b227a2511e1bccb4eb166e` |
+| `menu.ogg` | `click_2.ogg` | `da523b03e042dde09cf4633615a42ad733cfb35899c5863b0cb9486269c78cd9` |
+| `switch.ogg` | `Ding.ogg` | `bc69b15effae9314e8afb86229bb83acdab6afd79d552b786f53a4812d902980` |
+| `gate.ogg`, `win.ogg` | `chimes.ogg` | `bb9c1826553beb87e47a534f9608a7dcd236614bb6194f4323d4661df81e895e` |
+| `wrong.ogg` | `ding_deep.ogg` | `7e61202079948a5bb7bb6bb37f22d3d367abdcfb9afd73a52e6f883a93de24be` |
+| `collision.ogg` | `negative_sound2.ogg` | `a068c1a2a375149da67bb8e547079987800b1ce21debb7f51ca556eeeaabd56a` |
+
+Đã xác minh Ogg Vorbis và checksum. Chưa có bằng chứng nghe/thẩm định mức âm bằng tai trên thiết bị ở thời điểm thêm file.
+
 Ngày tạo: 21/10/2026. Công cụ: built-in `image_gen` (không dùng API key/CLI). Ảnh `design/Midnight Shadow Theatre Game Board.png` do chủ sản phẩm cung cấp được dùng làm **tham chiếu phong cách**, không cắt thành sprite hoặc dùng làm dữ liệu va chạm. Ba file 1024 × 1536 RGB được đưa vào `assets/backgrounds/` và chỉ vẽ ở lớp hậu cảnh. Vật thể gameplay, chữ và nút vẫn được vẽ riêng bằng Flutter.
 
 | Màn | File | Chủ đề |
