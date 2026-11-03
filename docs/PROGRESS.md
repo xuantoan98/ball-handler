@@ -1,5 +1,11 @@
 # Tiến độ và task board
 
+## M5 — thiết kế bàn đèn, âm thanh, chuyển động v3 (03/11/2026)
+
+Đã đối chiếu ảnh Game Board, UI Kit, ảnh bàn đèn chủ sản phẩm chỉ định và screenshot Redmi đang chơi màn 08. Chủ sản phẩm chọn nhạc nền nhẹ cùng hiệu ứng ngắn, và nền bàn trang trí từ ảnh với đèn Flutter di động; [preview v3](superpowers/specs/m5-control-preview-v3.png) đã được xác nhận đúng hướng. [Thiết kế M5](superpowers/specs/2026-11-03-m5-control-audio-motion-design.md) ghi nguồn CC0, nút âm thanh, chuyển cảnh, confetti và rung có điều kiện; **đang chờ duyệt tài liệu trước khi sửa code/asset production**. Kiểm tra độc lập tài liệu: không còn câu hỏi quan trọng để lập kế hoạch. Chưa tích hợp âm thanh hay hiệu ứng, chưa kiểm trên máy cho bản M5 này.
+
+Lệnh đã chạy: `file docs/superpowers/specs/m5-control-preview-v3.png` → PNG 1859×846; `git diff --check` → không có lỗi khoảng trắng. Đã xem `pubspec.yaml` và `lib/` để xác nhận `soundEnabled` đã lưu nhưng chưa có phát audio/nút điều khiển.
+
 ## M6 — mô phỏng sai số đầu vào khi chưa có người thử (03/11/2026)
 
 Đã chạy `dart run tool/m6_simulate_inputs.dart` với 5 cấu hình × 20 màn × 25 seed qua cùng `GameAttempt`: đường chuẩn và lệch ±2 px mốc đèn thắng 500/500; lệch ±5 px thắng 218/500 (6 thua, 276 chưa vào đích); chậm 1,25× với ±2 px thắng 500/500; chậm 1,35× với ±8 px thắng 113/500 (10 thua, 377 chưa vào đích). Phần lớn lượt chưa xong hụt điều kiện **toàn bộ bóng trong cửa** ở mốc cuối. Đây là phép thử độ nhạy với sai số trên đường lời giải có sẵn, **không phải 5 người chơi giả lập** và không thể xác nhận họ hiểu điều khiển hay thấy độ khó hợp lý. Chi tiết giả định và dữ liệu từng màn ở [QA](QA.md). M6 vẫn chờ playtest người mới khi có thể tổ chức; hiện chủ sản phẩm chưa thu xếp được người tham gia.
