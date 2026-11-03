@@ -117,7 +117,7 @@ Tỷ lệ có thể co giãn nhẹ khi cần đọc chữ, nhưng thứ tự và
 ### Vị trí cố định
 
 - Quay lại: trên trái. Tạm dừng: trên phải.
-- Nhãn màn: trong HUD, không đặt tên dài giữa vùng gameplay.
+- HUD từ trái sang phải: số và tên màn, thời gian còn lại kiêm nút tạm dừng ở giữa, lượt ở bên phải. Tên dài được rút gọn trong biển tên, không lấn vào thời gian hoặc sân khấu.
 - Lượt: ba biểu tượng đèn và số x/3; lúc đang chơi mặc định hiển thị 2/3 sau khi bắt đầu từ 3 lượt.
 - Đặt lại: góc trên phải vùng điều khiển, chỉ reset thao tác theo luật phiên hiện hành; không âm thầm tạo ván mới hay trừ thêm lượt.
 - Bóng Mơ: giữa dải ngăn, không xuất hiện như một nhân vật thứ hai có thể di chuyển.

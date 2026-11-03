@@ -261,7 +261,11 @@ void main() {
     await tester.tap(find.text('Bắt đầu'));
     await tester.pump();
     expect(find.byKey(const Key('attempt-timer')), findsOneWidget);
-    expect(find.text('60/60s'), findsOneWidget);
+    expect(find.text('60s'), findsOneWidget);
+    expect(
+      tester.getCenter(find.byKey(const Key('attempt-timer'))).dx,
+      closeTo(tester.getCenter(find.byKey(const Key('game-canvas'))).dx, 15),
+    );
     expect(
       tester.getBottomLeft(find.byKey(const Key('attempt-timer'))).dy,
       lessThan(

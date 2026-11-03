@@ -759,19 +759,36 @@ class GamePainter extends CustomPainter {
     _round(c, _headerRect, 13, StageColors.ink);
     _stroke(c, _headerRect, 13, StageColors.goldEdge, 1.7);
     _stroke(c, _headerRect.deflate(4), 9, StageColors.frameEdge, 1);
-    _curl(c, const Offset(28, 24));
-    for (var i = 0; i < 3; i++) {
-      _lifeLantern(c, Offset(226.0 + i * 20, 33), i < lives);
-    }
-    _text(c, '$lives/3', 286, 25, 12, StageColors.cream);
+    _round(c, const Rect.fromLTWH(22, 15, 126, 36), 8, StageColors.frame);
+    _stroke(
+      c,
+      const Rect.fromLTWH(22, 15, 126, 36),
+      8,
+      StageColors.goldEdge,
+      1,
+    );
+    _round(c, const Rect.fromLTWH(246, 15, 121, 36), 8, StageColors.frame);
+    _stroke(
+      c,
+      const Rect.fromLTWH(246, 15, 121, 36),
+      8,
+      StageColors.goldEdge,
+      1,
+    );
     _text(
       c,
       'MÀN ${attempt.level.id.toString().padLeft(2, '0')}',
-      96,
-      25,
-      16,
-      StageColors.text,
+      30,
+      17,
+      12,
+      StageColors.goldCore,
+      maxWidth: 110,
     );
+    _text(c, attempt.level.title, 30, 33, 10, StageColors.text, maxWidth: 110);
+    for (var i = 0; i < 3; i++) {
+      _lifeLantern(c, Offset(260.0 + i * 19, 33), i < lives);
+    }
+    _text(c, '$lives/3', 322, 25, 13, StageColors.cream, maxWidth: 40);
     final message = attempt.feedback.isEmpty
         ? attempt.level.hint
         : attempt.feedback;

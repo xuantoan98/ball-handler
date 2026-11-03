@@ -6,18 +6,18 @@
 
 ## Âm thanh M5 (03/11/2026)
 
-Nhạc `music.ogg` lấy nguyên bản `Heavenly Loop_0.ogg` của isaiah658 tại [OpenGameArt](https://opengameart.org/content/heavenly-loop), tác giả ghi CC0. Sáu file hiệu ứng lấy nguyên bản từ `ui_ogg.zip` của Robin Lamb tại [OpenGameArt](https://opengameart.org/content/ui-sound-effects-button-clicks-user-feedback-notifications), trang ghi CC0; nguồn gốc ban đầu là VCSL/VSCO 2 CE theo tác giả. Không biên tập hoặc đổi format; `win.ogg` và `gate.ogg` cùng dùng `chimes.ogg`. Quyền CC0-1.0 và URL gốc ghi thêm tại `assets/audio/LICENSE.md`. Âm lượng trong code: nhạc 1,0, hiệu ứng 0,32. Nhạc đã nghe được sau khi sửa audio focus nhưng còn quá nhỏ ở hệ số 0,55 trên Redmi; mức mới cần được nghe lại bằng tai để chốt.
+Nhạc `music.ogg` bắt nguồn từ `Heavenly Loop_0.ogg` của isaiah658 tại [OpenGameArt](https://opengameart.org/content/heavenly-loop), tác giả ghi CC0. Theo phản hồi 03/11/2026 rằng nhạc vẫn nhỏ, đã giải mã và tăng biên độ 2× (xấp xỉ +6 dB), mã hóa lại Ogg Vorbis bằng GStreamer; peak sau mã hóa 0,508, dưới ngưỡng 1,0. Mức nghe trên Redmi sau bản này cần chủ sản phẩm đánh giá. Sáu file hiệu ứng giữ nguyên bản từ `ui_ogg.zip` của Robin Lamb tại [OpenGameArt](https://opengameart.org/content/ui-sound-effects-button-clicks-user-feedback-notifications), trang ghi CC0; nguồn gốc ban đầu là VCSL/VSCO 2 CE theo tác giả. `win.ogg` và `gate.ogg` cùng dùng `chimes.ogg`. Quyền CC0-1.0 và URL gốc ghi thêm tại `assets/audio/LICENSE.md`. Âm lượng player trong code: nhạc 1,0, hiệu ứng 0,32.
 
 | File | File gốc | SHA-256 |
 | --- | --- | --- |
-| `music.ogg` | `Heavenly Loop_0.ogg` | `a842e9e054019132cacc8fd352e7b31c000ebb51e0b227a2511e1bccb4eb166e` |
+| `music.ogg` | `Heavenly Loop_0.ogg` (biên độ 2×) | `6daaae17102a053812cd1f5c1508ca3e50982a1dcbbf35b41dbf23df548d152c` |
 | `menu.ogg` | `click_2.ogg` | `da523b03e042dde09cf4633615a42ad733cfb35899c5863b0cb9486269c78cd9` |
 | `switch.ogg` | `Ding.ogg` | `bc69b15effae9314e8afb86229bb83acdab6afd79d552b786f53a4812d902980` |
 | `gate.ogg`, `win.ogg` | `chimes.ogg` | `bb9c1826553beb87e47a534f9608a7dcd236614bb6194f4323d4661df81e895e` |
 | `wrong.ogg` | `ding_deep.ogg` | `7e61202079948a5bb7bb6bb37f22d3d367abdcfb9afd73a52e6f883a93de24be` |
 | `collision.ogg` | `negative_sound2.ogg` | `a068c1a2a375149da67bb8e547079987800b1ce21debb7f51ca556eeeaabd56a` |
 
-Đã xác minh Ogg Vorbis và checksum. Chưa có bằng chứng nghe/thẩm định mức âm bằng tai trên thiết bị ở thời điểm thêm file.
+Đã xác minh Ogg Vorbis và checksum. Biên độ mới chưa được thẩm định bằng tai trên thiết bị.
 
 Ngày tạo: 21/10/2026. Công cụ: built-in `image_gen` (không dùng API key/CLI). Ảnh `design/Midnight Shadow Theatre Game Board.png` do chủ sản phẩm cung cấp được dùng làm **tham chiếu phong cách**, không cắt thành sprite hoặc dùng làm dữ liệu va chạm. Ba file 1024 × 1536 RGB được đưa vào `assets/backgrounds/` và chỉ vẽ ở lớp hậu cảnh. Vật thể gameplay, chữ và nút vẫn được vẽ riêng bằng Flutter.
 

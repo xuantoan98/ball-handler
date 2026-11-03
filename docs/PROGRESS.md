@@ -1,5 +1,9 @@
 # Tiến độ và task board
 
+## Điều chỉnh độ khó và UI theo playtest chủ sản phẩm (03/11/2026)
+
+Chủ sản phẩm thấy 20 màn còn dễ, chớp dọc chỉ di chuyển giữa tường, cửa trăng hay ở góc trên phải, nhạc còn nhỏ và HUD/nút chưa đủ hoàn thiện. Đã tăng hành trình chớp dọc ở các màn 08–12, 16, 18, 20 đến gần mép trên/dưới; thêm chớp ngang ở 17 và 20; dùng cửa giữa phải ở 08, 10, 12, 20 và cửa dưới phải ở 19. Giữ luật hitbox và save. HUD mới: trái tên/số màn, giữa thời gian kèm tạm dừng, phải lượt; nút thẻ giấy có viền, sáng mép và hoa văn góc theo UI Kit. File nhạc nền tăng biên độ khoảng 6 dB. `flutter test --reporter compact --no-pub` **100/100 pass** gồm replay 20 màn, `flutter analyze --no-pub` sạch, build web/APK debug qua. APK đã cài và kiểm hình màn 20 trên Redmi, save trước/sau thử được trả đúng hash. **Còn cần chủ sản phẩm nghe mức nhạc mới và đánh giá độ khó bằng chơi thật; chưa đánh dấu cảm nhận là pass.** Xem [QA](QA.md).
+
 ## Sửa màn khởi động và lưu màn tiếp tục (03/11/2026)
 
 Chủ sản phẩm báo game mở ở màn 20 dù muốn bắt đầu từ màn 1, đồng thời yêu cầu thoát khi đang chơi màn 10 thì lần sau tiếp tục màn 10. Đã tách `currentLevel` khỏi `highestUnlocked` trong save v4: save mới và save cũ chỉ có tiến độ mở khóa mở “Chơi ngay” ở màn 1; ván đang chơi được khôi phục đúng màn và thời gian còn lại; bắt đầu màn nào lưu màn đó, thắng lưu màn kế tiếp. Test **99/99 pass**, `flutter analyze --no-pub` sạch, build web và APK debug qua. Redmi đã cài APK mới, migration save v3 giữ `highestUnlocked=19` và đặt `currentLevel=0`; “Chơi ngay” hiện preview màn 1. Thử bắt đầu màn 10, force-stop/mở lại cho thấy save `activeAttempt=9`, `currentLevel=9` và ván khôi phục với đồng hồ còn 55 giây; đã khôi phục save trước lượt thử, hash khớp. Chi tiết ở [QA](QA.md).

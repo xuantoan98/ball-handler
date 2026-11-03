@@ -2,6 +2,8 @@
 
 Ngày 02/11/2026. Trạng thái: **chủ sản phẩm đã duyệt tài liệu và ba concept, đang triển khai**. Nguồn: phản hồi sau khi chơi trên điện thoại thật; `docs/PRODUCT.md`, `docs/PLAN.md`, `docs/DESIGN_SYSTEM.md`, `design/Midnight Shadow Theatre Game Board.png`, `design/Whimsical Shadow Theatre UI Kit.png` và màn home v2 đã duyệt.
 
+**Bổ sung sau playtest 03/11/2026:** Chủ sản phẩm yêu cầu các màn sau khó hơn, chớp dọc đi gần mép trên/dưới, thêm kiểu chớp ngang và đổi vị trí cửa. Bản triển khai mới dùng cửa giữa/dưới bên phải ở một số màn, không giữ cố định cửa trên phải như bản nhịp đề xuất dưới đây. Vẫn cần người chơi thử độ khó thực; replay engine chỉ xác minh đường thắng.
+
 Ảnh duyệt: [bốn chapter](twenty-stages-chapter-concept-v1.png) · [Bóng Mơ](bong-mo-character-concept-v1.png) · [bàn kéo đèn](lamp-desk-concept-v2.png). Tạo bằng built-in `image_gen` với home, UI Kit và Game Board làm style reference. Đây là concept, **không phải ảnh production hay hình học va chạm**. Các bục trong ảnh chapter trông như game đi cảnh; sản phẩm thật vẫn là mặt tường phẳng với bóng dịch chuyển bằng phép chiếu. Bàn đèn bên phải trong ảnh nhân vật làm nút mặt trời quá lớn; lấy ảnh bàn kéo đèn v2 làm chuẩn tỷ lệ, để vùng kéo trống và nút nhỏ. Mọi chữ và nút của UI sản phẩm là Flutter thật.
 
 ## Ý định

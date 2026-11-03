@@ -846,9 +846,9 @@ class _GamePageState extends State<GamePage>
                 if (_attempt.phase == AttemptPhase.playing)
                   _placed(
                     mapper,
-                    310,
+                    153,
                     6,
-                    62,
+                    84,
                     50,
                     AttemptTimerButton(
                       remainingMs: _attempt.remainingMs,

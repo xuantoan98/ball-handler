@@ -5,6 +5,7 @@ const _start = Point2(220, 715);
 const _ne = Rect2(278, 74, 68, 76);
 const _nw = Rect2(14, 74, 68, 76);
 const _em = Rect2(278, 215, 68, 76);
+const _se = Rect2(278, 360, 68, 76);
 const _gate = Rect2(248, 0, 16, 480);
 
 Point2 _p(double x, double y) => controlForShadow(x, y);
@@ -108,19 +109,21 @@ final List<Level> m4Levels = List.unmodifiable([
     8,
     'Màn chớp đầu tiên',
     'Đợi chớp lên rồi băng qua dưới.',
-    [_p(130, 395), _p(285, 395), _p(285, 85)],
+    [_p(130, 395), _p(285, 395), _p(285, 225)],
+    exit: _em,
     moving: [
       const MovingHazard(
-        bounds: Rect2(190, 280, 24, 68),
-        travel: Point2(0, -130),
+        bounds: Rect2(190, 8, 24, 64),
+        travel: Point2(0, 400),
         periodSeconds: 4,
+        phaseSeconds: 2,
       ),
     ],
     timed: [
       SolutionStep.move(_p(130, 395), seconds: .5),
       const SolutionStep.wait(1.5),
       SolutionStep.move(_p(285, 395), seconds: 1),
-      SolutionStep.move(_p(285, 85), seconds: 2),
+      SolutionStep.move(_p(285, 225), seconds: 2),
     ],
   ),
   _scene(
@@ -132,9 +135,10 @@ final List<Level> m4Levels = List.unmodifiable([
     solid: [const Rect2(235, 110, 35, 90)],
     moving: [
       const MovingHazard(
-        bounds: Rect2(190, 210, 25, 70),
-        travel: Point2(0, 95),
-        periodSeconds: 5,
+        bounds: Rect2(190, 8, 25, 64),
+        travel: Point2(0, 400),
+        periodSeconds: 6,
+        phaseSeconds: 3,
       ),
     ],
   ),
@@ -142,14 +146,16 @@ final List<Level> m4Levels = List.unmodifiable([
     10,
     'Ròng rọc giấy',
     'Qua sao trước khi tới cửa chắn.',
-    [_p(75, 205), _p(75, 390), _p(285, 390), _p(285, 85)],
+    [_p(75, 205), _p(75, 390), _p(285, 390), _p(285, 225)],
+    exit: _em,
     stars: [const Rect2(65, 200, 40, 40)],
     gates: [_gate],
     moving: [
       const MovingHazard(
-        bounds: Rect2(185, 185, 25, 62),
-        travel: Point2(0, -85),
-        periodSeconds: 5,
+        bounds: Rect2(185, 8, 25, 64),
+        travel: Point2(0, 400),
+        periodSeconds: 7,
+        phaseSeconds: 3.5,
       ),
     ],
   ),
@@ -170,9 +176,10 @@ final List<Level> m4Levels = List.unmodifiable([
     solid: [const Rect2(120, 250, 45, 55)],
     moving: [
       const MovingHazard(
-        bounds: Rect2(185, 175, 22, 70),
-        travel: Point2(0, 80),
-        periodSeconds: 5,
+        bounds: Rect2(185, 8, 22, 64),
+        travel: Point2(0, 400),
+        periodSeconds: 8,
+        phaseSeconds: 1.5,
       ),
     ],
   ),
@@ -186,8 +193,9 @@ final List<Level> m4Levels = List.unmodifiable([
       _p(75, 88),
       _p(75, 405),
       _p(285, 405),
-      _p(285, 85),
+      _p(285, 225),
     ],
+    exit: _em,
     stars: [
       const Rect2(65, 385, 40, 40),
       const Rect2(65, 200, 40, 40),
@@ -196,14 +204,15 @@ final List<Level> m4Levels = List.unmodifiable([
     gates: [_gate],
     moving: [
       const MovingHazard(
-        bounds: Rect2(178, 160, 20, 65),
-        travel: Point2(0, 90),
-        periodSeconds: 6,
+        bounds: Rect2(178, 8, 20, 64),
+        travel: Point2(0, 400),
+        periodSeconds: 8,
+        phaseSeconds: 1.5,
       ),
       const MovingHazard(
-        bounds: Rect2(218, 130, 20, 60),
-        travel: Point2(0, 105),
-        periodSeconds: 6,
+        bounds: Rect2(218, 8, 20, 64),
+        travel: Point2(0, 400),
+        periodSeconds: 8,
         phaseSeconds: 2,
       ),
     ],
@@ -250,9 +259,10 @@ final List<Level> m4Levels = List.unmodifiable([
     solid: [const Rect2(125, 120, 35, 60)],
     moving: [
       const MovingHazard(
-        bounds: Rect2(185, 175, 22, 75),
-        travel: Point2(0, 80),
-        periodSeconds: 5,
+        bounds: Rect2(185, 8, 22, 64),
+        travel: Point2(0, 400),
+        periodSeconds: 7,
+        phaseSeconds: 3.5,
       ),
     ],
   ),
@@ -261,15 +271,16 @@ final List<Level> m4Levels = List.unmodifiable([
   _scene(
     17,
     'Mở rèm thiên hà',
-    'Phân biệt đạo cụ, coral và chớp.',
+    'Né cảm biến đứng và chớp ngang qua hành lang.',
     [_p(125, 405), _p(285, 405), _p(285, 85)],
     solid: [const Rect2(95, 105, 50, 130)],
     hazard: [const Rect2(180, 140, 28, 170)],
     moving: [
       const MovingHazard(
-        bounds: Rect2(225, 160, 24, 68),
-        travel: Point2(0, 80),
+        bounds: Rect2(180, 290, 60, 22),
+        travel: Point2(120, 0),
         periodSeconds: 5,
+        phaseSeconds: 1.5,
       ),
     ],
   ),
@@ -284,9 +295,10 @@ final List<Level> m4Levels = List.unmodifiable([
     solid: [const Rect2(145, 90, 30, 90)],
     moving: [
       const MovingHazard(
-        bounds: Rect2(190, 125, 24, 70),
-        travel: Point2(0, 100),
-        periodSeconds: 5,
+        bounds: Rect2(190, 8, 24, 64),
+        travel: Point2(0, 400),
+        periodSeconds: 7,
+        phaseSeconds: 3.5,
       ),
     ],
   ),
@@ -294,7 +306,8 @@ final List<Level> m4Levels = List.unmodifiable([
     19,
     'Ba nhịp sân khấu',
     'Ba sao dẫn qua hai lối vòng.',
-    [_p(75, 205), _p(75, 85), _p(75, 395), _p(285, 395), _p(285, 85)],
+    [_p(75, 205), _p(75, 85), _p(75, 395), _p(285, 375)],
+    exit: _se,
     stars: [
       const Rect2(65, 200, 40, 40),
       const Rect2(65, 82, 40, 40),
@@ -308,8 +321,9 @@ final List<Level> m4Levels = List.unmodifiable([
   _scene(
     20,
     'Đại cảnh Rạp bóng nhỏ',
-    'Sao, đường vòng và nhịp chớp.',
-    [_p(75, 205), _p(75, 85), _p(75, 395), _p(285, 395), _p(285, 85)],
+    'Ba sao, chớp dọc sát mép và chớp ngang.',
+    [_p(75, 205), _p(75, 85), _p(75, 395), _p(285, 395), _p(285, 225)],
+    exit: _em,
     stars: [
       const Rect2(65, 200, 40, 40),
       const Rect2(65, 82, 40, 40),
@@ -321,9 +335,16 @@ final List<Level> m4Levels = List.unmodifiable([
     hazard: [const Rect2(210, 120, 25, 180)],
     moving: [
       const MovingHazard(
-        bounds: Rect2(235, 125, 24, 65),
-        travel: Point2(0, 110),
+        bounds: Rect2(218, 8, 20, 64),
+        travel: Point2(0, 400),
+        periodSeconds: 8,
+        phaseSeconds: 2.5,
+      ),
+      const MovingHazard(
+        bounds: Rect2(180, 280, 65, 22),
+        travel: Point2(105, 0),
         periodSeconds: 6,
+        phaseSeconds: 5.5,
       ),
     ],
   ),

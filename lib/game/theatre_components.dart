@@ -212,6 +212,40 @@ class _TicketPainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1,
     );
+    final inner = rect.deflate(8);
+    c.drawLine(
+      Offset(inner.left + 9, inner.top),
+      Offset(inner.right - 9, inner.top),
+      Paint()
+        ..color = StageColors.cream.withValues(alpha: disabled ? .12 : .55)
+        ..strokeWidth = 1.5,
+    );
+    c.drawLine(
+      Offset(inner.left + 9, inner.bottom),
+      Offset(inner.right - 9, inner.bottom),
+      Paint()
+        ..color = StageColors.ink.withValues(alpha: disabled ? .18 : .35)
+        ..strokeWidth = 1.3,
+    );
+    for (final side in [1.0, -1.0]) {
+      c.save();
+      c.translate(side == 1 ? 0 : size.width, 0);
+      c.scale(side, 1);
+      final flourish = Path()
+        ..moveTo(7, size.height * .42)
+        ..quadraticBezierTo(9, size.height * .22, 17, 11)
+        ..quadraticBezierTo(23, 8, 25, 12)
+        ..quadraticBezierTo(26, 15, 22, 16);
+      c.drawPath(
+        flourish,
+        Paint()
+          ..color = edge.withValues(alpha: disabled ? .25 : .75)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.25
+          ..strokeCap = StrokeCap.round,
+      );
+      c.restore();
+    }
     for (final x in [12.0, size.width - 12]) {
       for (final y in [size.height * .26, size.height * .74]) {
         _diamond(c, Offset(x, y), 1.6, edge);

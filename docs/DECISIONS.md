@@ -1,5 +1,13 @@
 # Quyết định M0
 
+## Phản hồi độ khó, HUD và nhạc (03/11/2026)
+
+| ID | Quyết định | Hệ quả / giới hạn |
+| --- | --- | --- |
+| D36 | Màn cao tăng thử thách bằng chớp dọc đi gần hết chiều cao, chớp ngang và vị trí cửa đa dạng | Cùng hitbox và luật va chạm hiện có; replay engine 20 màn phải còn thắng. Độ khó thực vẫn cần playtest người thật. |
+| D37 | HUD chia trái tên màn, giữa thời gian/tạm dừng, phải số lượt; nút theo chi tiết giấy cắt và viền đồng của UI Kit | Giữ vùng chơi/hitbox không đổi, không đặt chữ lên sân khấu. |
+| D38 | Tăng biên độ file nhạc nền 2× khi player đã ở volume 1,0 | Cần nghe trên Redmi để đánh giá mức mới; không coi kiểm tra peak là xác nhận âm lượng dễ chịu. |
+
 ## Lưu màn tiếp tục (03/11/2026)
 
 | ID | Quyết định | Hệ quả / giới hạn |

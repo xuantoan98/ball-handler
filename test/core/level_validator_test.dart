@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:ball_handler/core/geometry.dart';
 import 'package:ball_handler/core/level.dart';
 import 'package:ball_handler/core/level_validator.dart';
@@ -155,6 +157,33 @@ void main() {
               '${level.movingHazards.length}:${level.gates.length}',
       }.length,
       greaterThanOrEqualTo(16),
+    );
+  });
+
+  test('late stages sweep the wall and vary danger direction and exit', () {
+    final later = m4Levels.skip(7);
+    final fullHeight = later
+        .expand((level) => level.movingHazards)
+        .where((hazard) => hazard.travel.y.abs() >= 380);
+    expect(fullHeight.length, greaterThanOrEqualTo(6));
+    for (final hazard in fullHeight) {
+      final otherTop = hazard.bounds.top + hazard.travel.y;
+      expect(math.min(hazard.bounds.top, otherTop), lessThanOrEqualTo(12));
+      expect(
+        math.max(hazard.bounds.bottom, otherTop + hazard.bounds.height),
+        greaterThanOrEqualTo(468),
+      );
+    }
+    expect(
+      later
+          .expand((level) => level.movingHazards)
+          .any((hazard) => hazard.travel.x.abs() >= 100),
+      isTrue,
+    );
+    expect(
+      {for (final level in m4Levels) '${level.exit.left}:${level.exit.top}'}
+          .length,
+      greaterThanOrEqualTo(4),
     );
   });
 }

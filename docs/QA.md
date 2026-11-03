@@ -1,5 +1,11 @@
 # QA và bằng chứng Flutter
 
+## Điều chỉnh 20 màn, HUD, nút và nhạc (03/11/2026)
+
+- `gst-launch-1.0` giải mã `music.ogg`, `audioamplify amplification=2.0`, mã hóa Vorbis lại; `gst-discoverer-1.0` xác nhận thời lượng 33,652 giây, stereo 44,1 kHz. PCM sau giải mã có peak 0,508 và RMS 0,0972; file SHA-256 `6daaae17102a053812cd1f5c1508ca3e50982a1dcbbf35b41dbf23df548d152c`. Chưa có xác nhận bằng tai về mức mới.
+- `flutter test --reporter compact --no-pub` → **100/100 pass**, gồm validator và replay 20 màn; test mới kiểm chớp dọc chạm gần hai mép, có chớp ngang và ít nhất bốn vị trí cửa. `flutter analyze --no-pub` → No issues found. `flutter build apk --debug --no-pub` → APK SHA-256 `233f07366fd00388a31901e21dbd76beb38f0b67dd4a897f3eb0da98c01ce662`; `flutter build web --no-wasm-dry-run --no-pub` → tạo `build/web`.
+- Redmi `9d9af905`: `adb install -r` → Success. Xem [ảnh HUD màn 20](qa/m5/hud-stage20-redmi-v2.png): tên/số màn trái, thời gian 41s và pause giữa, lượt 3/3 phải; chữ không đè nhau ở khung 1080×2400. Nút home và preview có hoa văn góc mới. Trong quá trình kiểm ảnh, ván đang chạy trên máy hết giờ; đã force-stop và khôi phục save sao lưu trước thử. Hash save trước/sau khớp `ce83e29bfdba2f23a1ddf7cc20aa26d8e7f0ee67fd70f03b6ed810cdc0c1c33c`, gồm 3/3 lượt, `activeAttempt=19`, `attemptRemainingMs=53275`. App mở lại ở home và thông báo ván được khôi phục. Đây là kiểm hình và trạng thái save, chưa phải bằng chứng người thật giải được các màn đã chỉnh hoặc mức nhạc dễ chịu.
+
 ## Màn khởi động và lưu màn tiếp tục (03/11/2026)
 
 - `dart format` → 5 file kiểm tra, 2 file đổi; `flutter test --reporter compact --no-pub` → **99/99 pass**; `flutter analyze --no-pub` → No issues found; `flutter build web --no-wasm-dry-run --no-pub` → tạo `build/web`; `flutter build apk --debug --no-pub` → tạo APK SHA-256 `f640ee975c9a5d4345e9b58416a7f72c35039c133bca8a5e86037d83cae518ac`.
