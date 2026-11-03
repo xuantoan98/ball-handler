@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:ball_handler/core/geometry.dart';
 import 'package:ball_handler/core/level.dart';
 import 'package:ball_handler/core/level_validator.dart';
+import 'package:ball_handler/core/rules.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -185,5 +186,25 @@ void main() {
           .length,
       greaterThanOrEqualTo(4),
     );
+  });
+
+  test('stages fifteen and nineteen have separate zigzag obstacles', () {
+    for (final id in [15, 19]) {
+      final level = m4Levels[id - 1];
+      final obstacles = [...level.solids, ...level.hazards, ...level.gates];
+      for (var i = 0; i < obstacles.length; i++) {
+        for (var j = i + 1; j < obstacles.length; j++) {
+          expect(
+            overlaps(obstacles[i], obstacles[j]),
+            isFalse,
+            reason: 'Màn $id: vật cản $i/$j chồng nhau',
+          );
+        }
+      }
+      expect(level.solids.length, 2);
+      expect(level.solids[0].bottom, 480);
+      expect(level.solids[1].top, lessThan(120));
+      expect(level.solution.length, greaterThanOrEqualTo(7));
+    }
   });
 }

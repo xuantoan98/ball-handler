@@ -113,22 +113,94 @@ class GamePainter extends CustomPainter {
     if (progress >= 1) return;
     final exit = _wall(attempt.level.exit);
     if (effect.phase == AttemptPhase.won) {
-      final pulse = (1 - progress) * 5;
-      canvas.drawOval(
-        exit.inflate(pulse),
-        Paint()
-          ..color = StageColors.mint.withValues(alpha: (1 - progress) * .5)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2,
-      );
-      for (final particle in effect.particles) {
-        canvas.drawCircle(
-          exit.center + Offset(particle.dx * progress, particle.dy * progress),
-          particle.radius * (1 - progress),
+      final burst = math.sin(progress * math.pi).clamp(0.0, 1.0);
+      for (final (index, color) in [
+        StageColors.mint,
+        StageColors.goldCore,
+      ].indexed) {
+        final radius = 10 + progress * (65 + index * 36);
+        canvas.drawOval(
+          exit.inflate(radius),
           Paint()
-            ..color =
-                (particle.gold ? StageColors.goldCore : StageColors.lilacLight)
-                    .withValues(alpha: 1 - progress),
+            ..color = color.withValues(alpha: burst * (.7 - index * .16))
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 3 - index.toDouble(),
+        );
+      }
+      for (var i = 0; i < 12; i++) {
+        final angle = i * math.pi / 6 + progress * .15;
+        final direction = Offset(math.cos(angle), math.sin(angle));
+        canvas.drawLine(
+          exit.center + direction * (38 + progress * 48),
+          exit.center + direction * (52 + progress * 95),
+          Paint()
+            ..color = StageColors.goldCore.withValues(alpha: burst * .75)
+            ..strokeCap = StrokeCap.round
+            ..strokeWidth = i.isEven ? 2.5 : 1.5,
+        );
+      }
+      for (final particle in effect.particles) {
+        final position =
+            exit.center +
+            Offset(particle.dx * progress, particle.dy * progress);
+        final size = particle.radius * (1 - progress * .65);
+        final paint = Paint()
+          ..color =
+              (particle.gold ? StageColors.goldCore : StageColors.lilacLight)
+                  .withValues(alpha: 1 - progress);
+        if (particle.gold) {
+          canvas.drawPath(
+            Path()
+              ..moveTo(position.dx, position.dy - size)
+              ..lineTo(position.dx + size * .55, position.dy)
+              ..lineTo(position.dx, position.dy + size)
+              ..lineTo(position.dx - size * .55, position.dy)
+              ..close(),
+            paint,
+          );
+        } else {
+          canvas.drawCircle(position, size, paint);
+        }
+      }
+      final bannerOpacity =
+          ((progress - .12) / .22).clamp(0.0, 1.0) *
+          ((1 - progress) / .18).clamp(0.0, 1.0);
+      if (bannerOpacity > 0) {
+        final banner = Rect.fromCenter(
+          center: Offset(_stageRect.center.dx, _stageRect.top + 55),
+          width: 224 + burst * 12,
+          height: 48,
+        );
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(banner, const Radius.circular(13)),
+          Paint()
+            ..color = StageColors.ink.withValues(alpha: .86 * bannerOpacity),
+        );
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(banner, const Radius.circular(13)),
+          Paint()
+            ..color = StageColors.goldCore.withValues(alpha: bannerOpacity)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2,
+        );
+        final title = TextPainter(
+          text: TextSpan(
+            text: '✦  HOÀN THÀNH!  ✦',
+            style: TextStyle(
+              fontFamily: 'Nunito',
+              color: StageColors.cream.withValues(alpha: bannerOpacity),
+              fontWeight: FontWeight.w900,
+              fontSize: 21,
+            ),
+          ),
+          textDirection: TextDirection.ltr,
+        )..layout();
+        title.paint(
+          canvas,
+          Offset(
+            banner.center.dx - title.width / 2,
+            banner.center.dy - title.height / 2,
+          ),
         );
       }
     } else if (effect.collisionHaptic) {

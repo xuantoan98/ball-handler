@@ -241,12 +241,20 @@ final List<Level> m4Levels = List.unmodifiable([
   _scene(
     15,
     'Phòng bản đồ trăng',
-    'Chuẩn bị đường trước khi bật sao cuối.',
-    [_p(75, 85), _p(75, 385), _p(285, 385), _p(285, 85)],
+    'Sau sao cuối, lách trên rồi xuống giữa hai vách giấy.',
+    [
+      _p(75, 85),
+      _p(75, 385),
+      _p(75, 235),
+      _p(160, 235),
+      _p(160, 385),
+      _p(285, 385),
+      _p(285, 85),
+    ],
     stars: [const Rect2(65, 82, 40, 40), const Rect2(65, 380, 40, 40)],
     gates: [_gate],
     window: 13,
-    solid: [const Rect2(180, 145, 40, 210), const Rect2(215, 185, 20, 90)],
+    solid: [const Rect2(120, 380, 25, 100), const Rect2(205, 100, 25, 230)],
   ),
   _scene(
     16,
@@ -305,8 +313,16 @@ final List<Level> m4Levels = List.unmodifiable([
   _scene(
     19,
     'Ba nhịp sân khấu',
-    'Ba sao dẫn qua hai lối vòng.',
-    [_p(75, 205), _p(75, 85), _p(75, 395), _p(285, 375)],
+    'Bật ba sao rồi luồn chữ S qua hai vách.',
+    [
+      _p(75, 205),
+      _p(75, 85),
+      _p(75, 395),
+      _p(75, 235),
+      _p(160, 235),
+      _p(160, 390),
+      _p(285, 375),
+    ],
     exit: _se,
     stars: [
       const Rect2(65, 200, 40, 40),
@@ -315,8 +331,8 @@ final List<Level> m4Levels = List.unmodifiable([
     ],
     gates: [_gate],
     window: 14,
-    solid: [const Rect2(180, 135, 38, 220), const Rect2(205, 100, 28, 130)],
-    hazard: [const Rect2(210, 250, 30, 110)],
+    solid: [const Rect2(120, 380, 25, 100), const Rect2(205, 105, 25, 225)],
+    hazard: [const Rect2(165, 75, 30, 100)],
   ),
   _scene(
     20,

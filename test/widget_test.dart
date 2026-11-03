@@ -236,6 +236,23 @@ void main() {
     expect(find.text('Bắt đầu'), findsOneWidget);
   });
 
+  testWidgets('a fresh player cannot start stage twenty from level browser', (
+    tester,
+  ) async {
+    setSize(tester, const Size(390, 844));
+    final store = _MemoryStore();
+    await _pumpM3(tester, store: store);
+    for (var stage = 2; stage <= 20; stage++) {
+      await tester.tap(find.text('Màn sau'));
+      await tester.pump();
+      expect(currentAttempt(tester).level.id, stage);
+      expect(find.text('Chưa mở'), findsOneWidget);
+    }
+    expect(currentAttempt(tester).phase, AttemptPhase.preview);
+    expect(SaveRecord.decode(store.value!).highestUnlocked, 0);
+    expect(SaveRecord.decode(store.value!).activeLevel, isNull);
+  });
+
   testWidgets('choosing levels after restore shows level hint', (tester) async {
     setSize(tester, const Size(390, 844));
     final store = _MemoryStore()
@@ -414,7 +431,7 @@ void main() {
     expect(currentAttempt(tester).lamp.y, m2Levels[0].initialLamp.y);
   });
 
-  testWidgets('win appears after one second and opens next preview', (
+  testWidgets('win celebration precedes result and opens next level', (
     tester,
   ) async {
     setSize(tester, const Size(390, 844));
@@ -435,7 +452,7 @@ void main() {
     expect(currentAttempt(tester).phase, AttemptPhase.won);
     expect(currentPainter(tester).lives, 3);
     expect(find.text('Qua cửa trăng!'), findsNothing);
-    await tester.pump(const Duration(milliseconds: 650));
+    await tester.pump(const Duration(milliseconds: 1250));
     expect(find.text('Qua cửa trăng!'), findsOneWidget);
     await tester.pump();
     await tester.tap(find.text('Màn tiếp theo'));

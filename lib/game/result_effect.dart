@@ -12,7 +12,7 @@ class PaperParticle {
 
 /// Decorative outcome state. It never owns or modifies a GameAttempt.
 class ResultEffect {
-  static const duration = Duration(milliseconds: 600);
+  static const duration = Duration(milliseconds: 1200);
   AttemptPhase? _phase;
   Stopwatch? _clock;
   bool _reducedMotion = false;
@@ -35,13 +35,13 @@ class ResultEffect {
   List<PaperParticle> get particles {
     if (_phase != AttemptPhase.won || _reducedMotion) return const [];
     final random = math.Random(1817);
-    return List.generate(16, (_) {
+    return List.generate(36, (_) {
       final angle = random.nextDouble() * math.pi * 2;
-      final distance = 20 + random.nextDouble() * 70;
+      final distance = 32 + random.nextDouble() * 125;
       return PaperParticle(
         math.cos(angle) * distance,
         math.sin(angle) * distance,
-        2 + random.nextDouble() * 3,
+        2.5 + random.nextDouble() * 4,
         random.nextBool(),
       );
     });

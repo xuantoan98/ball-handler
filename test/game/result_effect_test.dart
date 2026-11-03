@@ -10,11 +10,12 @@ void main() {
     final effect = ResultEffect();
     expect(effect.begin(AttemptPhase.won, reducedMotion: false), isTrue);
     expect(effect.begin(AttemptPhase.won, reducedMotion: false), isFalse);
-    expect(effect.particles.length, inInclusiveRange(12, 20));
+    expect(effect.particles.length, 36);
     expect(
-      effect.progressAt(const Duration(milliseconds: 300)),
+      effect.progressAt(const Duration(milliseconds: 600)),
       closeTo(.5, .01),
     );
+    expect(effect.panelDelay, const Duration(milliseconds: 1200));
     expect(attempt.lamp, lamp);
     expect(attempt.phase, AttemptPhase.playing);
   });

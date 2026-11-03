@@ -1,5 +1,13 @@
 # Quyết định M0
 
+## Bố cục màn và tiến độ tuần tự (03/11/2026)
+
+| ID | Quyết định | Hệ quả / giới hạn |
+| --- | --- | --- |
+| D39 | Màn 15 và 19 dùng hai vách ziczac tách rời; vùng nguy hiểm màn 19 không chồng vách | Giữ cùng luật va chạm. Replay engine qua màn không thay cho người chơi thử độ khó thực. |
+| D40 | Duyệt được 20 màn nhưng chỉ bắt đầu màn đã mở; save QA Redmi mở sẵn đến 20 được đưa về màn 1 | Cơ chế khóa đã có ở UI và `LivesService`; test mới bảo vệ luồng duyệt đến 20. Save QA cũ được sao lưu trước khi đặt lại. |
+| D41 | Hiệu ứng qua màn có vòng sáng, tia và mảnh giấy trong 1,2 giây | Chỉ đổi lớp vẽ/khoảng chờ panel, không đổi luật thắng; giảm chuyển động vẫn được tôn trọng. |
+
 ## Phản hồi độ khó, HUD và nhạc (03/11/2026)
 
 | ID | Quyết định | Hệ quả / giới hạn |

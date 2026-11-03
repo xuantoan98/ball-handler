@@ -1,5 +1,11 @@
 # Tiến độ và task board
 
+## Sửa chồng chướng ngại vật và khóa thứ tự màn (03/11/2026)
+
+Đã tách các vật chắn đè nhau ở màn 15 và 19, bố trí lại thành hai lối lách ziczac; màn 19 có vùng nguy hiểm riêng, không chồng vật chắn. Cập nhật đường giải tham chiếu và gợi ý, replay engine vẫn qua cả 20 màn. Hiệu ứng thắng kéo dài 1,2 giây với vòng sáng mint/vàng, tia sáng, 36 mảnh giấy và nhãn hoàn thành; chế độ giảm chuyển động vẫn bỏ hiệu ứng. Luật chỉ mở màn kế sau khi thắng vốn đã chặn ở UI và service; test mới duyệt từ màn 1 đến 20 trên save mới xác nhận không thể bắt đầu màn khóa. Save Redmi trước đó có `highestUnlocked=19` do QA; đã sao lưu rồi đặt tiến độ thử nghiệm về màn 1 và xác nhận màn 2 bị khóa cả sau khi mở lại app.
+
+`flutter test --reporter compact --no-pub` **102/102 pass**; `flutter analyze --no-pub` sạch; build web và APK debug qua, APK đã cài trên Redmi. Ảnh máy xác nhận bố cục màn 15/19, hiệu ứng thắng màn 1 và khóa màn 2. Chưa có người chơi thử độ khó mới; xem [QA](QA.md).
+
 ## Điều chỉnh độ khó và UI theo playtest chủ sản phẩm (03/11/2026)
 
 Chủ sản phẩm thấy 20 màn còn dễ, chớp dọc chỉ di chuyển giữa tường, cửa trăng hay ở góc trên phải, nhạc còn nhỏ và HUD/nút chưa đủ hoàn thiện. Đã tăng hành trình chớp dọc ở các màn 08–12, 16, 18, 20 đến gần mép trên/dưới; thêm chớp ngang ở 17 và 20; dùng cửa giữa phải ở 08, 10, 12, 20 và cửa dưới phải ở 19. Giữ luật hitbox và save. HUD mới: trái tên/số màn, giữa thời gian kèm tạm dừng, phải lượt; nút thẻ giấy có viền, sáng mép và hoa văn góc theo UI Kit. File nhạc nền tăng biên độ khoảng 6 dB. `flutter test --reporter compact --no-pub` **100/100 pass** gồm replay 20 màn, `flutter analyze --no-pub` sạch, build web/APK debug qua. APK đã cài và kiểm hình màn 20 trên Redmi, save trước/sau thử được trả đúng hash. **Còn cần chủ sản phẩm nghe mức nhạc mới và đánh giá độ khó bằng chơi thật; chưa đánh dấu cảm nhận là pass.** Xem [QA](QA.md).
