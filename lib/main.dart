@@ -116,6 +116,8 @@ class _GamePageState extends State<GamePage>
   Timer? _countdownTimer;
   bool _ready = false;
   bool _operationBusy = false;
+  bool _soundSaveBusy = false;
+  bool get _visualBusy => _operationBusy && !_soundSaveBusy;
   bool _terminalPending = false;
   bool _terminalSaveFailed = false;
   bool _adOpen = false;
@@ -659,6 +661,7 @@ class _GamePageState extends State<GamePage>
     setState(() {
       _soundEnabled = next;
       _operationBusy = true;
+      _soundSaveBusy = true;
     });
     _audio.setEnabled(next);
     try {
@@ -673,7 +676,12 @@ class _GamePageState extends State<GamePage>
         });
       }
     } finally {
-      if (mounted) setState(() => _operationBusy = false);
+      if (mounted) {
+        setState(() {
+          _operationBusy = false;
+          _soundSaveBusy = false;
+        });
+      }
     }
   }
 
@@ -704,7 +712,8 @@ class _GamePageState extends State<GamePage>
                 lives: _lives.lives,
                 refill: _lives.untilNextRefill,
                 introVisible: _introVisible,
-                busy: _operationBusy,
+                busy: _visualBusy,
+                soundBusy: _operationBusy,
                 notice: _notice,
                 onPlay: _openHomePlay,
                 onLevels: _openHomeLevels,

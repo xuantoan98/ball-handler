@@ -2,6 +2,10 @@
 
 ## M5 — triển khai bàn đèn, âm thanh và hiệu ứng (03/11/2026)
 
+Âm thanh: chủ sản phẩm nghe được nhạc sau sửa audio focus nhưng còn nhỏ; đã tăng volume nhạc lên 1,0, được phản hồi mức âm ổn. Theo yêu cầu tiếp theo, Android hiện bắt đầu nhạc ngay ở home khi save bật âm, web vẫn chờ gesture. Chủ sản phẩm xác nhận nhạc phát ở home. Phản hồi tiếp: bấm loa làm hai nút home nháy vì trạng thái save tạm vô hiệu hóa chúng; test tái hiện đỏ và sửa để nút giữ visual ổn định. Test 96/96, analyze, build web/APK đều qua; đang chờ xem lại trên Redmi. M5 vẫn DOING vì QA hiệu ứng/performance còn mở.
+
+Phản hồi nghe thật: nhạc nền không nghe được dù SFX sao có tiếng. Đã xác minh file nhạc không im lặng, tăng âm lượng nhưng vẫn không nghe; tìm thấy SFX mặc định giành audio focus khiến nhạc bị tạm dừng. APK mới cấu hình SFX không giành focus, build/test qua và track nhạc vẫn active sau tiếng nút trên Redmi; **đang chờ chủ sản phẩm nghe xác nhận**, chưa đánh dấu âm thanh đạt. Xem [QA](QA.md).
+
 Sau khi Redmi được mở khóa, đã xem home/preview 20/chơi 01/pause, kiểm nút loa lưu qua restart, thắng màn 01 và thua do cảm biến ở màn 02 bằng touch ADB. Ảnh thiết bị và kết quả ở [QA](QA.md). Save gốc đã khôi phục nguyên byte, hash khớp, app mở lại ở home 3/3 lượt. Chưa chấm chất lượng âm bằng tai, chưa đo frame time M5 hoặc xác nhận trực quan hạt giấy/rung; M5 tiếp tục **DOING / chờ QA cảm nhận**.
 
 Tiếp tục M5: đã sửa lỗi biên dịch popup hướng dẫn do thiếu `BuildContext` trong `HomeScreen._stage`, và hai cảnh báo analyze trong audio/test. Kiểm tra cuối: `flutter analyze --no-pub` sạch, `flutter test --reporter compact --no-pub` **94/94 pass**, `flutter build web --no-wasm-dry-run --no-pub` và `flutter build apk --debug --no-pub` đều thành công. APK debug mới đã cài trên Redmi, lệnh mở được nhận và process chạy; máy đang khóa nên chưa xác nhận hình UI bản cuối. Chưa đo frame time hoặc kiểm âm thanh/hiệu ứng bằng cảm nhận trên máy. Chi tiết và hash artifact ở [QA](QA.md). Không push/phát hành.

@@ -17,6 +17,7 @@ class HomeScreen extends StatelessWidget {
     required this.onAcknowledgeIntro,
     required this.soundEnabled,
     required this.onToggleSound,
+    this.soundBusy = false,
     this.refill,
     this.busy = false,
     this.notice,
@@ -32,6 +33,7 @@ class HomeScreen extends StatelessWidget {
   final String? notice;
   final bool soundEnabled;
   final VoidCallback? onToggleSound;
+  final bool soundBusy;
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
@@ -69,7 +71,7 @@ class HomeScreen extends StatelessWidget {
         height: 50,
         child: SoundButton(
           enabled: soundEnabled,
-          onPressed: busy ? null : onToggleSound,
+          onPressed: busy || soundBusy ? null : onToggleSound,
         ),
       ),
       Positioned(

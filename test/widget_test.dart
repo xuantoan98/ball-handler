@@ -5,6 +5,8 @@ import 'package:ball_handler/core/geometry.dart';
 import 'package:ball_handler/core/level.dart';
 import 'package:ball_handler/core/rules.dart';
 import 'package:ball_handler/game/game_painter.dart';
+import 'package:ball_handler/game/entrance_motion.dart';
+import 'package:ball_handler/game/theatre_components.dart';
 import 'package:ball_handler/main.dart';
 import 'package:ball_handler/services/lives_service.dart';
 import 'package:ball_handler/services/save_service.dart';
@@ -112,6 +114,50 @@ void main() {
     await tester.tap(find.byKey(const Key('attempt-timer')));
     await tester.pump();
     expect(find.byTooltip('Bật âm thanh'), findsOneWidget);
+  });
+
+  testWidgets('sound save keeps home play buttons visually enabled', (
+    tester,
+  ) async {
+    setSize(tester, const Size(390, 844));
+    final store = _MemoryStore();
+    await tester.pumpWidget(
+      ShadowTheatreApp(saveStore: store, tabOwnership: _Writer()),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 650));
+    await tester.tap(find.text('Đã hiểu'));
+    await tester.pump();
+    final gate = Completer<void>();
+    store.writeGate = gate;
+    await tester.tap(find.byTooltip('Tắt âm thanh'));
+    await tester.pump();
+    for (final label in ['Chơi ngay', 'Xem màn']) {
+      final button = tester.widget<TheatreButton>(
+        find.ancestor(
+          of: find.text(label),
+          matching: find.byType(TheatreButton),
+        ),
+      );
+      expect(button.onPressed, isNotNull, reason: label);
+    }
+    for (final index in [1, 2]) {
+      expect(
+        tester
+            .widget<Opacity>(
+              find
+                  .descendant(
+                    of: find.byType(EntranceMotion).at(index),
+                    matching: find.byType(Opacity),
+                  )
+                  .first,
+            )
+            .opacity,
+        1,
+      );
+    }
+    gate.complete();
+    await tester.pump();
   });
 
   testWidgets('home appears each launch and guide only on fresh save', (

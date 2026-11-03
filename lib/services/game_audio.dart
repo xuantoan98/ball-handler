@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart';
 
 enum GameSound { menu, switchOn, gate, wrong, collision, win }
 
@@ -17,6 +18,7 @@ class PlayerAudioBackend implements GameAudioBackend {
   final Map<GameSound, AudioPlayer> _effects = {
     for (final sound in GameSound.values) sound: AudioPlayer(),
   };
+  final Set<GameSound> _configuredEffects = {};
   bool _musicStarted = false;
 
   @override
@@ -25,7 +27,7 @@ class PlayerAudioBackend implements GameAudioBackend {
       await _music.resume();
     } else {
       await _music.setReleaseMode(ReleaseMode.loop);
-      await _music.play(AssetSource('audio/music.ogg'), volume: .12);
+      await _music.play(AssetSource('audio/music.ogg'), volume: 1);
       _musicStarted = true;
     }
   }
@@ -51,6 +53,16 @@ class PlayerAudioBackend implements GameAudioBackend {
       GameSound.win => 'win.ogg',
     };
     final player = _effects[sound]!;
+    if (!_configuredEffects.contains(sound)) {
+      await player.setAudioContext(
+        AudioContext(
+          android: const AudioContextAndroid(
+            audioFocus: AndroidAudioFocus.none,
+          ),
+        ),
+      );
+      _configuredEffects.add(sound);
+    }
     await player.stop();
     await player.play(AssetSource('audio/$file'), volume: .32);
   }
@@ -66,15 +78,16 @@ class PlayerAudioBackend implements GameAudioBackend {
 
 /// One controller for both targets; a gesture unlocks browser playback.
 class GameAudio {
-  GameAudio({GameAudioBackend? backend})
-    : _backend = backend ?? PlayerAudioBackend();
+  GameAudio({GameAudioBackend? backend, bool? requiresGesture})
+    : _backend = backend ?? PlayerAudioBackend(),
+      _unlocked = !(requiresGesture ?? kIsWeb);
 
   final GameAudioBackend _backend;
   bool _enabled = true;
   bool _foreground = true;
   bool _musicActive = false;
   bool _adOpen = false;
-  bool _unlocked = false;
+  bool _unlocked;
   bool _playing = false;
   bool _disposed = false;
   int _cueGeneration = 0;
@@ -82,6 +95,7 @@ class GameAudio {
   final Map<GameSound, DateTime> _lastCue = {};
 
   void unlock() {
+    if (_unlocked) return;
     _unlocked = true;
     _reconcile();
   }

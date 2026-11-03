@@ -6,7 +6,7 @@
 
 ## Âm thanh M5 (03/11/2026)
 
-Nhạc `music.ogg` lấy nguyên bản `Heavenly Loop_0.ogg` của isaiah658 tại [OpenGameArt](https://opengameart.org/content/heavenly-loop), tác giả ghi CC0. Sáu file hiệu ứng lấy nguyên bản từ `ui_ogg.zip` của Robin Lamb tại [OpenGameArt](https://opengameart.org/content/ui-sound-effects-button-clicks-user-feedback-notifications), trang ghi CC0; nguồn gốc ban đầu là VCSL/VSCO 2 CE theo tác giả. Không biên tập hoặc đổi format; `win.ogg` và `gate.ogg` cùng dùng `chimes.ogg`. Quyền CC0-1.0 và URL gốc ghi thêm tại `assets/audio/LICENSE.md`. Âm lượng giảm trong code: nhạc 0,12, hiệu ứng 0,32.
+Nhạc `music.ogg` lấy nguyên bản `Heavenly Loop_0.ogg` của isaiah658 tại [OpenGameArt](https://opengameart.org/content/heavenly-loop), tác giả ghi CC0. Sáu file hiệu ứng lấy nguyên bản từ `ui_ogg.zip` của Robin Lamb tại [OpenGameArt](https://opengameart.org/content/ui-sound-effects-button-clicks-user-feedback-notifications), trang ghi CC0; nguồn gốc ban đầu là VCSL/VSCO 2 CE theo tác giả. Không biên tập hoặc đổi format; `win.ogg` và `gate.ogg` cùng dùng `chimes.ogg`. Quyền CC0-1.0 và URL gốc ghi thêm tại `assets/audio/LICENSE.md`. Âm lượng trong code: nhạc 1,0, hiệu ứng 0,32. Nhạc đã nghe được sau khi sửa audio focus nhưng còn quá nhỏ ở hệ số 0,55 trên Redmi; mức mới cần được nghe lại bằng tai để chốt.
 
 | File | File gốc | SHA-256 |
 | --- | --- | --- |

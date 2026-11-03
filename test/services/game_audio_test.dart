@@ -22,7 +22,7 @@ class _Backend implements GameAudioBackend {
 void main() {
   test('music follows mute, foreground, ad and first gesture', () async {
     final backend = _Backend();
-    final audio = GameAudio(backend: backend);
+    final audio = GameAudio(backend: backend, requiresGesture: true);
     audio.setMusicActive(true);
     await audio.flush();
     expect(backend.starts, 0);
@@ -42,6 +42,18 @@ void main() {
     audio.setEnabled(false);
     await audio.flush();
     expect(backend.starts, 2);
+    await audio.dispose();
+  });
+
+  test('native music starts on the waiting screen without a gesture', () async {
+    final backend = _Backend();
+    final audio = GameAudio(backend: backend, requiresGesture: false);
+    audio.setMusicActive(true);
+    await audio.flush();
+    expect(backend.starts, 1);
+    audio.unlock();
+    await audio.flush();
+    expect(backend.starts, 1);
     await audio.dispose();
   });
 
