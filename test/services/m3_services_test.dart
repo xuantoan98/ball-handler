@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:ball_handler/services/lives_service.dart';
 import 'package:ball_handler/services/rewarded_ads.dart';
 import 'package:ball_handler/services/save_service.dart';
+import 'package:ball_handler/game/game_language.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class FakeClock implements GameClock {
@@ -60,6 +61,40 @@ class FakeAd implements RewardedAdSource {
 void main() {
   final origin = DateTime.utc(2026, 10, 22, 0);
 
+  test('language persists and old v4 saves default to Vietnamese', () async {
+    final store = MemoryStore();
+    final lives = LivesService(SaveService(store), FakeClock(origin));
+    await lives.initialize();
+    expect(lives.record.language, GameLanguage.vi);
+    await lives.setLanguage(GameLanguage.en);
+    expect(SaveRecord.decode(store.value!).language, GameLanguage.en);
+    final reopened = LivesService(SaveService(store), FakeClock(origin));
+    await reopened.initialize();
+    expect(reopened.record.language, GameLanguage.en);
+
+    final old = jsonDecode(store.value!) as Map<String, dynamic>;
+    old['schemaVersion'] = 4;
+    (old['settings'] as Map<String, dynamic>).remove('language');
+    store.value = jsonEncode(old);
+    final migrated = LivesService(SaveService(store), FakeClock(origin));
+    await migrated.initialize();
+    expect(migrated.record.language, GameLanguage.vi);
+    expect(jsonDecode(store.value!)['schemaVersion'], 5);
+  });
+
+  test('failed language write leaves durable choice unchanged', () async {
+    final store = MemoryStore();
+    final lives = LivesService(SaveService(store), FakeClock(origin));
+    await lives.initialize();
+    store.failWrite = true;
+    await expectLater(
+      lives.setLanguage(GameLanguage.en),
+      throwsA(isA<SaveFailure>()),
+    );
+    expect(lives.record.language, GameLanguage.vi);
+    expect(SaveRecord.decode(store.value!).language, GameLanguage.vi);
+  });
+
   test(
     'fresh guide, locked levels and timer persist only after save',
     () async {
@@ -99,7 +134,7 @@ void main() {
     await lives.initialize();
     expect(lives.record.introSeen, true);
     expect(lives.record.attemptRemainingMs, 60000);
-    expect(jsonDecode(store.value!)['schemaVersion'], 4);
+    expect(jsonDecode(store.value!)['schemaVersion'], 5);
   });
 
   test('saved progress and active attempt can reach level twenty', () async {
@@ -131,7 +166,7 @@ void main() {
       await lives.initialize();
       expect(lives.currentLevel, 0);
       expect(lives.highestUnlocked, 19);
-      expect(jsonDecode(store.value!)['schemaVersion'], 4);
+      expect(jsonDecode(store.value!)['schemaVersion'], 5);
     },
   );
 
@@ -277,7 +312,7 @@ void main() {
       expect(first.lives, 3);
       expect(first.activeLevel, 1);
       expect(first.untilNextRefill, isNull);
-      expect(jsonDecode(store.value!)['schemaVersion'], 4);
+      expect(jsonDecode(store.value!)['schemaVersion'], 5);
       final again = LivesService(SaveService(store), FakeClock(origin));
       await again.initialize();
       expect(again.lives, 3);
@@ -299,7 +334,7 @@ void main() {
     store.failWrite = false;
     await lives.initialize();
     expect(lives.lives, 2);
-    expect(jsonDecode(store.value!)['schemaVersion'], 4);
+    expect(jsonDecode(store.value!)['schemaVersion'], 5);
   });
 
   test('reward ID is durable and duplicate callback earns once', () async {

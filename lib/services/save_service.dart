@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../game/game_language.dart';
+
 abstract interface class SaveStore {
   Future<String?> read();
   Future<void> write(String value);
@@ -38,13 +40,14 @@ class SaveRecord {
     required this.highestUnlocked,
     required this.currentLevel,
     required this.soundEnabled,
+    required this.language,
     required this.lastObservedAtMs,
     required this.introSeen,
     required this.attemptRemainingMs,
     this.sourceVersion = schemaVersion,
   });
 
-  static const schemaVersion = 4;
+  static const schemaVersion = 5;
   static const fresh = SaveRecord(
     lives: 3,
     nextRefillAtMs: null,
@@ -53,6 +56,7 @@ class SaveRecord {
     highestUnlocked: 0,
     currentLevel: 0,
     soundEnabled: true,
+    language: GameLanguage.vi,
     lastObservedAtMs: 0,
     introSeen: false,
     attemptRemainingMs: null,
@@ -67,6 +71,7 @@ class SaveRecord {
   /// Stage selected for the next launch; independent of unlocked progress.
   final int currentLevel;
   final bool soundEnabled;
+  final GameLanguage language;
   final int lastObservedAtMs;
   final bool introSeen;
   final int? attemptRemainingMs;
@@ -84,6 +89,7 @@ class SaveRecord {
     int? highestUnlocked,
     int? currentLevel,
     bool? soundEnabled,
+    GameLanguage? language,
     int? lastObservedAtMs,
     bool? introSeen,
     int? attemptRemainingMs,
@@ -95,6 +101,7 @@ class SaveRecord {
     highestUnlocked: highestUnlocked ?? this.highestUnlocked,
     currentLevel: currentLevel ?? this.currentLevel,
     soundEnabled: soundEnabled ?? this.soundEnabled,
+    language: language ?? this.language,
     lastObservedAtMs: lastObservedAtMs ?? this.lastObservedAtMs,
     introSeen: introSeen ?? this.introSeen,
     attemptRemainingMs: clearAttempt
@@ -116,7 +123,7 @@ class SaveRecord {
       'highestUnlocked': highestUnlocked,
       'currentLevel': currentLevel,
     },
-    'settings': {'soundEnabled': soundEnabled},
+    'settings': {'soundEnabled': soundEnabled, 'language': language.code},
     'lastObservedAt': lastObservedAtMs,
     'introSeen': introSeen,
     'attemptRemainingMs': attemptRemainingMs,
@@ -129,6 +136,7 @@ class SaveRecord {
           (data['schemaVersion'] != 1 &&
               data['schemaVersion'] != 2 &&
               data['schemaVersion'] != 3 &&
+              data['schemaVersion'] != 4 &&
               data['schemaVersion'] != schemaVersion)) {
         throw const SaveFailure('Phiên bản dữ liệu lưu không được hỗ trợ.');
       }
@@ -153,10 +161,14 @@ class SaveRecord {
           rewards.any((item) => item is! String || item.isEmpty) ||
           progression is! Map ||
           progression['highestUnlocked'] is! int ||
-          data['schemaVersion'] == schemaVersion &&
+          (data['schemaVersion'] as int) >= 4 &&
               progression['currentLevel'] is! int ||
           settings is! Map ||
           settings['soundEnabled'] is! bool ||
+          data['schemaVersion'] == schemaVersion &&
+              !GameLanguage.values.any(
+                (item) => item.code == settings['language'],
+              ) ||
           observed is! int ||
           observed < 0 ||
           next != null && next < 0 ||
@@ -171,7 +183,7 @@ class SaveRecord {
         throw const SaveFailure('Dữ liệu lưu bị lỗi.');
       }
       final oldActive = data['schemaVersion'] == 1 && active != null;
-      final currentLevel = data['schemaVersion'] == schemaVersion
+      final currentLevel = (data['schemaVersion'] as int) >= 4
           ? progression['currentLevel'] as int
           : active ?? 0;
       if (currentLevel < 0 || currentLevel > 19) {
@@ -186,6 +198,9 @@ class SaveRecord {
         highestUnlocked: progression['highestUnlocked'] as int,
         currentLevel: currentLevel,
         soundEnabled: settings['soundEnabled'] as bool,
+        language: data['schemaVersion'] == schemaVersion
+            ? GameLanguage.fromCode(settings['language'] as String)
+            : GameLanguage.vi,
         lastObservedAtMs: observed,
         introSeen: intro,
         attemptRemainingMs: remaining,

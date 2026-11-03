@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../design_tokens.dart';
 import 'theatre_components.dart';
+import 'game_language.dart';
 
 bool timerPulseActive(double remainingMs) =>
     remainingMs <= 10000 && remainingMs > 0 && (remainingMs % 1000) > 750;
@@ -12,16 +13,20 @@ class AttemptTimerButton extends StatelessWidget {
     super.key,
     required this.remainingMs,
     required this.onPause,
+    this.language = GameLanguage.vi,
   });
 
   final double remainingMs;
   final VoidCallback onPause;
+  final GameLanguage language;
 
   @override
   Widget build(BuildContext context) {
     final seconds = (remainingMs / 1000).ceil().clamp(0, 60);
     return Semantics(
-      label: 'Còn $seconds giây trong tối đa 60 giây của màn này. Tạm dừng',
+      label: language == GameLanguage.vi
+          ? 'Còn $seconds giây trong tối đa 60 giây của màn này. Tạm dừng'
+          : '$seconds seconds left of 60. Pause',
       child: Stack(
         key: const Key('attempt-timer'),
         children: [

@@ -19,6 +19,7 @@ import 'game/stage_backdrop.dart';
 import 'game/board_ui_layout.dart';
 import 'game/theatre_components.dart';
 import 'game/home_screen.dart';
+import 'game/game_language.dart';
 import 'game/attempt_timer_button.dart';
 import 'services/lives_service.dart';
 import 'services/game_audio.dart';
@@ -112,6 +113,9 @@ class _GamePageState extends State<GamePage>
   bool _terminalPanelVisible = true;
   Timer? _terminalPanelTimer;
   bool _soundEnabled = true;
+  GameLanguage _language = GameLanguage.vi;
+  bool _settingsVisible = false;
+  String _t(String value) => _language.text(value);
   bool _reduceMotion = false;
   Timer? _countdownTimer;
   bool _ready = false;
@@ -188,6 +192,7 @@ class _GamePageState extends State<GamePage>
       final writer = await _ownership.acquire();
       await _lives.initialize(readOnly: !writer);
       _soundEnabled = _lives.record.soundEnabled;
+      _language = _lives.record.language;
       _audio.setEnabled(_soundEnabled);
       _audio.setMusicActive(true);
       if (!mounted) return;
@@ -568,18 +573,18 @@ class _GamePageState extends State<GamePage>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Đặt lại dữ liệu lưu?'),
-        content: const Text(
-          'Thao tác này xóa lượt và tiến độ bị lỗi trên thiết bị này.',
+        title: Text(_t('Đặt lại dữ liệu lưu?')),
+        content: Text(
+          _t('Thao tác này xóa lượt và tiến độ bị lỗi trên thiết bị này.'),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Hủy'),
+            child: Text(_t('Hủy')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Đặt lại'),
+            child: Text(_t('Đặt lại')),
           ),
         ],
       ),
@@ -685,6 +690,37 @@ class _GamePageState extends State<GamePage>
     }
   }
 
+  Future<void> _selectLanguage(GameLanguage value) async {
+    if (!_ready || _operationBusy || _lives.isReadOnly || value == _language) {
+      return;
+    }
+    final previous = _language;
+    setState(() {
+      _language = value;
+      _notice = null;
+      _operationBusy = true;
+      _soundSaveBusy = true;
+    });
+    try {
+      await _lives.setLanguage(value);
+      _audio.play(GameSound.menu);
+    } on SaveFailure {
+      if (mounted) {
+        setState(() {
+          _language = previous;
+          _notice = 'Không lưu được ngôn ngữ. Vui lòng thử lại.';
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _operationBusy = false;
+          _soundSaveBusy = false;
+        });
+      }
+    }
+  }
+
   Future<void> _openHomeLevels() async {
     if (_introVisible || _operationBusy) return;
     if (_lives.activeLevel != null) {
@@ -720,6 +756,11 @@ class _GamePageState extends State<GamePage>
                 onAcknowledgeIntro: _acknowledgeIntro,
                 soundEnabled: _soundEnabled,
                 onToggleSound: _toggleSound,
+                language: _language,
+                settingsVisible: _settingsVisible,
+                onOpenSettings: () => setState(() => _settingsVisible = true),
+                onCloseSettings: () => setState(() => _settingsVisible = false),
+                onSelectLanguage: _selectLanguage,
               );
             }
             if (constraints.maxWidth > constraints.maxHeight &&
@@ -742,8 +783,8 @@ class _GamePageState extends State<GamePage>
                           const SizedBox(height: 8),
                           Text(
                             _attempt.phase == AttemptPhase.paused
-                                ? 'Xoay dọc để tiếp tục'
-                                : 'Xoay dọc để chơi',
+                                ? _t('Xoay dọc để tiếp tục')
+                                : _t('Xoay dọc để chơi'),
                             textAlign: TextAlign.center,
                             style: const TextStyle(
                               color: StageColors.text,
@@ -819,10 +860,9 @@ class _GamePageState extends State<GamePage>
                   onPointerUp: (event) => _endPointer(event.pointer),
                   onPointerCancel: (event) => _endPointer(event.pointer),
                   child: Semantics(
-                    label:
-                        'Sân khấu của Bóng Mơ. '
-                        'Cửa trăng ${_attempt.gateOpen ? 'đang mở' : 'đang khóa'}. '
-                        'Kéo đèn vàng bằng một ngón để dẫn bóng.',
+                    label: _language == GameLanguage.vi
+                        ? 'Sân khấu của Bóng Mơ. Cửa trăng ${_attempt.gateOpen ? 'đang mở' : 'đang khóa'}. Kéo đèn vàng bằng một ngón để dẫn bóng.'
+                        : 'Shadow stage. Moon door ${_attempt.gateOpen ? 'open' : 'locked'}. Drag the yellow lamp with one finger to guide the shadow.',
                     child: SizedBox.expand(
                       child: CustomPaint(
                         key: const Key('game-canvas'),
@@ -832,6 +872,7 @@ class _GamePageState extends State<GamePage>
                           backdrop: _backdrop,
                           deskBackdrop: _deskBackdrop,
                           resultEffect: _resultEffect,
+                          language: _language,
                           reducedMotion: _reduceMotion,
                           animation: _visualAnimation,
                           motionClock: _motionClock,
@@ -852,6 +893,7 @@ class _GamePageState extends State<GamePage>
                     50,
                     AttemptTimerButton(
                       remainingMs: _attempt.remainingMs,
+                      language: _language,
                       onPause: _pause,
                     ),
                   ),
@@ -907,7 +949,7 @@ class _GamePageState extends State<GamePage>
                     42,
                     Center(
                       child: Text(
-                        'Hồi sau\n${_countdown(_lives.untilNextRefill!)}',
+                        '${_t('Hồi sau')}\n${_countdown(_lives.untilNextRefill!)}',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: StageColors.goldCore,
@@ -929,6 +971,7 @@ class _GamePageState extends State<GamePage>
                     40,
                     SoundButton(
                       enabled: _soundEnabled,
+                      language: _language,
                       onPressed: _operationBusy ? null : _toggleSound,
                     ),
                   ),
@@ -971,7 +1014,7 @@ class _GamePageState extends State<GamePage>
     bool small = false,
     bool primary = false,
   }) => TheatreButton(
-    label: label,
+    label: _t(label),
     onPressed: onPressed,
     icon: icon,
     leading: primary
@@ -1036,7 +1079,7 @@ class _GamePageState extends State<GamePage>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  title,
+                  _t(title),
                   key: const Key('panel-title'),
                   textAlign: TextAlign.center,
                   maxLines: preview ? 2 : 1,
@@ -1052,7 +1095,7 @@ class _GamePageState extends State<GamePage>
                 ),
                 Flexible(
                   child: Text(
-                    detail,
+                    _t(detail),
                     textAlign: TextAlign.center,
                     maxLines: preview ? 2 : 4,
                     overflow: TextOverflow.ellipsis,
@@ -1196,7 +1239,7 @@ class _GamePageState extends State<GamePage>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Quảng cáo mô phỏng',
+                      _t('Quảng cáo mô phỏng'),
                       style: TextStyle(
                         color: StageColors.goldCore,
                         fontSize: 21 * map.scale,
@@ -1204,11 +1247,11 @@ class _GamePageState extends State<GamePage>
                       ),
                     ),
                     Text(
-                      switch (_mockAds.phase) {
+                      _t(switch (_mockAds.phase) {
                         AdPhase.loading => 'Đang tải…',
                         AdPhase.saving => 'Đang lưu thưởng…',
                         _ => 'Xem đủ 5 giây để nhận +1 lượt.',
-                      },
+                      }),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: StageColors.text,
@@ -1222,8 +1265,8 @@ class _GamePageState extends State<GamePage>
                     ),
                     Text(
                       _mockAds.phase == AdPhase.saving
-                          ? 'Đang lưu'
-                          : '${(5 - _mockAds.progress * 5).ceil().clamp(0, 5)} giây',
+                          ? _t('Đang lưu')
+                          : '${(5 - _mockAds.progress * 5).ceil().clamp(0, 5)} ${_t('giây')}',
                       style: TextStyle(
                         color: StageColors.goldCore,
                         fontSize: 15 * map.scale,
@@ -1244,7 +1287,7 @@ class _GamePageState extends State<GamePage>
                     if (kDebugMode && _mockAds.phase != AdPhase.saving)
                       TextButton(
                         onPressed: _mockAds.failForDebug,
-                        child: const Text('Giả lập lỗi tải'),
+                        child: Text(_t('Giả lập lỗi tải')),
                       ),
                   ],
                 ),
@@ -1272,11 +1315,13 @@ class _GamePageState extends State<GamePage>
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     Text(
-                      !_ready && _loadError == null
-                          ? 'Đang đọc phiên chơi…'
-                          : readOnly
-                          ? 'Tab chỉ đọc'
-                          : 'Không mở được dữ liệu lưu',
+                      _t(
+                        !_ready && _loadError == null
+                            ? 'Đang đọc phiên chơi…'
+                            : readOnly
+                            ? 'Tab chỉ đọc'
+                            : 'Không mở được dữ liệu lưu',
+                      ),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: StageColors.goldCore,
@@ -1285,9 +1330,11 @@ class _GamePageState extends State<GamePage>
                       ),
                     ),
                     Text(
-                      readOnly
-                          ? 'Một tab khác đang chơi. Đóng tab đó rồi tải lại để tiếp tục.'
-                          : _loadError ?? 'Vui lòng đợi một chút.',
+                      _t(
+                        readOnly
+                            ? 'Một tab khác đang chơi. Đóng tab đó rồi tải lại để tiếp tục.'
+                            : _loadError ?? 'Vui lòng đợi một chút.',
+                      ),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: StageColors.text,

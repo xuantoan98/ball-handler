@@ -11,6 +11,7 @@ import 'board_ui_layout.dart';
 import 'moon_door_painter.dart';
 import 'puppet_motion.dart';
 import 'result_effect.dart';
+import 'game_language.dart';
 
 /// The same wall rectangles used by GameAttempt are drawn without extra padding.
 class GamePainter extends CustomPainter {
@@ -22,6 +23,7 @@ class GamePainter extends CustomPainter {
     required this.lastMovementMs,
     required this.travelDirection,
     required this.lives,
+    this.language = GameLanguage.vi,
     this.backdrop,
     this.deskBackdrop,
     this.resultEffect,
@@ -39,6 +41,7 @@ class GamePainter extends CustomPainter {
   final int lastMovementMs;
   final Offset travelDirection;
   final int lives;
+  final GameLanguage language;
 
   static const _stageRect = BoardUiLayout.stage;
   static const _headerRect = BoardUiLayout.header;
@@ -185,7 +188,7 @@ class GamePainter extends CustomPainter {
         );
         final title = TextPainter(
           text: TextSpan(
-            text: '✦  HOÀN THÀNH!  ✦',
+            text: language.text('✦  HOÀN THÀNH!  ✦'),
             style: TextStyle(
               fontFamily: 'Nunito',
               color: StageColors.cream.withValues(alpha: bannerOpacity),
@@ -433,7 +436,7 @@ class GamePainter extends CustomPainter {
         }
         _text(
           c,
-          'KHÓA',
+          language.text('KHÓA'),
           box.left - 14,
           box.center.dy - 38,
           12,
@@ -521,7 +524,15 @@ class GamePainter extends CustomPainter {
     final plaque = const Rect.fromLTWH(154, 622, 82, 16);
     _round(c, plaque, 4, StageColors.gold);
     _stroke(c, plaque, 4, StageColors.goldEdge, 1);
-    _text(c, 'Bóng Mơ', 168, 622, 11, StageColors.darkText, maxWidth: 65);
+    _text(
+      c,
+      language.text('Bóng Mơ'),
+      168,
+      622,
+      11,
+      StageColors.darkText,
+      maxWidth: 65,
+    );
   }
 
   void _puppet(
@@ -824,7 +835,14 @@ class GamePainter extends CustomPainter {
         StageColors.goldCore,
       );
     }
-    _text(c, 'Kéo đèn · Dẫn bóng về cửa', 84, 814, 14, StageColors.cream);
+    _text(
+      c,
+      language.text('Kéo đèn · Dẫn bóng về cửa'),
+      84,
+      814,
+      14,
+      StageColors.cream,
+    );
   }
 
   void _hud(Canvas c) {
@@ -849,14 +867,22 @@ class GamePainter extends CustomPainter {
     );
     _text(
       c,
-      'MÀN ${attempt.level.id.toString().padLeft(2, '0')}',
+      '${language.text('MÀN')} ${attempt.level.id.toString().padLeft(2, '0')}',
       30,
       17,
       12,
       StageColors.goldCore,
       maxWidth: 110,
     );
-    _text(c, attempt.level.title, 30, 33, 10, StageColors.text, maxWidth: 110);
+    _text(
+      c,
+      language.text(attempt.level.title),
+      30,
+      33,
+      10,
+      StageColors.text,
+      maxWidth: 110,
+    );
     for (var i = 0; i < 3; i++) {
       _lifeLantern(c, Offset(260.0 + i * 19, 33), i < lives);
     }
@@ -870,7 +896,7 @@ class GamePainter extends CustomPainter {
     _star(c, const Offset(361, 81), 2, StageColors.goldEdge);
     _text(
       c,
-      message,
+      language.text(message),
       34,
       66,
       12,

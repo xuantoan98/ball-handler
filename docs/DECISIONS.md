@@ -1,5 +1,11 @@
 # Quyết định M0
 
+## Ngôn ngữ và popup cài đặt (03/11/2026)
+
+| ID | Quyết định | Hệ quả / giới hạn |
+| --- | --- | --- |
+| D42 | Icon Cài đặt đứng cạnh loa ở home; popup khung giấy có các mục xếp dọc, trước mắt chỉ chọn Tiếng Việt/English | Tái sử dụng UI Kit, không thay vị trí nút chơi. Dữ liệu `language` nằm trong settings của save schema v5; v1–v4 mặc định Tiếng Việt. Chữ gameplay được dịch ở lớp hiển thị, dữ liệu màn và logic va chạm giữ nguyên. |
+
 ## Bố cục màn và tiến độ tuần tự (03/11/2026)
 
 | ID | Quyết định | Hệ quả / giới hạn |

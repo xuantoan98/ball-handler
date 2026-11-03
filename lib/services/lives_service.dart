@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'save_service.dart';
+import '../game/game_language.dart';
 
 abstract interface class GameClock {
   DateTime now();
@@ -213,6 +214,18 @@ class LivesService {
     _busy = true;
     try {
       await _commit(record.change(soundEnabled: value));
+    } finally {
+      _busy = false;
+    }
+  }
+
+  Future<void> setLanguage(GameLanguage value) async {
+    if (_readOnly) throw const SaveFailure('Tab này chỉ đọc.');
+    if (_busy) throw const SaveFailure('Đang lưu.');
+    if (record.language == value) return;
+    _busy = true;
+    try {
+      await _commit(record.change(language: value));
     } finally {
       _busy = false;
     }

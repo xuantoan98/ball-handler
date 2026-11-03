@@ -5,6 +5,7 @@ import 'package:ball_handler/core/geometry.dart';
 import 'package:ball_handler/core/level.dart';
 import 'package:ball_handler/core/rules.dart';
 import 'package:ball_handler/game/game_painter.dart';
+import 'package:ball_handler/game/game_language.dart';
 import 'package:ball_handler/game/entrance_motion.dart';
 import 'package:ball_handler/game/theatre_components.dart';
 import 'package:ball_handler/main.dart';
@@ -91,6 +92,74 @@ Future<void> _pumpM3(
 }
 
 void main() {
+  testWidgets('settings changes the whole game language and persists', (
+    tester,
+  ) async {
+    setSize(tester, const Size(390, 844));
+    final store = _MemoryStore();
+    await tester.pumpWidget(
+      ShadowTheatreApp(saveStore: store, tabOwnership: _Writer()),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 650));
+    await tester.tap(find.text('Đã hiểu'));
+    await tester.pump();
+    await tester.tap(find.byTooltip('Cài đặt'));
+    await tester.pump();
+    expect(find.byKey(const Key('settings-popup')), findsOneWidget);
+    await tester.tap(find.textContaining('English'));
+    await tester.pump();
+    expect(SaveRecord.decode(store.value!).language, GameLanguage.en);
+    expect(find.text('Settings'), findsOneWidget);
+    expect(find.text('Play now'), findsOneWidget);
+    expect(find.byTooltip('Mute sound'), findsOneWidget);
+    await tester.tap(find.byTooltip('Close'));
+    await tester.pump();
+    await tester.tap(find.text('Play now'));
+    await tester.pump();
+    expect(find.text('Awaken the light'), findsOneWidget);
+    expect(currentPainter(tester).language, GameLanguage.en);
+    expect(find.text('Start'), findsOneWidget);
+    await tester.tap(find.text('Start'));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('attempt-timer')));
+    await tester.pump();
+    expect(find.text('Paused'), findsOneWidget);
+    expect(find.text('Continue'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpWidget(
+      ShadowTheatreApp(saveStore: store, tabOwnership: _Writer()),
+    );
+    await tester.pump();
+    expect(find.text('Play now'), findsOneWidget);
+    await tester.tap(find.byTooltip('Settings'));
+    await tester.pump();
+    await tester.tap(find.textContaining('Tiếng Việt'));
+    await tester.pump();
+    expect(find.text('Cài đặt'), findsOneWidget);
+    expect(SaveRecord.decode(store.value!).language, GameLanguage.vi);
+  });
+
+  testWidgets('failed language save rolls back the selection', (tester) async {
+    setSize(tester, const Size(390, 844));
+    final store = _MemoryStore();
+    await tester.pumpWidget(
+      ShadowTheatreApp(saveStore: store, tabOwnership: _Writer()),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 650));
+    await tester.tap(find.text('Đã hiểu'));
+    await tester.pump();
+    await tester.tap(find.byTooltip('Cài đặt'));
+    await tester.pump();
+    store.failWrites = true;
+    await tester.tap(find.textContaining('English'));
+    await tester.pump();
+    expect(find.text('Cài đặt'), findsOneWidget);
+    expect(find.textContaining('Không lưu được ngôn ngữ'), findsOneWidget);
+    expect(SaveRecord.decode(store.value!).language, GameLanguage.vi);
+  });
+
   testWidgets('sound toggle persists from home and is available while paused', (
     tester,
   ) async {

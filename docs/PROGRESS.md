@@ -1,5 +1,11 @@
 # Tiến độ và task board
 
+## Bộ chọn Tiếng Việt / English (03/11/2026)
+
+Đã thêm icon Cài đặt cạnh nút loa trên home. Popup dùng khung sân khấu, viền đồng, thẻ giấy vàng/lilac theo UI Kit; hai lựa chọn xếp dọc để sau này thêm mục cài đặt. Chọn ngôn ngữ cập nhật ngay home, hướng dẫn, preview/HUD/gợi ý 20 màn, phản hồi trong ván, nút, kết quả, quảng cáo mô phỏng và thông báo lỗi; lưu bền cùng save. Save schema v5 đọc v1–v4 với Tiếng Việt mặc định. Lỗi lưu sẽ trả về ngôn ngữ cũ và hiện thông báo.
+
+`flutter test --reporter compact --no-pub` **108/108 pass**; `flutter analyze --no-pub` sạch; build APK debug và web qua. APK đã cài trên Redmi: xem popup hai ngôn ngữ và preview màn 1 tiếng Anh, đọc UI bằng semantics. Save QA trước thử đã được sao lưu và trả về; sau migration v5 máy ở Tiếng Việt, màn 1. Xem [QA](QA.md). Chưa có đánh giá bản dịch từ người bản ngữ hoặc kiểm màn dài trên mọi kích thước máy.
+
 ## Sửa chồng chướng ngại vật và khóa thứ tự màn (03/11/2026)
 
 Đã tách các vật chắn đè nhau ở màn 15 và 19, bố trí lại thành hai lối lách ziczac; màn 19 có vùng nguy hiểm riêng, không chồng vật chắn. Cập nhật đường giải tham chiếu và gợi ý, replay engine vẫn qua cả 20 màn. Hiệu ứng thắng kéo dài 1,2 giây với vòng sáng mint/vàng, tia sáng, 36 mảnh giấy và nhãn hoàn thành; chế độ giảm chuyển động vẫn bỏ hiệu ứng. Luật chỉ mở màn kế sau khi thắng vốn đã chặn ở UI và service; test mới duyệt từ màn 1 đến 20 trên save mới xác nhận không thể bắt đầu màn khóa. Save Redmi trước đó có `highestUnlocked=19` do QA; đã sao lưu rồi đặt tiến độ thử nghiệm về màn 1 và xác nhận màn 2 bị khóa cả sau khi mở lại app.

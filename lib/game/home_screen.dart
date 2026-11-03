@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../design_tokens.dart';
+import 'game_language.dart';
 import 'theatre_components.dart';
 import 'entrance_motion.dart';
 
@@ -17,6 +18,11 @@ class HomeScreen extends StatelessWidget {
     required this.onAcknowledgeIntro,
     required this.soundEnabled,
     required this.onToggleSound,
+    required this.language,
+    required this.settingsVisible,
+    required this.onOpenSettings,
+    required this.onCloseSettings,
+    required this.onSelectLanguage,
     this.soundBusy = false,
     this.refill,
     this.busy = false,
@@ -34,6 +40,13 @@ class HomeScreen extends StatelessWidget {
   final bool soundEnabled;
   final VoidCallback? onToggleSound;
   final bool soundBusy;
+  final GameLanguage language;
+  final bool settingsVisible;
+  final VoidCallback? onOpenSettings;
+  final VoidCallback onCloseSettings;
+  final ValueChanged<GameLanguage> onSelectLanguage;
+
+  String _t(String value) => language.text(value);
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
@@ -65,12 +78,25 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       Positioned(
+        right: 86,
+        top: 48,
+        width: 50,
+        height: 50,
+        child: TheatreButton(
+          label: _t('Cài đặt'),
+          icon: Icons.settings,
+          onPressed: busy || soundBusy ? null : onOpenSettings,
+          tone: TheatreButtonTone.outline,
+        ),
+      ),
+      Positioned(
         right: 29,
         top: 48,
         width: 50,
         height: 50,
         child: SoundButton(
           enabled: soundEnabled,
+          language: language,
           onPressed: busy || soundBusy ? null : onToggleSound,
         ),
       ),
@@ -93,21 +119,21 @@ class HomeScreen extends StatelessWidget {
                 ),
               ],
             ),
-            child: const Column(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'RẠP BÓNG NHỎ',
+                  _t('RẠP BÓNG NHỎ'),
                   maxLines: 1,
                   style: TextStyle(
                     color: StageColors.text,
-                    fontSize: 27,
+                    fontSize: language == GameLanguage.en ? 21 : 27,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-                SizedBox(height: 3),
+                const SizedBox(height: 3),
                 Text(
-                  'Một ngọn đèn. Cả thế giới chuyển động.',
+                  _t('Một ngọn đèn. Cả thế giới chuyển động.'),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -129,7 +155,7 @@ class HomeScreen extends StatelessWidget {
         child: EntranceMotion(
           delayFraction: .12,
           child: TheatreButton(
-            label: 'Chơi ngay',
+            label: _t('Chơi ngay'),
             onPressed: busy ? null : onPlay,
             leading: Icons.play_arrow,
             tone: TheatreButtonTone.gold,
@@ -144,7 +170,7 @@ class HomeScreen extends StatelessWidget {
         child: EntranceMotion(
           delayFraction: .24,
           child: TheatreButton(
-            label: 'Xem màn',
+            label: _t('Xem màn'),
             onPressed: busy ? null : onLevels,
             leading: Icons.theaters,
           ),
@@ -160,8 +186,8 @@ class HomeScreen extends StatelessWidget {
           child: Center(
             child: Text(
               refill == null
-                  ? '$lives / 3 lượt'
-                  : '$lives / 3 lượt  ·  ${_clock(refill!)}',
+                  ? '$lives / 3 ${_t('lượt')}'
+                  : '$lives / 3 ${_t('lượt')}  ·  ${_clock(refill!)}',
               style: const TextStyle(
                 color: StageColors.text,
                 fontSize: 16,
@@ -171,13 +197,13 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ),
-      if (notice != null && !introVisible)
+      if (notice != null && !introVisible && !settingsVisible)
         Positioned(
           left: 36,
           top: 553,
           width: 318,
           child: Text(
-            notice!,
+            _t(notice!),
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: StageColors.text,
@@ -195,6 +221,7 @@ class HomeScreen extends StatelessWidget {
           builder: (context, progress, child) =>
               progress < 1 ? const SizedBox.shrink() : _intro(),
         ),
+      if (settingsVisible && !introVisible) _settingsPopup(),
     ],
   );
 
@@ -211,8 +238,8 @@ class HomeScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 18),
               child: Column(
                 children: [
-                  const Text(
-                    'Cách chơi',
+                  Text(
+                    _t('Cách chơi'),
                     style: TextStyle(
                       color: StageColors.text,
                       fontSize: 28,
@@ -220,19 +247,17 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 14),
-                  const _GuideLine('Kéo đèn để dẫn bóng\nvề cửa trăng.'),
+                  _GuideLine(_t('Kéo đèn để dẫn bóng\nvề cửa trăng.')),
                   const SizedBox(height: 20),
-                  const _GuideLine('Tránh vùng đỏ, bật sao\ntheo thứ tự.'),
+                  _GuideLine(_t('Tránh vùng đỏ, bật sao\ntheo thứ tự.')),
                   const SizedBox(height: 20),
-                  const _GuideLine(
-                    'Mỗi lượt có 60 giây.\nTạm dừng sẽ dừng giờ.',
-                  ),
+                  _GuideLine(_t('Mỗi lượt có 60 giây.\nTạm dừng sẽ dừng giờ.')),
                   Expanded(
                     child: Center(
                       child: notice == null
                           ? const SizedBox.shrink()
                           : Text(
-                              notice!,
+                              _t(notice!),
                               textAlign: TextAlign.center,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
@@ -247,11 +272,104 @@ class HomeScreen extends StatelessWidget {
                     height: 59,
                     width: double.infinity,
                     child: TheatreButton(
-                      label: 'Đã hiểu',
+                      label: _t('Đã hiểu'),
                       onPressed: busy ? null : onAcknowledgeIntro,
                       tone: TheatreButtonTone.gold,
                     ),
                   ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  Widget _settingsPopup() => Positioned.fill(
+    child: ColoredBox(
+      color: const Color(0xD90B1029),
+      child: Center(
+        child: SizedBox(
+          key: const Key('settings-popup'),
+          width: 334,
+          height: 370,
+          child: TheatrePanel(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(22, 20, 22, 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.settings, color: StageColors.goldCore),
+                      const SizedBox(width: 9),
+                      Expanded(
+                        child: Text(
+                          _t('Cài đặt'),
+                          style: const TextStyle(
+                            color: StageColors.text,
+                            fontSize: 25,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: _t('Đóng'),
+                        onPressed: soundBusy ? null : onCloseSettings,
+                        icon: const Icon(Icons.close),
+                        color: StageColors.lilacLight,
+                      ),
+                    ],
+                  ),
+                  const Divider(color: StageColors.goldEdge, height: 22),
+                  Text(
+                    _t('Ngôn ngữ'),
+                    style: const TextStyle(
+                      color: StageColors.goldCore,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    _t('Chọn ngôn ngữ hiển thị'),
+                    style: const TextStyle(color: StageColors.secondaryText),
+                  ),
+                  const SizedBox(height: 15),
+                  for (final option in GameLanguage.values) ...[
+                    SizedBox(
+                      height: 54,
+                      child: TheatreButton(
+                        label:
+                            '${option.displayName}  ${language == option ? '✓' : ''}',
+                        onPressed: soundBusy
+                            ? null
+                            : () => onSelectLanguage(option),
+                        tone: language == option
+                            ? TheatreButtonTone.gold
+                            : TheatreButtonTone.lilac,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                  ],
+                  const Spacer(),
+                  if (soundBusy)
+                    Text(
+                      _t('Đang lưu cài đặt…'),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: StageColors.goldCore),
+                    ),
+                  if (notice != null)
+                    Text(
+                      _t(notice!),
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      style: const TextStyle(
+                        color: StageColors.text,
+                        fontSize: 12,
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -272,13 +390,15 @@ class SoundButton extends StatelessWidget {
     super.key,
     required this.enabled,
     required this.onPressed,
+    this.language = GameLanguage.vi,
   });
   final bool enabled;
   final VoidCallback? onPressed;
+  final GameLanguage language;
 
   @override
   Widget build(BuildContext context) => IconButton.filledTonal(
-    tooltip: enabled ? 'Tắt âm thanh' : 'Bật âm thanh',
+    tooltip: language.text(enabled ? 'Tắt âm thanh' : 'Bật âm thanh'),
     onPressed: onPressed,
     icon: Icon(enabled ? Icons.volume_up : Icons.volume_off),
     style: IconButton.styleFrom(

@@ -1,5 +1,11 @@
 # QA và bằng chứng Flutter
 
+## Chuyển ngôn ngữ toàn game (03/11/2026)
+
+- `flutter test --reporter compact --no-pub` → **108/108 pass**. Test mới xác nhận save v4 lên v5 mặc định Tiếng Việt, English lưu qua restart, lỗi ghi không đổi save, đủ bản dịch tên/gợi ý 20 màn, phản hồi số sao/màn, popup chuyển ngay home/preview/pause rồi đổi lại Tiếng Việt. `flutter analyze --no-pub` → No issues found. `flutter build apk --debug --no-pub` → pass, SHA-256 artifact cuối `60961b983e4043cc218ca2ab99a64ce41e1f43ddae469ca7f3366c4294764756`; `flutter build web --no-wasm-dry-run --no-pub` → pass (cảnh báo font CupertinoIcons cũ).
+- Redmi K30 5G `9d9af905`: `adb install -r` → Success. [Popup Tiếng Việt](qa/language/settings-vi-redmi.png), [popup English](qa/language/settings-en-redmi.png), [preview 01 tiếng Anh](qa/language/stage01-en-redmi.png) là ảnh máy thật. UI semantics đổi `Cài đặt`→`Settings`, `Tắt âm thanh`→`Mute sound`, `Chơi ngay`→`Play now`, nút preview `Bắt đầu`→`Start`. Save sau chọn English có `schemaVersion=5`, `language=en`, `highestUnlocked=0`, `currentLevel=0`. Đây là QA đọc hình và thao tác ADB; chưa đánh giá ngôn ngữ bởi người bản ngữ hoặc kiểm mọi câu dịch trên thiết bị.
+- Save trước thử được sao lưu `/tmp/ball-handler-before-language-qa.pb`, SHA-256 `d80cff94d77820878d5694bfcbe76f01050f7cbddc6723eb6d30ac673ba8479a`, schema v4, màn 1, 3 lượt, âm bật. Sau QA đã force-stop, chép lại đúng hash rồi mở app; migration tạo schema v5 với `language=vi`, `highestUnlocked=0`, `currentLevel=0`, home hiện `Chơi ngay`. Save gốc không bị giữ ở English sau phép thử.
+
 ## Màn 15/19, hiệu ứng thắng và khóa màn (03/11/2026)
 
 - `flutter test --reporter compact --no-pub` → **102/102 pass**: replay 20 màn; test mới kiểm vật chắn 15/19 không giao nhau, đường ziczac, 36 hạt và thời gian hiệu ứng 1.200 ms; widget test duyệt 01→20 từ save mới, màn khóa đều không tạo ván. `flutter analyze --no-pub` → No issues found; `flutter build web --no-wasm-dry-run --no-pub` → pass; `flutter build apk --debug --no-pub` → pass, SHA-256 `344e281d5c6c160b6c49fb04e32b83bc73bd6f004829ef3e3fe92b21aeb69fd0`; `adb install -r` trên Redmi `9d9af905` → Success.
