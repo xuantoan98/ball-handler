@@ -409,14 +409,23 @@ class GamePainter extends CustomPainter {
   }) {
     final cycle = animation.value;
     c.save();
-    // Visual motion stays inside the exact collision rectangle.
-    c.clipRect(box);
     c.translate(box.center.dx, box.center.dy);
     c.rotate(-direction.dx * activity * .055);
     c.translate(-box.center.dx, -box.center.dy);
     c.translate(0, PuppetMotion.bob(cycle, activity));
     final artBox = box.deflate(2);
-    _drop(c, artBox, 5, StageColors.gold, 7, offset: const Offset(0, 3));
+    c.drawOval(
+      Rect.fromCenter(
+        center: artBox.center + const Offset(0, 3),
+        width: artBox.width * .82,
+        height: artBox.height * .8,
+      ),
+      Paint()
+        ..color = StageColors.gold.withValues(alpha: .24)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+    );
+    // The animated silhouette stays inside the exact collision rectangle.
+    c.clipRect(box);
     final left = artBox.left;
     final top = artBox.top;
     final w = artBox.width;

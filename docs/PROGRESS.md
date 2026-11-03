@@ -6,7 +6,7 @@ Chủ sản phẩm đã duyệt [thiết kế và ba concept](superpowers/specs/
 
 Lệnh cuối: `dart format lib test` → 40 files, 0 changed; `dart run tool/export_levels.dart` → `Exported 20 validated levels`; `flutter test` → **84/84 pass**; `flutter analyze` → **No issues found**; `flutter build web` → `Built build/web`; `flutter build apk --debug` → `Built build/app/outputs/flutter-apk/app-debug.apk`, 177 MiB, SHA-256 `e61798339eae84420674476f21221ab16327aa722dd159a7fc6444f3a73fc4ad`; `git diff --check` → không có lỗi. Đã render thử 7 board đại diện 01/04/08/10/13/17/20 bằng `GamePainter` trong Flutter test với asset đóng gói; đây là kiểm tra bố cục, font test không phản ánh app thật.
 
-`adb devices -l` tại lần kiểm tra cuối chỉ hiện `List of devices attached` rỗng. APK v2 **chưa cài/chạy trên Android thật**; chưa có ảnh, đo FPS/bộ nhớ, kiểm cảm ứng một ngón, hay người mới giải các màn v2. Các replay tự động chỉ chứng minh đường tham chiếu hợp lệ trong rules. Bản này chưa phát hành và chưa push.
+**Cập nhật 03/11:** Redmi K30 5G đã kết nối lại và chạy APK debug bản v2. Đã kiểm home, sáu preview đại diện, kéo đèn bằng ADB touch thắng màn 08, mở rồi hết hạn cửa màn 13, pause giữ thời gian, và đo PSS debug. Ảnh/lệnh/giới hạn ở [QA](QA.md). Sau khi ADB ngắt rồi kết nối lại, đã force-stop và khôi phục save gốc; SHA-256 trước/sau cùng `5a177d4f8ff3fcbe015039c468a7684c947f4179d96ea325359e22bdae126ce6`. Chưa có playtest người mới, xác minh va chạm bằng ngón tay người hoặc phép đo frame time Flutter đủ tin cậy. Bản này chưa phát hành và chưa push.
 
 Đã thử mở `build/web` qua browser automation, nhưng inventory trả `browsers: []`; chưa có smoke tương tác bản web v2. Không quy kết `flutter build web` thành kiểm thử UI trên trình duyệt.
 

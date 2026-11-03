@@ -7,11 +7,25 @@
 | Catalog/schema/luật | PASS tự động: 20 layout có ID giữ nguyên, validator và replay có thời gian qua trong 60 giây. Test riêng kiểm đạo cụ chắn, chớp chạm bóng đứng yên, pause/reset, cửa có thời hạn và export JSON. Replay không chứng minh người mới hiểu hay giải được bằng ngón tay. |
 | Art và bố cục | 20 WebP riêng được nạp từ asset bundle, tổng 11.76 MB. Đã xem từng nền qua contact sheet và render từ `GamePainter` bảy màn 01/04/08/10/13/17/20 ở 390×844. Flutter test dùng font thay thế, nên bản render chỉ dùng rà vị trí/độ tương phản vật thể, không phải ảnh app thật. |
 | Lệnh xác minh | `dart format lib test`: 40 files, 0 changed; `dart run tool/export_levels.dart`: 20 validated levels; `flutter test`: **84/84 pass**; `flutter analyze`: No issues found; `flutter build web`: pass; `flutter build apk --debug`: pass. APK debug 177 MiB, SHA-256 `e61798339eae84420674476f21221ab16327aa722dd159a7fc6444f3a73fc4ad`. Web build có cảnh báo CupertinoIcons template nhưng vẫn thành công. |
-| Android thật bản v2 | **NOT VERIFIED**: `adb devices -l` không liệt kê thiết bị ở lần kiểm cuối. Chưa cài APK v2, đo FPS/heap, kiểm kéo một ngón hoặc quan sát chớp/cửa có hạn trên máy. |
+| Android thật bản v2 | **Đã kiểm một phần trên Redmi K30 5G ngày 03/11**: cài APK debug, xem home và sáu preview, kéo đèn bằng ADB touch để thắng màn 08, quan sát cửa màn 13 mở rồi khóa sau hạn. Chi tiết và giới hạn ở mục ngay dưới. |
 | Web tương tác bản v2 | **NOT VERIFIED**: `flutter build web` qua, nhưng inventory của công cụ browser không có trình duyệt/tab để mở bản cuối. Ảnh render Flutter test ở trên chỉ là kiểm tra bố cục. |
 | Playtest độ khó 20 màn | **NOT VERIFIED**: chưa có người chơi mới thử từng màn; cần đo thời gian giải, số lần chết, nhận biết coral/vật chắn và khoảng hở với ngón tay. |
 
-Bản v2 chưa có bằng chứng đủ để nghiệm thu chất lượng trải nghiệm trên Android thật. Không xuất bản công khai.
+Bản v2 đã có smoke trên Android thật nhưng chưa có playtest người mới hoặc số liệu frame time Flutter đáng tin cậy để nghiệm thu chất lượng trải nghiệm. Không xuất bản công khai.
+
+### Smoke Android thật bản 20 màn v2 (03/11/2026)
+
+Thiết bị `9d9af905`: Redmi K30 5G, Android 10/API 29, 1080×2400, density 440. `adb devices -l` báo `device`; `adb install -r build/app/outputs/flutter-apk/app-debug.apk` → `Success`; `adb shell am start -n com.example.ball_handler/.MainActivity` mở app. APK debug cuối sau sửa bóng có SHA-256 `dbb3fb7ef9a3e3788f586bcc6c4fbdbda9cea52f850ccab1f97c111ed17c4233`. Trước cài đã sao lưu DataStore gốc 271 byte; cuối phiên force-stop và chép lại, SHA-256 trước/sau cùng `5a177d4f8ff3fcbe015039c468a7684c947f4179d96ea325359e22bdae126ce6`. Không xóa app data.
+
+| Kiểm tra | Kết quả và bằng chứng |
+| --- | --- |
+| Home và 20 màn có thể duyệt | **PASS smoke**: [home](qa/twenty-stages/home-redmi-v2.png) và preview [01](qa/twenty-stages/preview-01-redmi-v2.png), [04](qa/twenty-stages/preview-04-redmi-v2.png), [08](qa/twenty-stages/preview-08-redmi-v2.png), [13](qa/twenty-stages/preview-13-redmi-v2.png), [17](qa/twenty-stages/preview-17-redmi-v2.png), [20](qa/twenty-stages/preview-20-redmi-v2.png) là ảnh từ máy thật. Art theo chapter, điều khiển và nhân vật đọc được ở các mẫu này; chưa xem riêng toàn bộ 20 màn đang chơi trên máy. |
+| Kéo đèn, màn chớp và thắng | **PASS một đường màn 08**: ADB `input swipe` phát sự kiện chạm một ngón qua bàn đèn, tránh màn chớp di chuyển và giữ cửa để thắng; [đang chơi](qa/twenty-stages/playing-08-redmi-v2.png), [thắng](qa/twenty-stages/win-08-redmi-v2.png). Đây là touch được ADB tiêm vào điện thoại thật, chưa chứng minh sự thoải mái của ngón tay người chơi. Pause hiển thị đúng [ảnh](qa/twenty-stages/paused-08-redmi-v2.png); thời gian còn 18.601 giây không đổi giữa hai lần đọc save khi pause. |
+| Cửa có thời hạn màn 13 | **PASS một chu kỳ**: ADB swipe chạm sao; UI semantics báo “Cửa trăng đang mở”, và [ảnh](qa/twenty-stages/gate-open-13-redmi-v2.png) có vòng đếm. Sau 12 giây, UI semantics báo “Cửa trăng đang khóa” trong cùng lượt. Không suy từ ảnh nền ra hitbox. |
+| Bộ nhớ và khung hình | `adb shell dumpsys meminfo com.example.ball_handler` khi app debug đang chơi: TOTAL PSS 383017 KB, trong đó Graphics 94800 KB. `dumpsys gfxinfo` chỉ ghi 12 Android View frames, 3 janky; mẫu này không đo đầy đủ Flutter raster/UI frames và không đủ để kết luận 60 FPS. Cần profile build + Flutter DevTools trên thiết bị để nghiệm thu hiệu năng. |
+| Lệnh kiểm code sau sửa glow bóng | `flutter test` → **84/84 pass**; `flutter analyze` → No issues found; `flutter build web` và `flutter build apk --debug` → pass. Đổi glow hình chữ nhật thành oval blur, còn silhouette vẫn clip trong hitbox. |
+
+ADB đã mất kết nối một lần giữa phép thử màn 13; sau khi cắm lại, `adb devices -l` nhận máy, app được mở lại để kiểm rồi khôi phục save gốc. Ảnh có thông báo/overlay cá nhân đã loại khỏi bộ bằng chứng. Chưa có playtest người mới 01–20, kiểm va chạm chớp bằng ngón tay người hoặc đo frame time bằng profile build.
 
 Review code độc lập phát hiện và đã sửa: cửa đọc `requires` riêng, va chạm khi bóng/chớp cùng đi qua nhau, ảnh nền bị kéo giãn, và phần nhân vật động vượt mép hitbox. Validator chặn gate có thời hạn chỉ tham chiếu một phần chuỗi sao vì đồng hồ của schema v2 bắt đầu ở sao cuối. Ba test mới tương ứng đã chạy đỏ trước sửa và xanh sau sửa; toàn bộ suite cuối 84/84.
 
