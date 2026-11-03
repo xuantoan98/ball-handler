@@ -1,5 +1,9 @@
 # Tiến độ và task board
 
+## M6 — mô phỏng sai số đầu vào khi chưa có người thử (03/11/2026)
+
+Đã chạy `dart run tool/m6_simulate_inputs.dart` với 5 cấu hình × 20 màn × 25 seed qua cùng `GameAttempt`: đường chuẩn và lệch ±2 px mốc đèn thắng 500/500; lệch ±5 px thắng 218/500 (6 thua, 276 chưa vào đích); chậm 1,25× với ±2 px thắng 500/500; chậm 1,35× với ±8 px thắng 113/500 (10 thua, 377 chưa vào đích). Phần lớn lượt chưa xong hụt điều kiện **toàn bộ bóng trong cửa** ở mốc cuối. Đây là phép thử độ nhạy với sai số trên đường lời giải có sẵn, **không phải 5 người chơi giả lập** và không thể xác nhận họ hiểu điều khiển hay thấy độ khó hợp lý. Chi tiết giả định và dữ liệu từng màn ở [QA](QA.md). M6 vẫn chờ playtest người mới khi có thể tổ chức; hiện chủ sản phẩm chưa thu xếp được người tham gia.
+
 ## M6 tiếp tục trên Redmi và Android Chrome (03/11/2026)
 
 Trên Redmi K30 5G đã đo Flutter VM timeline bằng APK profile ở màn 01/20. Phát hiện profile crash trước khi vào Flutter do thiếu AdMob application ID trong merged manifest; đã thêm Google sample ID **chỉ cho biến thể profile**, build lại và xác nhận app chạy. Màn 20 đứng yên qua 8 mẫu ×1,8 giây có UI p99 7,184 ms, raster p99 11,173 ms; mẫu kéo đèn 2,2 giây có UI p99 11,450 ms, raster p99 15,463 ms. Chưa đủ dữ liệu để khẳng định FPS ổn định khi chơi dài. ADB hoàn tất 30 chu kỳ Bắt đầu/Tạm dừng/Bỏ ván về preview, PID giữ nguyên; PSS tăng 260449→273059 KB. Background 5 giây hiện pause khi trở lại. Chrome Beta trên máy mở bản web, popup/home/preview/play và kéo đèn bằng CDP touch; chưa thắng màn web trong phiên này. Chi tiết lệnh, ảnh và giới hạn ở [QA](QA.md).

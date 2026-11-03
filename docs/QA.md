@@ -1,5 +1,21 @@
 # QA và bằng chứng Flutter
 
+## M6 mô phỏng sai số thao tác — không thay playtest (03/11/2026)
+
+Theo yêu cầu khi chưa thu xếp được người thử thật, `dart run tool/m6_simulate_inputs.dart` đã phát sinh **5 cấu hình đầu vào tổng hợp × 20 màn × 25 seed = 2.500 lượt** qua `GameAttempt` của game. Mỗi cấu hình đi theo `solutionSteps` đã author, chỉ thay tọa độ mốc đèn trong vùng điều khiển và tốc độ/chờ; không nhìn ảnh, tự tìm đường hay sửa sau khi hụt cửa. Seed cố định `20261103`; [dữ liệu từng màn](qa/m6/simulated-inputs-2026-11-03.json) có số thắng/thua/chưa hoàn thành và lý do. `px` ở đây là đơn vị logic của bàn điều khiển 390×844, không phải sai số đo từ ngón tay người.
+
+| Cấu hình tổng hợp | Sai số mốc | Tốc độ / chờ thêm | Thắng | Thua | Chưa hoàn thành |
+| --- | --- | --- | ---: | ---: | ---: |
+| Đường tham chiếu | 0 px | 1× / 0 s | 500 | 0 | 0 |
+| Lệch nhỏ | ±2 px mỗi trục | 1× / 0 s | 500 | 0 | 0 |
+| Lệch vừa | ±5 px mỗi trục | 1× / 0 s | 218 | 6 | 276 |
+| Chậm và dừng nghĩ | ±2 px mỗi trục | 1,25× / 0,5 s trước mỗi bước kéo | 500 | 0 | 0 |
+| Chậm, lệch lớn | ±8 px mỗi trục | 1,35× / 0,8 s trước mỗi bước kéo | 113 | 10 | 377 |
+
+Trong cấu hình ±5 px, 272/276 lượt chưa hoàn thành có cửa mở nhưng bóng chưa nằm trọn trong đích sau mốc cuối; ở ±8 px là 351/377. Hình học hiện tại cho bóng cao 54, cửa cao 76 trên tường; một đơn vị dọc bàn đèn dịch bóng khoảng 4,84 đơn vị tường, nên dải dọc để bóng **nằm trọn** cửa chỉ khoảng 4,54 px logic. Đây là **dấu hiệu cần quan sát khả năng chỉnh vị trí cuối bằng ngón tay**, không phải tỷ lệ thất bại dự đoán của người chơi: mô phỏng cố ý không nhìn phản hồi để sửa đường. Năm cấu hình không tương đương năm người; M6 vẫn chờ playtest người mới theo [phiếu](M6_PLAYTEST_V2.md).
+
+Sau khi thêm công cụ mô phỏng: `flutter analyze` → No issues found; `flutter test --reporter compact` → **84/84 pass**; kiểm JSON → 100 hàng màn×cấu hình, mỗi hàng 25 lượt; `git diff --check` → không lỗi.
+
 ## M6 tiếp tục — Redmi profile và Android Chrome (03/11/2026)
 
 Thiết bị thật: Redmi K30 5G `9d9af905`, Android 10/API 29, 1080×2400. Lần này kiểm bản profile native và bản web trong **Chrome Beta trên chính điện thoại**, không gọi viewport desktop là máy thật. Save native gốc 271 byte đã sao lưu trước thử; sau cùng cài lại APK debug, force-stop và khôi phục đúng file, SHA-256 trước/sau `5a177d4f8ff3fcbe015039c468a7684c947f4179d96ea325359e22bdae126ce6`. Không xóa app data, không công bố bản build.

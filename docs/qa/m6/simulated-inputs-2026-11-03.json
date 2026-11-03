@@ -1,0 +1,1033 @@
+{
+  "kind": "synthetic waypoint perturbation, not human playtest",
+  "seed": 20261103,
+  "repeatsPerLevelProfile": 25,
+  "profiles": [
+    {
+      "name": "reference",
+      "waypointOffsetControlPx": 0.0,
+      "moveAndWaitDurationScale": 1.0,
+      "extraWaitBeforeEachMoveSeconds": 0.0
+    },
+    {
+      "name": "small_offset",
+      "waypointOffsetControlPx": 2.0,
+      "moveAndWaitDurationScale": 1.0,
+      "extraWaitBeforeEachMoveSeconds": 0.0
+    },
+    {
+      "name": "medium_offset",
+      "waypointOffsetControlPx": 5.0,
+      "moveAndWaitDurationScale": 1.0,
+      "extraWaitBeforeEachMoveSeconds": 0.0
+    },
+    {
+      "name": "hesitant",
+      "waypointOffsetControlPx": 2.0,
+      "moveAndWaitDurationScale": 1.25,
+      "extraWaitBeforeEachMoveSeconds": 0.5
+    },
+    {
+      "name": "slow_imprecise",
+      "waypointOffsetControlPx": 8.0,
+      "moveAndWaitDurationScale": 1.35,
+      "extraWaitBeforeEachMoveSeconds": 0.8
+    }
+  ],
+  "results": [
+    {
+      "level": 1,
+      "profile": "reference",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 2.4999999999997815,
+      "reasons": {}
+    },
+    {
+      "level": 1,
+      "profile": "small_offset",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 2.4999999999997815,
+      "reasons": {}
+    },
+    {
+      "level": 1,
+      "profile": "medium_offset",
+      "won": 8,
+      "lost": 0,
+      "incomplete": 17,
+      "medianWinSeconds": 2.4999999999997815,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 17
+      }
+    },
+    {
+      "level": 1,
+      "profile": "hesitant",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 3.375000000000349,
+      "reasons": {}
+    },
+    {
+      "level": 1,
+      "profile": "slow_imprecise",
+      "won": 7,
+      "lost": 0,
+      "incomplete": 18,
+      "medianWinSeconds": 3.824999999999636,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 18
+      }
+    },
+    {
+      "level": 2,
+      "profile": "reference",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 5.499999999999345,
+      "reasons": {}
+    },
+    {
+      "level": 2,
+      "profile": "small_offset",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 5.499999999999345,
+      "reasons": {}
+    },
+    {
+      "level": 2,
+      "profile": "medium_offset",
+      "won": 9,
+      "lost": 6,
+      "incomplete": 10,
+      "medianWinSeconds": 5.499999999999345,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 10,
+        "Bóng chạm cảm biến đỏ.": 6
+      }
+    },
+    {
+      "level": 2,
+      "profile": "hesitant",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 8.125000000001048,
+      "reasons": {}
+    },
+    {
+      "level": 2,
+      "profile": "slow_imprecise",
+      "won": 4,
+      "lost": 8,
+      "incomplete": 13,
+      "medianWinSeconds": 9.474999999998909,
+      "reasons": {
+        "Bóng chạm cảm biến đỏ.": 8,
+        "Chưa vào trọn cửa sau đường mốc": 13
+      }
+    },
+    {
+      "level": 3,
+      "profile": "reference",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 3.9999999999995635,
+      "reasons": {}
+    },
+    {
+      "level": 3,
+      "profile": "small_offset",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 3.9999999999995635,
+      "reasons": {}
+    },
+    {
+      "level": 3,
+      "profile": "medium_offset",
+      "won": 10,
+      "lost": 0,
+      "incomplete": 15,
+      "medianWinSeconds": 3.9999999999995635,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 15
+      }
+    },
+    {
+      "level": 3,
+      "profile": "hesitant",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 5.750000000000698,
+      "reasons": {}
+    },
+    {
+      "level": 3,
+      "profile": "slow_imprecise",
+      "won": 4,
+      "lost": 0,
+      "incomplete": 21,
+      "medianWinSeconds": 6.649999999999272,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 21
+      }
+    },
+    {
+      "level": 4,
+      "profile": "reference",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 5.499999999999345,
+      "reasons": {}
+    },
+    {
+      "level": 4,
+      "profile": "small_offset",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 5.499999999999345,
+      "reasons": {}
+    },
+    {
+      "level": 4,
+      "profile": "medium_offset",
+      "won": 9,
+      "lost": 0,
+      "incomplete": 16,
+      "medianWinSeconds": 5.499999999999345,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 16
+      }
+    },
+    {
+      "level": 4,
+      "profile": "hesitant",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 8.125000000001048,
+      "reasons": {}
+    },
+    {
+      "level": 4,
+      "profile": "slow_imprecise",
+      "won": 7,
+      "lost": 0,
+      "incomplete": 18,
+      "medianWinSeconds": 9.474999999998909,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 18
+      }
+    },
+    {
+      "level": 5,
+      "profile": "reference",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 3.9999999999995635,
+      "reasons": {}
+    },
+    {
+      "level": 5,
+      "profile": "small_offset",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 3.9999999999995635,
+      "reasons": {}
+    },
+    {
+      "level": 5,
+      "profile": "medium_offset",
+      "won": 14,
+      "lost": 0,
+      "incomplete": 11,
+      "medianWinSeconds": 3.9999999999995635,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 11
+      }
+    },
+    {
+      "level": 5,
+      "profile": "hesitant",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 5.750000000000698,
+      "reasons": {}
+    },
+    {
+      "level": 5,
+      "profile": "slow_imprecise",
+      "won": 4,
+      "lost": 0,
+      "incomplete": 21,
+      "medianWinSeconds": 6.649999999999272,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 21
+      }
+    },
+    {
+      "level": 6,
+      "profile": "reference",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 3.9999999999995635,
+      "reasons": {}
+    },
+    {
+      "level": 6,
+      "profile": "small_offset",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 3.9999999999995635,
+      "reasons": {}
+    },
+    {
+      "level": 6,
+      "profile": "medium_offset",
+      "won": 12,
+      "lost": 0,
+      "incomplete": 13,
+      "medianWinSeconds": 3.9999999999995635,
+      "reasons": {
+        "Đạo cụ đang chắn đường bóng.": 4,
+        "Chưa vào trọn cửa sau đường mốc": 9
+      }
+    },
+    {
+      "level": 6,
+      "profile": "hesitant",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 5.750000000000698,
+      "reasons": {}
+    },
+    {
+      "level": 6,
+      "profile": "slow_imprecise",
+      "won": 5,
+      "lost": 2,
+      "incomplete": 18,
+      "medianWinSeconds": 6.649999999999272,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 11,
+        "Đạo cụ đang chắn đường bóng.": 7,
+        "Bóng chạm cảm biến đỏ.": 2
+      }
+    },
+    {
+      "level": 7,
+      "profile": "reference",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 6.999999999999127,
+      "reasons": {}
+    },
+    {
+      "level": 7,
+      "profile": "small_offset",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 6.999999999999127,
+      "reasons": {}
+    },
+    {
+      "level": 7,
+      "profile": "medium_offset",
+      "won": 9,
+      "lost": 0,
+      "incomplete": 16,
+      "medianWinSeconds": 6.999999999999127,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 16
+      }
+    },
+    {
+      "level": 7,
+      "profile": "hesitant",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 10.500000000001396,
+      "reasons": {}
+    },
+    {
+      "level": 7,
+      "profile": "slow_imprecise",
+      "won": 9,
+      "lost": 0,
+      "incomplete": 16,
+      "medianWinSeconds": 12.299999999998544,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 16
+      }
+    },
+    {
+      "level": 8,
+      "profile": "reference",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 5.999999999999491,
+      "reasons": {}
+    },
+    {
+      "level": 8,
+      "profile": "small_offset",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 5.999999999999491,
+      "reasons": {}
+    },
+    {
+      "level": 8,
+      "profile": "medium_offset",
+      "won": 13,
+      "lost": 0,
+      "incomplete": 12,
+      "medianWinSeconds": 5.999999999999491,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 12
+      }
+    },
+    {
+      "level": 8,
+      "profile": "hesitant",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 8.749999999999483,
+      "reasons": {}
+    },
+    {
+      "level": 8,
+      "profile": "slow_imprecise",
+      "won": 9,
+      "lost": 0,
+      "incomplete": 16,
+      "medianWinSeconds": 10.149999999999505,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 16
+      }
+    },
+    {
+      "level": 9,
+      "profile": "reference",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 5.499999999999345,
+      "reasons": {}
+    },
+    {
+      "level": 9,
+      "profile": "small_offset",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 5.499999999999345,
+      "reasons": {}
+    },
+    {
+      "level": 9,
+      "profile": "medium_offset",
+      "won": 10,
+      "lost": 0,
+      "incomplete": 15,
+      "medianWinSeconds": 5.499999999999345,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 15
+      }
+    },
+    {
+      "level": 9,
+      "profile": "hesitant",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 8.125000000001048,
+      "reasons": {}
+    },
+    {
+      "level": 9,
+      "profile": "slow_imprecise",
+      "won": 6,
+      "lost": 0,
+      "incomplete": 19,
+      "medianWinSeconds": 9.474999999998909,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 19
+      }
+    },
+    {
+      "level": 10,
+      "profile": "reference",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 6.999999999999127,
+      "reasons": {}
+    },
+    {
+      "level": 10,
+      "profile": "small_offset",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 6.999999999999127,
+      "reasons": {}
+    },
+    {
+      "level": 10,
+      "profile": "medium_offset",
+      "won": 13,
+      "lost": 0,
+      "incomplete": 12,
+      "medianWinSeconds": 6.999999999999127,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 12
+      }
+    },
+    {
+      "level": 10,
+      "profile": "hesitant",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 10.500000000001396,
+      "reasons": {}
+    },
+    {
+      "level": 10,
+      "profile": "slow_imprecise",
+      "won": 2,
+      "lost": 0,
+      "incomplete": 23,
+      "medianWinSeconds": 12.299999999998544,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 21,
+        "Cửa chắn đang khóa. Hãy chạm công tắc sao.": 2
+      }
+    },
+    {
+      "level": 11,
+      "profile": "reference",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 9.99999999999869,
+      "reasons": {}
+    },
+    {
+      "level": 11,
+      "profile": "small_offset",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 9.99999999999869,
+      "reasons": {}
+    },
+    {
+      "level": 11,
+      "profile": "medium_offset",
+      "won": 8,
+      "lost": 0,
+      "incomplete": 17,
+      "medianWinSeconds": 9.99999999999869,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 17
+      }
+    },
+    {
+      "level": 11,
+      "profile": "hesitant",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 15.250000000002096,
+      "reasons": {}
+    },
+    {
+      "level": 11,
+      "profile": "slow_imprecise",
+      "won": 4,
+      "lost": 0,
+      "incomplete": 21,
+      "medianWinSeconds": 17.949999999997818,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 18,
+        "Cửa chắn đang khóa. Hãy chạm công tắc sao.": 3
+      }
+    },
+    {
+      "level": 12,
+      "profile": "reference",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 9.99999999999869,
+      "reasons": {}
+    },
+    {
+      "level": 12,
+      "profile": "small_offset",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 9.99999999999869,
+      "reasons": {}
+    },
+    {
+      "level": 12,
+      "profile": "medium_offset",
+      "won": 9,
+      "lost": 0,
+      "incomplete": 16,
+      "medianWinSeconds": 9.99999999999869,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 16
+      }
+    },
+    {
+      "level": 12,
+      "profile": "hesitant",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 15.250000000002096,
+      "reasons": {}
+    },
+    {
+      "level": 12,
+      "profile": "slow_imprecise",
+      "won": 4,
+      "lost": 0,
+      "incomplete": 21,
+      "medianWinSeconds": 17.949999999997818,
+      "reasons": {
+        "Cửa chắn đang khóa. Hãy chạm công tắc sao.": 4,
+        "Chưa vào trọn cửa sau đường mốc": 17
+      }
+    },
+    {
+      "level": 13,
+      "profile": "reference",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 3.9999999999995635,
+      "reasons": {}
+    },
+    {
+      "level": 13,
+      "profile": "small_offset",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 3.9999999999995635,
+      "reasons": {}
+    },
+    {
+      "level": 13,
+      "profile": "medium_offset",
+      "won": 11,
+      "lost": 0,
+      "incomplete": 14,
+      "medianWinSeconds": 3.9999999999995635,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 14
+      }
+    },
+    {
+      "level": 13,
+      "profile": "hesitant",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 5.750000000000698,
+      "reasons": {}
+    },
+    {
+      "level": 13,
+      "profile": "slow_imprecise",
+      "won": 7,
+      "lost": 0,
+      "incomplete": 18,
+      "medianWinSeconds": 6.649999999999272,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 18
+      }
+    },
+    {
+      "level": 14,
+      "profile": "reference",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 6.999999999999127,
+      "reasons": {}
+    },
+    {
+      "level": 14,
+      "profile": "small_offset",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 6.999999999999127,
+      "reasons": {}
+    },
+    {
+      "level": 14,
+      "profile": "medium_offset",
+      "won": 15,
+      "lost": 0,
+      "incomplete": 10,
+      "medianWinSeconds": 6.999999999999127,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 10
+      }
+    },
+    {
+      "level": 14,
+      "profile": "hesitant",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 10.500000000001396,
+      "reasons": {}
+    },
+    {
+      "level": 14,
+      "profile": "slow_imprecise",
+      "won": 7,
+      "lost": 0,
+      "incomplete": 18,
+      "medianWinSeconds": 12.299999999998544,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 17,
+        "Đạo cụ đang chắn đường bóng.": 1
+      }
+    },
+    {
+      "level": 15,
+      "profile": "reference",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 6.999999999999127,
+      "reasons": {}
+    },
+    {
+      "level": 15,
+      "profile": "small_offset",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 6.999999999999127,
+      "reasons": {}
+    },
+    {
+      "level": 15,
+      "profile": "medium_offset",
+      "won": 9,
+      "lost": 0,
+      "incomplete": 16,
+      "medianWinSeconds": 6.999999999999127,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 16
+      }
+    },
+    {
+      "level": 15,
+      "profile": "hesitant",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 10.500000000001396,
+      "reasons": {}
+    },
+    {
+      "level": 15,
+      "profile": "slow_imprecise",
+      "won": 6,
+      "lost": 0,
+      "incomplete": 19,
+      "medianWinSeconds": 12.299999999998544,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 16,
+        "Đạo cụ đang chắn đường bóng.": 3
+      }
+    },
+    {
+      "level": 16,
+      "profile": "reference",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 6.999999999999127,
+      "reasons": {}
+    },
+    {
+      "level": 16,
+      "profile": "small_offset",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 6.999999999999127,
+      "reasons": {}
+    },
+    {
+      "level": 16,
+      "profile": "medium_offset",
+      "won": 13,
+      "lost": 0,
+      "incomplete": 12,
+      "medianWinSeconds": 6.999999999999127,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 12
+      }
+    },
+    {
+      "level": 16,
+      "profile": "hesitant",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 10.500000000001396,
+      "reasons": {}
+    },
+    {
+      "level": 16,
+      "profile": "slow_imprecise",
+      "won": 3,
+      "lost": 0,
+      "incomplete": 22,
+      "medianWinSeconds": 12.299999999998544,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 21,
+        "Cửa chắn đang khóa. Hãy chạm công tắc sao.": 1
+      }
+    },
+    {
+      "level": 17,
+      "profile": "reference",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 5.499999999999345,
+      "reasons": {}
+    },
+    {
+      "level": 17,
+      "profile": "small_offset",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 5.499999999999345,
+      "reasons": {}
+    },
+    {
+      "level": 17,
+      "profile": "medium_offset",
+      "won": 11,
+      "lost": 0,
+      "incomplete": 14,
+      "medianWinSeconds": 5.499999999999345,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 14
+      }
+    },
+    {
+      "level": 17,
+      "profile": "hesitant",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 8.125000000001048,
+      "reasons": {}
+    },
+    {
+      "level": 17,
+      "profile": "slow_imprecise",
+      "won": 7,
+      "lost": 0,
+      "incomplete": 18,
+      "medianWinSeconds": 9.474999999998909,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 18
+      }
+    },
+    {
+      "level": 18,
+      "profile": "reference",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 6.999999999999127,
+      "reasons": {}
+    },
+    {
+      "level": 18,
+      "profile": "small_offset",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 6.999999999999127,
+      "reasons": {}
+    },
+    {
+      "level": 18,
+      "profile": "medium_offset",
+      "won": 14,
+      "lost": 0,
+      "incomplete": 11,
+      "medianWinSeconds": 6.999999999999127,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 11
+      }
+    },
+    {
+      "level": 18,
+      "profile": "hesitant",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 10.500000000001396,
+      "reasons": {}
+    },
+    {
+      "level": 18,
+      "profile": "slow_imprecise",
+      "won": 7,
+      "lost": 0,
+      "incomplete": 18,
+      "medianWinSeconds": 12.299999999998544,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 17,
+        "Cửa chắn đang khóa. Hãy chạm công tắc sao.": 1
+      }
+    },
+    {
+      "level": 19,
+      "profile": "reference",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 8.49999999999891,
+      "reasons": {}
+    },
+    {
+      "level": 19,
+      "profile": "small_offset",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 8.49999999999891,
+      "reasons": {}
+    },
+    {
+      "level": 19,
+      "profile": "medium_offset",
+      "won": 9,
+      "lost": 0,
+      "incomplete": 16,
+      "medianWinSeconds": 8.49999999999891,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 16
+      }
+    },
+    {
+      "level": 19,
+      "profile": "hesitant",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 12.875000000001746,
+      "reasons": {}
+    },
+    {
+      "level": 19,
+      "profile": "slow_imprecise",
+      "won": 4,
+      "lost": 0,
+      "incomplete": 21,
+      "medianWinSeconds": 15.124999999998181,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 20,
+        "Cửa chắn đang khóa. Hãy chạm công tắc sao.": 1
+      }
+    },
+    {
+      "level": 20,
+      "profile": "reference",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 8.49999999999891,
+      "reasons": {}
+    },
+    {
+      "level": 20,
+      "profile": "small_offset",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 8.49999999999891,
+      "reasons": {}
+    },
+    {
+      "level": 20,
+      "profile": "medium_offset",
+      "won": 12,
+      "lost": 0,
+      "incomplete": 13,
+      "medianWinSeconds": 8.49999999999891,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 13
+      }
+    },
+    {
+      "level": 20,
+      "profile": "hesitant",
+      "won": 25,
+      "lost": 0,
+      "incomplete": 0,
+      "medianWinSeconds": 12.875000000001746,
+      "reasons": {}
+    },
+    {
+      "level": 20,
+      "profile": "slow_imprecise",
+      "won": 7,
+      "lost": 0,
+      "incomplete": 18,
+      "medianWinSeconds": 15.124999999998181,
+      "reasons": {
+        "Chưa vào trọn cửa sau đường mốc": 15,
+        "Cửa chắn đang khóa. Hãy chạm công tắc sao.": 3
+      }
+    }
+  ]
+}
