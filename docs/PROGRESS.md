@@ -2,6 +2,8 @@
 
 ## M5 — triển khai bàn đèn, âm thanh và hiệu ứng (03/11/2026)
 
+Sau khi Redmi được mở khóa, đã xem home/preview 20/chơi 01/pause, kiểm nút loa lưu qua restart, thắng màn 01 và thua do cảm biến ở màn 02 bằng touch ADB. Ảnh thiết bị và kết quả ở [QA](QA.md). Save gốc đã khôi phục nguyên byte, hash khớp, app mở lại ở home 3/3 lượt. Chưa chấm chất lượng âm bằng tai, chưa đo frame time M5 hoặc xác nhận trực quan hạt giấy/rung; M5 tiếp tục **DOING / chờ QA cảm nhận**.
+
 Tiếp tục M5: đã sửa lỗi biên dịch popup hướng dẫn do thiếu `BuildContext` trong `HomeScreen._stage`, và hai cảnh báo analyze trong audio/test. Kiểm tra cuối: `flutter analyze --no-pub` sạch, `flutter test --reporter compact --no-pub` **94/94 pass**, `flutter build web --no-wasm-dry-run --no-pub` và `flutter build apk --debug --no-pub` đều thành công. APK debug mới đã cài trên Redmi, lệnh mở được nhận và process chạy; máy đang khóa nên chưa xác nhận hình UI bản cuối. Chưa đo frame time hoặc kiểm âm thanh/hiệu ứng bằng cảm nhận trên máy. Chi tiết và hash artifact ở [QA](QA.md). Không push/phát hành.
 
 Theo yêu cầu tiếp tục, đã đưa nền bàn v3 trống mặt trời vào `GamePainter`; đèn và hitbox kéo vẫn do Flutter/rules điều khiển. Đã thêm nhạc/hiệu ứng CC0 cục bộ, nút âm thanh trên home/pause lưu qua `LivesService`, điều khiển phát một loop sau tương tác đầu tiên, dừng khi pause/background/ad. Thêm hiệu ứng giấy vàng/lilac khi thắng, viền coral khi bóng chạm nguy hiểm, rung Android một lần sau khi lưu kết quả va chạm, và nhịp vào nhẹ cho tiêu đề/nút/panel; chế độ giảm chuyển động bỏ hạt/rung/dịch chuyển. Không thay level, lượt, save schema, đồng hồ hoặc adapter quảng cáo.
