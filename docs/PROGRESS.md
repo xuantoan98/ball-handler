@@ -1,5 +1,11 @@
 # Tiến độ và task board
 
+## Một lệnh commit → push (05/11/2026)
+
+Thêm [`skills/commit/SKILL.md`](../skills/commit/SKILL.md) để câu lệnh `commit` thực hiện tuần tự viết Conventional Commit message, tạo commit đúng phạm vi và push lên `origin/develop`. Cập nhật `AGENTS.md` để agent trong repo hiểu lệnh ngắn này đã bao gồm quyền push; các yêu cầu chỉ viết message/commit local/push riêng vẫn giữ phạm vi hẹp. Workflow dừng nếu Git đích sai, remote đi trước chưa xử lý, staged ngoài phạm vi hoặc bước trước lỗi; không force push.
+
+Lệnh/kết quả: `python3 /home/bss-group/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/commit` → Skill is valid; `git diff --check` → sạch. Chưa chạy workflow commit/push trong lượt tạo skill; chưa có kiểm chứng end-to-end.
+
 ## README dự án (05/11/2026)
 
 Thêm [`README.md`](../README.md) ở gốc repo: giới thiệu Little Shadow Theatre, cách chạy/kiểm thử/build Flutter trên Android và web, luật chơi chính, cấu trúc source, tài liệu liên quan và giới hạn phát hành M7. README nêu rõ bản web dùng để xem thử và quảng cáo Android hiện chỉ là spike debug.

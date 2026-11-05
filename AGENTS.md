@@ -9,3 +9,5 @@ Chủ sản phẩm đã chọn Flutter + Dart thay giả định web-first trong
 Chỉ làm milestone được giao. Ghi lệnh và kết quả thật vào `docs/PROGRESS.md` hoặc `docs/QA.md`. Không đánh dấu thiết bị thật, playtest, ad thật hoặc màn giải được là đạt khi thiếu bằng chứng. Giữ nguyên thay đổi không liên quan của người dùng.
 
 Git remote của dự án ở GitHub. Làm việc và push trực tiếp lên `develop` khi được yêu cầu; không giả định có `main` hoặc `master`, và không tạo Pull Request theo quy trình mặc định. Không force push.
+
+Trong repo này, khi chủ sản phẩm nhắn riêng `commit` hoặc gọi `skills/commit/SKILL.md`, áp dụng [workflow commit](skills/commit/SKILL.md): viết Conventional Commit message từ thay đổi đúng phạm vi, tạo commit, rồi push lên `origin/develop` trong cùng lượt. Đây là yêu cầu push đã được chủ sản phẩm cho phép. Nếu họ chỉ yêu cầu viết message, commit local hoặc push riêng, giữ đúng phạm vi đó.
