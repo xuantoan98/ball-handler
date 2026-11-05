@@ -1,5 +1,11 @@
 # Tiến độ và task board
 
+## README dự án (05/11/2026)
+
+Thêm [`README.md`](../README.md) ở gốc repo: giới thiệu Little Shadow Theatre, cách chạy/kiểm thử/build Flutter trên Android và web, luật chơi chính, cấu trúc source, tài liệu liên quan và giới hạn phát hành M7. README nêu rõ bản web dùng để xem thử và quảng cáo Android hiện chỉ là spike debug.
+
+Lệnh/kết quả: script Python kiểm tra 10 liên kết tương đối trong README → 10 tồn tại, 0 thiếu; `git diff --check` → sạch. Thay đổi chỉ là tài liệu; không chạy lại app hoặc kiểm thiết bị trong lượt này.
+
 ## Đồng bộ source còn lại lên develop (05/11/2026)
 
 Rà toàn bộ working tree sau commit graphic/ASO: các file Flutter, test, launcher icon, web metadata, tài liệu và ảnh QA là nội dung dự án cần lưu. Thêm `/.kotlin/` vào `android/.gitignore` vì đây là cache compiler sinh tự động. Không đưa cache hoặc APK build vào Git.
