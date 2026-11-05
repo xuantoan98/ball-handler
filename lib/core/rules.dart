@@ -5,6 +5,20 @@ import 'level.dart';
 
 enum AttemptPhase { preview, playing, paused, won, lost }
 
+enum AttemptFeedbackKind {
+  none,
+  hint,
+  switchOn,
+  wrongOrder,
+  solid,
+  lockedGate,
+  hazard,
+  movingHazard,
+  timeout,
+  win,
+  gateClosed,
+}
+
 /// Strict overlap: edge contact alone is not occupancy.
 bool overlaps(Rect2 a, Rect2 b) =>
     a.left < b.right &&
@@ -70,6 +84,7 @@ class GameAttempt {
   double gateWindowRemaining = 0;
   bool _gateClosingPending = false;
   String feedback = '';
+  AttemptFeedbackKind feedbackKind = AttemptFeedbackKind.none;
 
   Rect2 get shadow => SandboxGeometry.shadowOnWall(lamp);
   List<Rect2> get movingHazardBounds => [
@@ -97,7 +112,7 @@ class GameAttempt {
   void start() {
     if (phase != AttemptPhase.preview) return;
     phase = AttemptPhase.playing;
-    feedback = level.hint;
+    _feedback(AttemptFeedbackKind.hint, level.hint);
   }
 
   void pause() {
@@ -126,7 +141,7 @@ class GameAttempt {
     elapsedSeconds = 0;
     gateWindowRemaining = 0;
     _gateClosingPending = false;
-    feedback = '';
+    _feedback(AttemptFeedbackKind.none, '');
   }
 
   void retry() {
@@ -174,26 +189,29 @@ class GameAttempt {
         lamp = _lerp(oldLamp, target, contact.time);
         exitHoldSeconds = 0;
         phase = AttemptPhase.lost;
-        feedback = 'Bóng chạm cảm biến đỏ.';
+        _feedback(AttemptFeedbackKind.hazard, 'Bóng chạm cảm biến đỏ.');
         return;
       }
       if (contact.kind == 'movingHazard') {
         lamp = _lerp(oldLamp, target, contact.time);
         exitHoldSeconds = 0;
         phase = AttemptPhase.lost;
-        feedback = 'Bóng chạm màn chớp.';
+        _feedback(AttemptFeedbackKind.movingHazard, 'Bóng chạm màn chớp.');
         return;
       }
       if (contact.kind == 'solid') {
         lamp = _lerp(oldLamp, target, math.max(0, contact.time - 1e-6));
         exitHoldSeconds = 0;
-        feedback = 'Đạo cụ đang chắn đường bóng.';
+        _feedback(AttemptFeedbackKind.solid, 'Đạo cụ đang chắn đường bóng.');
         return;
       }
       if (contact.kind == 'gate' && !isGateOpen(contact.index)) {
         lamp = _lerp(oldLamp, target, math.max(0, contact.time - 1e-6));
         exitHoldSeconds = 0;
-        feedback = 'Cửa chắn đang khóa. Hãy chạm công tắc sao.';
+        _feedback(
+          AttemptFeedbackKind.lockedGate,
+          'Cửa chắn đang khóa. Hãy chạm công tắc sao.',
+        );
         return;
       }
       if (contact.kind == 'switch') {
@@ -204,9 +222,15 @@ class GameAttempt {
             gateWindowRemaining = level.gateWindowSeconds!;
             _gateClosingPending = false;
           }
-          feedback = 'Đã bật công tắc $activatedSwitches.';
+          _feedback(
+            AttemptFeedbackKind.switchOn,
+            'Đã bật công tắc $activatedSwitches.',
+          );
         } else if (contact.index > activatedSwitches) {
-          feedback = 'Hãy bật công tắc ${activatedSwitches + 1} trước.';
+          _feedback(
+            AttemptFeedbackKind.wrongOrder,
+            'Hãy bật công tắc ${activatedSwitches + 1} trước.',
+          );
         }
       }
     }
@@ -221,7 +245,7 @@ class GameAttempt {
     if (_movingHazardHits(elapsedSeconds, elapsedSeconds + effectiveSeconds)) {
       elapsedSeconds += effectiveSeconds;
       phase = AttemptPhase.lost;
-      feedback = 'Bóng chạm màn chớp.';
+      _feedback(AttemptFeedbackKind.movingHazard, 'Bóng chạm màn chớp.');
       return;
     }
     _shadowAtLastTick = shadow;
@@ -229,7 +253,7 @@ class GameAttempt {
     remainingMs = math.max(0, remainingMs - seconds * 1000);
     if (remainingMs == 0) {
       phase = AttemptPhase.lost;
-      feedback = 'Hết 60 giây.';
+      _feedback(AttemptFeedbackKind.timeout, 'Hết 60 giây.');
       return;
     }
     if (level.gateWindowSeconds != null &&
@@ -246,7 +270,7 @@ class GameAttempt {
     if (exitHoldSeconds >= 1) {
       exitHoldSeconds = 1;
       phase = AttemptPhase.won;
-      feedback = 'Bóng đã qua cửa trăng!';
+      _feedback(AttemptFeedbackKind.win, 'Bóng đã qua cửa trăng!');
     }
   }
 
@@ -268,7 +292,15 @@ class GameAttempt {
     activatedSwitches = 0;
     _gateClosingPending = false;
     gateWindowRemaining = 0;
-    feedback = 'Cửa đã khép. Hãy bật lại các sao.';
+    _feedback(
+      AttemptFeedbackKind.gateClosed,
+      'Cửa đã khép. Hãy bật lại các sao.',
+    );
+  }
+
+  void _feedback(AttemptFeedbackKind kind, String message) {
+    feedbackKind = kind;
+    feedback = message;
   }
 
   bool _movingHazardHits(double start, double end) {

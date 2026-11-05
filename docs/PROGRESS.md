@@ -1,5 +1,11 @@
 # Tiến độ và task board
 
+## Đồng bộ source còn lại lên develop (05/11/2026)
+
+Rà toàn bộ working tree sau commit graphic/ASO: các file Flutter, test, launcher icon, web metadata, tài liệu và ảnh QA là nội dung dự án cần lưu. Thêm `/.kotlin/` vào `android/.gitignore` vì đây là cache compiler sinh tự động. Không đưa cache hoặc APK build vào Git.
+
+Lệnh/kết quả: `git status --short` và `git ls-files --others --exclude-standard` để phân loại; `git diff --check` → sạch; `flutter analyze --no-pub` → No issues found; `flutter test --reporter compact --no-pub` → **110/110 pass**; `flutter build web --no-pub --no-wasm-dry-run` → tạo `build/web`; `flutter build apk --debug --no-pub` → tạo `build/app/outputs/flutter-apk/app-debug.apk`. Đây là kiểm tra build tự động, chưa kiểm thử lại APK này trên thiết bị thật.
+
 ## ASO Google Play vi-VN/en-US (05/11/2026)
 
 Đã soạn [kế hoạch ASO](../assets/store/google-play/ASO.md) và [listing tiếng Việt](../assets/store/google-play/listing-vi-VN.md)/[English](../assets/store/google-play/listing-en-US.md) cho Google Play: cùng tên thương hiệu Little Shadow Theatre, mô tả ngắn/dài bám tính năng có thật, cụm tìm kiếm giả thuyết, thứ tự ảnh, alt text và kế hoạch đo bằng Play Console/experiment. Xuất thêm feature graphic có tagline tiếng Việt và bốn screenshot tiếng Anh từ capture Redmi; mỗi locale có 4–6 ảnh đúng 1080×1920. Dùng tài liệu Play Console hiện hành cho giới hạn tên 30, mô tả ngắn 80, mô tả đầy đủ 4000 ký tự và yêu cầu bản địa hóa ảnh có chữ. Không có dữ liệu search term/traffic của app, nên không tuyên bố thứ hạng/tăng trưởng.
@@ -9,6 +15,40 @@ Lệnh/kết quả: `python3 tool/export_play_graphics.py` → icon 512×512, ha
 ## Bộ graphic Google Play (05/11/2026)
 
 Đã xuất [icon, feature graphic và sáu screenshot](../assets/store/google-play/README.md) cho Little Shadow Theatre. Icon dùng nguồn đã chọn trước đó, feature graphic minh họa rạp bóng/đèn/Bóng Mơ/cửa trăng theo design system, screenshot dùng ảnh chụp UI thật trên Redmi K30 5G với caption tiếng Việt. Theo quy cách Google Play hiện hành, xuất feature **1024×500** thay vì 1080×500 ước lượng; icon 512×512; screenshot 1080×1920. Script tái tạo: `python3 tool/export_play_graphics.py` → 9 PNG gồm 8 bản upload và 1 nguồn feature; từng file đã được kiểm kích thước/mode bằng Pillow, icon 421 KB (<1 MB), feature 823 KB. Đã xem trực quan icon nguồn, feature cuối, screenshot 01/03/06. Chưa upload lên Play Console hay phát hành.
+
+## Rà soát bảo mật và hướng xử lý (05/11/2026)
+
+Đã rà Flutter/Android/web, save và reward, signing, AdMob/UMP, backup, dependency và tài liệu M7; mức rủi ro, bằng chứng và thứ tự xử lý ở [SECURITY_REVIEW](SECURITY_REVIEW.md). Hai điều kiện chặn phát hành được xác nhận từ config/merged release manifest: release vẫn dùng debug signing và `com.example.ball_handler`; release thiếu AdMob app ID trong khi SDK/quyền ad đã được merge. Save/reward local chỉ bảo vệ luồng thường và callback lặp trong cùng save, không chống người dùng sửa dữ liệu hay đồng hồ; chọn chấp nhận giới hạn offline hoặc backend/SSV trước ad thật. Không thay code, không phát hành.
+
+Lệnh/kết quả: truy vấn OSV `querybatch` cho 73 package Pub hosted trong `pubspec.lock` → 0 match tại thời điểm kiểm (không quét Gradle/Maven); quét mẫu secret thường gặp bằng `rg -l` trong source/docs → 0 file match (không quét lịch sử Git); `flutter build apk --release --no-pub` → **exit 143** sau khoảng 172 giây, chưa rõ nguyên nhân, không có APK; merged manifest release đã sinh và xác nhận các mục trên. `git diff --check` → sạch. Chưa kiểm runtime release, website đang host, Play/AdMob production, pentest hay scan native dependency.
+
+## Triển khai tách component và điều phối game (04/11/2026)
+
+Đã thực hiện phần refactor ưu tiên cao của [kế hoạch tối ưu code](CODE_OPTIMIZATION_PLAN.md): tách `GamePage`, popup home, `BoardCanvas`/input, result/ad/status overlay, nút board, session puzzle, hàng đợi lưu đồng hồ và renderer hậu cảnh. Thêm `AttemptFeedbackKind` để cue âm thanh/hiệu ứng không phụ thuộc câu tiếng Việt. Luật chơi, dữ liệu 20 màn, save schema và adapter quảng cáo không đổi. Chưa có phép đo chứng minh cải thiện FPS/bộ nhớ; các phần còn lại ghi rõ trong kế hoạch.
+
+`flutter analyze --no-pub` → No issues found; `flutter test --reporter compact --no-pub` → **110/110 pass** sau tách `BoardCanvas`; `dart run tool/export_levels.dart` → 20 validated levels (file xuất được trả về trạng thái trước lượt này); `flutter build web --no-wasm-dry-run --no-pub` và `flutter build apk --debug --no-pub` → pass. APK debug cuối SHA-256 `ccea1d60be10d2d10c501e90ac709d57d2feb31ec1920779a4e031f8276858de`. Redmi K30 5G đã mở home/settings/preview màn 01/playing/pause trên APK cuối; save gốc được khôi phục với SHA-256 `126805e3ead151b656fbe4deb4948a8267dc05d31e137670693b062e44bb2869`. Web 390×844 tải popup Cách chơi trên Chrome headless. Xem [QA](QA.md) cho giới hạn; chưa có playtest mới, profile mới, quảng cáo hay release.
+
+## Rà source và kế hoạch tối ưu code (04/11/2026)
+
+Đã rà `lib/`, `test/`, `tool/` và đối chiếu PRODUCT/PLAN/DECISIONS/DESIGN_SYSTEM. Đánh giá và thứ tự tách component/điều phối/render được ghi ở [CODE_OPTIMIZATION_PLAN](CODE_OPTIMIZATION_PLAN.md). Chưa refactor code hoặc thay đổi milestone. `flutter analyze --no-pub` → No issues found; `flutter test --reporter compact --no-pub` → 108/108 pass; `git diff --check` → sạch. Không chạy profile hoặc kiểm thiết bị trong lượt này.
+
+## Đồng bộ nút Âm thanh với Cài đặt (04/11/2026)
+
+Theo phản hồi của chủ sản phẩm, `SoundButton` nay dùng chính `TheatreButton` tông outline như nút Cài đặt trên home. Hai nút cùng nền, viền vàng kép, kích thước và phản hồi bấm; bật/tắt chỉ thay icon loa. Component này cũng dùng ở popup tạm dừng. Không đổi cơ chế lưu âm thanh hay bố cục hai nút Chơi ngay/Xem màn.
+
+`dart format lib/game/home_screen.dart` → 0 đổi thêm; `flutter analyze --no-pub` → No issues found; `flutter test test/widget_test.dart --reporter compact --no-pub` → **27/27 pass**, gồm lưu trạng thái âm thanh và kiểm nút chơi không đổi trạng thái thị giác khi lưu; `flutter build apk --debug --no-pub` → pass, SHA-256 `ce319b7736085ee31d2db50350930167666f14710f6c88b8a9306a61d28e5586`; `flutter build web --no-wasm-dry-run --no-pub` → pass. APK cài đè trên Redmi, kiểm cả [âm bật](qa/sound-button/home-on-redmi.png) và [âm tắt](qa/sound-button/home-off-redmi.png); save sau bật lại có SHA-256 trùng trước thử `126805e3ead151b656fbe4deb4948a8267dc05d31e137670693b062e44bb2869`. Xem [QA](QA.md).
+
+## Icon và tên ứng dụng (04/11/2026)
+
+Chủ sản phẩm chọn tên **Little Shadow Theatre**. Đã đổi Android launcher label, Flutter title, metadata web và mô tả package; tên “Rạp bóng nhỏ” giữ cho bản dịch tiếng Việt/hướng mỹ thuật. Tạo icon gốc 1254×1254 bằng built-in `image_gen` theo ảnh chuẩn và home art, chọn bản cận mặt Bóng Mơ vì rõ ở 48 px. `tool/generate_app_icons.py` xuất launcher legacy/adaptive và web icon; nguồn/prompt ở [ASSETS](ASSETS.md). Không đổi `applicationId` placeholder.
+
+`flutter analyze --no-pub` → sạch; `flutter build apk --debug --no-pub` → pass, APK SHA-256 `59d3b798ff5334e3175c0f647a710470bb687415b1fecca366497ede964619ac`; `flutter build web --no-wasm-dry-run --no-pub` → pass. `aapt dump badging` đọc đúng label; APK cài đè thành công trên Redmi và [launcher](qa/app-icon/launcher-redmi.png) hiện icon/tên mới, app khởi động. Save máy giữ nguyên hash. Chi tiết ở [QA](QA.md); chưa có release AAB hoặc xuất bản.
+
+## M7 — cập nhật matrix và spike lại trên Redmi (04/11/2026)
+
+D27 đã chốt Flutter Android qua Google Play. Đối chiếu tài liệu chính thức Google Mobile Ads Flutter setup/rewarded/test ads, UMP và quy định target API Play hiện hành; matrix, giới hạn adapter và đầu vào của chủ sản phẩm được cập nhật ở [M7_READINESS](M7_READINESS.md). Sửa adapter debug để gọi UMP consent update ngay lúc mở app và dùng một future cho ad request. Sample app/unit ID vẫn chỉ dùng cho debug; release chưa bật quảng cáo, chưa ký/phát hành.
+
+Lệnh/kết quả: `flutter analyze` → No issues found; `flutter test --reporter compact` → **108/108 pass**; `flutter build apk --debug` → pass, SHA-256 `55be05080ea83816db23082e815f8ad5aba079f5ef96e3bc794d819003d61352`; `adb install -r` → Success, sample creative hiện trên Redmi K30 5G Android 10. APK trước và sau sửa đều cho xem đủ 2/3→3/3; mất mạng +0, Home khi ad đang chạy +0 trên APK trước sửa. Cancel trước reward, show fail riêng, callback SDK trùng và một số lifecycle chưa xác minh; chi tiết và ảnh ở [QA](QA.md). Save thiết bị được khôi phục với SHA-256 trùng backup `126805e3ead151b656fbe4deb4948a8267dc05d31e137670693b062e44bb2869`, Wi-Fi/mobile data về trạng thái đầu. **M7 đang làm; không có AAB ký hoặc phát hành công khai.**
 
 ## Bộ chọn Tiếng Việt / English (03/11/2026)
 

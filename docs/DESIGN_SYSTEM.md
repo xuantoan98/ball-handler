@@ -27,7 +27,7 @@ Không sao chép sai lệch hình học hoặc chữ lỗi trong ảnh mockup. K
 
 ## 2. Ý tưởng thương hiệu
 
-**Tên làm việc:** Rạp bóng nhỏ.
+**Tên hướng mỹ thuật/bản địa hóa tiếng Việt:** Rạp bóng nhỏ. Tên hiển thị ứng dụng do chủ sản phẩm chọn ngày 04/11/2026: **Little Shadow Theatre**.
 **Câu mô tả:** “Một ngọn đèn. Cả thế giới chuyển động.”
 **Cảm giác:** kỳ diệu, tò mò, ấm áp, tinh nghịch; có chiều sâu nhưng dễ tiếp cận.
 **Ngôn ngữ hình ảnh:** rạp múa bóng thu nhỏ, giấy cắt nhiều lớp, khung sân khấu thủ công, điểm sáng ấm trên nền tối.

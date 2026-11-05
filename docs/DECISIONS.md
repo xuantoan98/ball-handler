@@ -42,6 +42,12 @@
 | D27 | Chủ sản phẩm chọn lựa chọn 1: **Flutter Android trên Google Play** | Trả lời “1” cho câu hỏi kênh phát hành M7. Web tiếp tục là bản review theo codebase hiện tại; chưa có chỉ đạo phát hành web công khai. |
 | D28 | Spike Android debug dùng `google_mobile_ads` 9.2.0, Google sample app ID/unit ID, `RewardedAdSource` và `RewardedAdCoordinator` hiện có | Chỉ callback `onUserEarnedReward` gọi lưu thưởng. Dismiss/error không tự cộng. Ad test chỉ bật trong debug; release Android vô hiệu hóa nút cho đến khi có AdMob ID và hồ sơ phát hành. Không có ad live hoặc Play Console upload. |
 
+## Tên và icon ứng dụng (04/11/2026)
+
+| ID | Quyết định | Hệ quả / giới hạn |
+| --- | --- | --- |
+| D35 | Chủ sản phẩm chọn tên hiển thị **Little Shadow Theatre** | Cập nhật Android launcher label, Flutter title và metadata web. “Rạp bóng nhỏ” vẫn là bản dịch/nhận diện tiếng Việt trong game; không đổi `applicationId` placeholder khi chưa có định danh thương mại. Icon launcher mới dùng Bóng Mơ đội vương miện, cửa trăng mint và đèn vàng. Chưa khảo sát nhãn hiệu/tên trên cửa hàng. |
+
 ## Phản hồi thiết bị thật, thiết kế trang chủ v2 (02/11/2026)
 
 | ID | Quyết định | Hệ quả / giới hạn |

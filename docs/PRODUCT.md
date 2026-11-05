@@ -24,4 +24,4 @@ Mô hình logic có ba mặt phẳng: đèn `L` tại `z=0`, vật tạo bóng `
 
 Dự kiến 20 màn thủ công, chỉ mở rộng sau khi ba màn đầu chứng minh điều khiển dễ hiểu và thú vị. Có hướng dẫn, chọn màn, tạm dừng, kết quả, hết lượt, cài đặt, ghi nguồn asset và lưu tiến độ/lượt/âm thanh. Không tài khoản, bảng xếp hạng, mua vật phẩm, 3D, vật lý đi bộ, bóng mềm vật lý, nhiều đèn, multiplayer hoặc màn sinh ngẫu nhiên. Google Play và quảng cáo thật là nhánh sau khi gameplay đạt yêu cầu.
 
-Tên “Rạp bóng nhỏ” là tên làm việc theo hướng mỹ thuật đã được chấp nhận; tên thương mại và mức độ khác biệt với game tương tự chưa được khảo sát/chốt.
+Tên hiển thị ứng dụng đã được chủ sản phẩm chọn là **Little Shadow Theatre** (04/11/2026). “Rạp bóng nhỏ” tiếp tục là tên bản địa hóa tiếng Việt và tên hướng mỹ thuật. Chưa khảo sát trùng tên hoặc nhãn hiệu trên cửa hàng.

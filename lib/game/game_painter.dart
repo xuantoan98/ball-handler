@@ -8,6 +8,7 @@ import '../core/geometry.dart';
 import '../core/rules.dart';
 import '../design_tokens.dart';
 import 'board_ui_layout.dart';
+import 'stage_backdrop_renderer.dart';
 import 'moon_door_painter.dart';
 import 'puppet_motion.dart';
 import 'result_effect.dart';
@@ -78,7 +79,7 @@ class GamePainter extends CustomPainter {
       canvas.clipRRect(
         RRect.fromRectAndRadius(_stageRect, const Radius.circular(8)),
       );
-      _paintBackdrop(canvas, backdrop!, _stageRect);
+      StageBackdropRenderer.paint(canvas, backdrop!, _stageRect);
       canvas.restore();
     }
     canvas.save();
@@ -216,70 +217,6 @@ class GamePainter extends CustomPainter {
           ..color = StageColors.coral.withValues(alpha: (1 - progress) * .65)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 3,
-      );
-    }
-  }
-
-  /// Keep the illustrated top/bottom proscenium at its native proportions.
-  /// Only the quiet central wall is shortened to fit the gameplay viewport.
-  void _paintBackdrop(Canvas canvas, ui.Image image, Rect destination) {
-    final width = image.width.toDouble();
-    final height = image.height.toDouble();
-    final scale = destination.width / width;
-    final visibleHeight = destination.height / scale;
-    final basePaint = Paint()..filterQuality = FilterQuality.medium;
-    if (visibleHeight >= height) {
-      canvas.drawImageRect(
-        image,
-        Rect.fromLTWH(0, 0, width, height),
-        destination,
-        basePaint,
-      );
-      return;
-    }
-    final join = visibleHeight * .54;
-    final fade = math.min(80.0, visibleHeight * .1);
-    final fadeStart = join - fade / 2;
-    final lowerSourceStart = height - (visibleHeight - fadeStart);
-    canvas.drawImageRect(
-      image,
-      Rect.fromLTRB(0, lowerSourceStart, width, height),
-      Rect.fromLTRB(
-        destination.left,
-        destination.top + fadeStart * scale,
-        destination.right,
-        destination.bottom,
-      ),
-      basePaint,
-    );
-    canvas.drawImageRect(
-      image,
-      Rect.fromLTRB(0, 0, width, fadeStart),
-      Rect.fromLTRB(
-        destination.left,
-        destination.top,
-        destination.right,
-        destination.top + fadeStart * scale,
-      ),
-      basePaint,
-    );
-    const strips = 16;
-    for (var i = 0; i < strips; i++) {
-      final sourceTop = fadeStart + fade * i / strips;
-      final sourceBottom = fadeStart + fade * (i + 1) / strips;
-      final alpha = (1 - (i + .5) / strips).clamp(0.0, 1.0);
-      canvas.drawImageRect(
-        image,
-        Rect.fromLTRB(0, sourceTop, width, sourceBottom),
-        Rect.fromLTRB(
-          destination.left,
-          destination.top + sourceTop * scale,
-          destination.right,
-          destination.top + sourceBottom * scale,
-        ),
-        Paint()
-          ..filterQuality = FilterQuality.medium
-          ..color = Colors.white.withValues(alpha: alpha),
       );
     }
   }

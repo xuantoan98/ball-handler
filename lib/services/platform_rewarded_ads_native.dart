@@ -12,10 +12,20 @@ RewardedAdSource? createPlatformRewardedAds(RewardIdFactory ids) =>
 
 /// Android spike adapter: Google sample IDs only, never a live ad unit.
 class GoogleTestRewardedAds implements RewardedAdSource {
-  GoogleTestRewardedAds(this._ids);
+  GoogleTestRewardedAds(this._ids) {
+    // UMP requires a fresh consent update on each app launch. Keep this single
+    // future so tapping the ad cannot start a second request or show a second
+    // form while the launch request is still in progress.
+    if (kDebugMode) {
+      _launchConsent = _requestConsent().onError(
+        (_, _) async => ConsentInformation.instance.canRequestAds(),
+      );
+    }
+  }
 
   static const testUnitId = 'ca-app-pub-3940256099942544/5224354917';
   final RewardIdFactory _ids;
+  Future<bool>? _launchConsent;
   bool _busy = false;
   RewardedAd? _ad;
 
@@ -34,7 +44,7 @@ class GoogleTestRewardedAds implements RewardedAdSource {
     _busy = true;
     phase = AdPhase.loading;
     try {
-      final permitted = await _requestConsent();
+      final permitted = await (_launchConsent ?? _requestConsent());
       if (!permitted) return AdOutcome.error;
       await MobileAds.instance.initialize();
       final loaded = Completer<RewardedAd>();
