@@ -1,5 +1,15 @@
 # Tiến độ và task board
 
+## ASO Google Play vi-VN/en-US (05/11/2026)
+
+Đã soạn [kế hoạch ASO](../assets/store/google-play/ASO.md) và [listing tiếng Việt](../assets/store/google-play/listing-vi-VN.md)/[English](../assets/store/google-play/listing-en-US.md) cho Google Play: cùng tên thương hiệu Little Shadow Theatre, mô tả ngắn/dài bám tính năng có thật, cụm tìm kiếm giả thuyết, thứ tự ảnh, alt text và kế hoạch đo bằng Play Console/experiment. Xuất thêm feature graphic có tagline tiếng Việt và bốn screenshot tiếng Anh từ capture Redmi; mỗi locale có 4–6 ảnh đúng 1080×1920. Dùng tài liệu Play Console hiện hành cho giới hạn tên 30, mô tả ngắn 80, mô tả đầy đủ 4000 ký tự và yêu cầu bản địa hóa ảnh có chữ. Không có dữ liệu search term/traffic của app, nên không tuyên bố thứ hạng/tăng trưởng.
+
+Lệnh/kết quả: `python3 tool/export_play_graphics.py` → icon 512×512, hai feature 1024×500, sáu screenshot vi-VN và bốn screenshot en-US; xem trực quan feature vi-VN, screenshot English 02/04. Script đếm Unicode ký tự trong ba trường listing → vi-VN **21/57/745**, en-US **21/65/772**, đều trong giới hạn. `zip -r` tạo `assets/store/google-play/little-shadow-theatre-aso-package.zip`. Còn cần chụp lại ảnh từ artifact release cuối (một số ảnh vi-VN từ bản trước lần chỉnh nút), ảnh chướng ngại/chiến thắng en-US, chốt thị trường/tuổi/category với chủ sản phẩm; chưa tạo hoặc upload listing, chưa phát hành.
+
+## Bộ graphic Google Play (05/11/2026)
+
+Đã xuất [icon, feature graphic và sáu screenshot](../assets/store/google-play/README.md) cho Little Shadow Theatre. Icon dùng nguồn đã chọn trước đó, feature graphic minh họa rạp bóng/đèn/Bóng Mơ/cửa trăng theo design system, screenshot dùng ảnh chụp UI thật trên Redmi K30 5G với caption tiếng Việt. Theo quy cách Google Play hiện hành, xuất feature **1024×500** thay vì 1080×500 ước lượng; icon 512×512; screenshot 1080×1920. Script tái tạo: `python3 tool/export_play_graphics.py` → 9 PNG gồm 8 bản upload và 1 nguồn feature; từng file đã được kiểm kích thước/mode bằng Pillow, icon 421 KB (<1 MB), feature 823 KB. Đã xem trực quan icon nguồn, feature cuối, screenshot 01/03/06. Chưa upload lên Play Console hay phát hành.
+
 ## Bộ chọn Tiếng Việt / English (03/11/2026)
 
 Đã thêm icon Cài đặt cạnh nút loa trên home. Popup dùng khung sân khấu, viền đồng, thẻ giấy vàng/lilac theo UI Kit; hai lựa chọn xếp dọc để sau này thêm mục cài đặt. Chọn ngôn ngữ cập nhật ngay home, hướng dẫn, preview/HUD/gợi ý 20 màn, phản hồi trong ván, nút, kết quả, quảng cáo mô phỏng và thông báo lỗi; lưu bền cùng save. Save schema v5 đọc v1–v4 với Tiếng Việt mặc định. Lỗi lưu sẽ trả về ngôn ngữ cũ và hiện thông báo.
